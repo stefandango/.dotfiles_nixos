@@ -14,6 +14,7 @@ in
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ../modules/greetd.nix	
+      ../modules/hyprland.nix
     ];
 
 
@@ -145,10 +146,10 @@ in
  ]);
   };
 
-  programs.hyprland = {
-		enable = true;
-		xwayland.enable = true;
-	};
+  #programs.hyprland = {
+  #		enable = true;
+  #	 	xwayland.enable = true;
+  #	 };
 
   hardware.pulseaudio.enable = false;
   services = {
@@ -196,6 +197,9 @@ in
   # networking.firewall.enable = false;
 
 
+  home-manager.users.${vars.user} = {
+    home.stateVersion = "23.11"; # <---- SETTING GOES HERE
+  };
 
   # Copy the NixOS configuration file and link it from the resulting system
   # (/run/current-system/configuration.nix). This is useful in case you
@@ -219,6 +223,6 @@ in
   #
   # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
   system.stateVersion = "23.11"; # Did you read the comment?
-
+  
 }
 
