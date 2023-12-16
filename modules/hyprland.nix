@@ -1,7 +1,7 @@
 { config, lib, system, pkgs, hyprland, vars, host, ... }:
 
 let
-  colors = import ../theming/colors.nix;
+  colors = import ../theme/colors.nix;
 in
 {
 
@@ -26,10 +26,11 @@ in
 
 		systemPackages = with pkgs; [
 			grimblast       # Screenshot
-				swayidle        # Idle Daemon
-				swaylock        # Lock Screen
-				wl-clipboard    # Clipboard
-				wlr-randr       # Monitor Settings
+			swayidle        # Idle Daemon
+			swaylock        # Lock Screen
+			wl-clipboard    # Clipboard
+			wlr-randr       # Monitor Settings
+			swaynotificationcenter #loaded in seperate nix file
 		];
 
 	};
@@ -183,7 +184,8 @@ in
 		bind = $mainMod, J, togglesplit, # dwindle
 		bind=SUPERSHIFT,R,exec,${pkgs.hyprland}/bin/hyprctl reload 
      		bind=SUPER,F,fullscreen,
-		bind=SUPER,L,exec,${pkgs.swaylock}/bin/swaylock 
+		bind=SUPER,L,exec,${pkgs.swaylock}/bin/swaylock jk
+		bind=SUPER,N,exec,${pkgs.swaynotificationcenter}/bin/swaync-client -t
 
         	bind=,print,exec,${pkgs.grimblast}/bin/grimblast --notify --freeze --wait 1 copysave area ~/Pictures/$(date +%Y-%m-%dT%H%M%S).png
 
@@ -252,7 +254,7 @@ in
 
 		#bind=,escape,submap,reset
 		#submap=reset		
-			
+		exec-once=${pkgs.swaynotificationcenter}/bin/swaync
 
 		${execute}
 		'';

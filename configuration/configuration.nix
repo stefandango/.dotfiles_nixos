@@ -13,7 +13,8 @@ in
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
-      ../modules/greetd.nix	
+      ../modules/greetd.nix
+      #../modules/swaync.nix	
       ../modules/hyprland.nix
     ];
 
@@ -46,8 +47,8 @@ in
 		extraPackages = with pkgs; [
 			intel-media-driver
 			vaapiIntel
-			rocm-opencl-icd
-			rocm-opencl-runtime
+			#rocm-opencl-icd
+			#rocm-opencl-runtime
 			amdvlk
 		];
 		extraPackages32 = with pkgs; [
