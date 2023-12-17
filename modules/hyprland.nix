@@ -31,6 +31,7 @@ in
 			wl-clipboard    # Clipboard
 			wlr-randr       # Monitor Settings
 			swaynotificationcenter #loaded in seperate nix file
+			libnotify
 		];
 
 	};

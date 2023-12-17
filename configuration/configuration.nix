@@ -14,7 +14,7 @@ in
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ../modules/greetd.nix
-      #../modules/swaync.nix	
+      ../modules/swaync.nix	
       ../modules/hyprland.nix
     ];
 
