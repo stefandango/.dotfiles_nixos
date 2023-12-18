@@ -1,102 +1,110 @@
 { config, lib, pkgs, vars, ... }:
 
 let
-	colors = import ../theme/colors.nix;
+colors = import ../theme/colors.nix;
 in
 {
 	home-manager.users.${vars.user} = {
 		xdg.configFile = {
 			"swaync/config.json".text = ''
-  {
-            "$schema": "/run/current-system/sw/etc/xdg/swaync/configSchema.json",
-            "positionX": "right",
-            "positionY": "top",
-            "control-center-margin-top": 10,
-            "control-center-margin-bottom": 10,
-            "control-center-margin-right": 10,
-            "control-center-margin-left": 10,
-            "notification-icon-size": 64,
-            "notification-body-image-height": 100,
-            "notification-body-image-width": 200,
-            "timeout": 10,
-            "timeout-low": 5,
-            "timeout-critical": 0,
-            "fit-to-screen": true,
-            "control-center-width": 400,
-            "control-center-height": 1025,
-            "notification-window-width": 400,
-            "keyboard-shortcuts": true,
-            "image-visibility": "when-available",
-            "transition-time": 200,
-            "hide-on-clear": false,
-            "hide-on-action": true,
-            "script-fail-notify": true,
-            "widgets": [
-              "title",
-              "buttons-grid",
-              "mpris",
-              "volume",
-              "dnd",
-              "notifications"
-            ],
-            "widget-config": {
-              "title": {
-                "text": "Notification Center",
-                "clear-all-button": true,
-                "button-text": "󰆴 Clear All"
-              },
-              "dnd": {
-                "text": "Do Not Disturb"
-              },
-              "label": {
-                "max-lines": 1,
-                "text": "Notification Center"
-              },
-              "mpris": {
-                "image-size": 96,
-                "image-radius": 7
-              },
-              "volume": {
-                "label": "󰕾"
-              },
-              "buttons-grid": {
-                "actions": [
-                  {
-                    "label": "󰐥",
-                    "command": "systemctl poweroff"
-                  },
-                  {
-                    "label": "󰜉",
-                    "command": "systemctl reboot"
-                  },
-                  {
-                    "label": "󰌾",
-                    "command": "${pkgs.swaylock}/bin/swaylock"
-                  },
-                  {
-                    "label": "󰍃",
-                    "command": "${pkgs.hyprland}/bin/hyprctl dispatch exit"
-                  },
-                  {
-                    "label": "󰕾",
-                    "command": "${pkgs.pulseaudio}/bin/pactl set-sink-mute @DEFAULT_SINK@ toggle"
-                  },
-                  {
-                    "label": "󰍬",
-                    "command": "${pkgs.pulseaudio}/bin/pactl set-source-mute @DEFAULT_SOURCE@ toggle"
-                  },
-                  {
-                    "label": "󰹑",
-                    "command": "${pkgs.grimblast}/bin/grimblast --notify --freeze --wait 1 copysave area ~/Pictures/$(date +%Y-%m-%dT%H%M%S).png"
-                  }
-                ]
-              }
-            }
-          }			
-	'';
+			{
+				"$schema": "/etc/xdg/swaync/configschema.json",
 
-"swaync/style.css".text =  with colors.scheme.default; ''
-          @define-color cc-bg rgba(${rgb.bg}, 0.95);
+				"positionx": "right",
+				"positiony": "top",
+				"control-center-positionx": "none",
+				"control-center-positiony": "none",
+				"control-center-margin-top": 8,
+				"control-center-margin-bottom": 8,
+				"control-center-margin-right": 8,
+				"control-center-margin-left": 8,
+				"control-center-width": 500,
+				"control-center-height": 1024,
+				"fit-to-screen": false,
+
+				"layer": "overlay",
+				"control-center-layer": "overlay",
+				"csspriority": "user",
+				"notification-icon-size": 64,
+				"notification-body-image-height": 100,
+				"notification-body-image-width": 200,
+				"notification-inline-replies": true,
+				"timeout": 10,
+				"timeout-low": 5,
+				"timeout-critical": 0,
+				"notification-window-width": 500,
+				"keyboard-shortcuts": true,
+				"image-visibility": "when-available",
+				"transition-time": 200,
+				"hide-on-clear": true,
+				"hide-on-action": true,
+				"script-fail-notify": true,
+				"widgets": [
+					"title",
+				"buttons-grid",
+				"mpris",
+				"volume",
+				"dnd",
+				"notifications"
+				],
+				"widget-config": {
+					"title": {
+						"text": "Notification center",
+						"clear-all-button": true,
+						"button-text": "󰆴 clear all"
+					},
+					"dnd": {
+						"text": "Do not disturb"
+					},
+					"label": {
+						"max-lines": 1,
+						"text": "Notification center"
+					},
+					"mpris": {
+						"image-size": 96,
+						"image-radius": 7
+					},
+					"volume": {
+						"label": "󰕾"
+					},
+					"buttons-grid": {
+						"actions": [
+						{
+							"label": "󰐥",
+							"command": "systemctl poweroff"
+						},
+						{
+							"label": "󰜉",
+							"command": "systemctl reboot"
+						},
+						{
+							"label": "󰌾",
+							"command": "${pkgs.swaylock}/bin/swaylock"
+						},
+						{
+							"label": "󰍃",
+							"command": "${pkgs.hyprland}/bin/hyprctl dispatch exit"
+						},
+						{
+							"label": "󰕾",
+							"command": "${pkgs.pulseaudio}/bin/pactl set-sink-mute @DEFAULT_SINK@ toggle"
+						},
+						{
+							"label": "󰍬",
+							"command": "${pkgs.pulseaudio}/bin/pactl set-source-mute @DEFAULT_SOURCE@ toggle"
+						},
+						{
+							"label": "󰹑",
+							"command": "${pkgs.grimblast}/bin/grimblast --notify --freeze --wait 1 copysave area ~/Pictures/$(date +%Y-%m-%dT%H%M%S).png"
+						}
+						]
+					}
+				}
+			}			
+			'';
+
+			"swaync/style.css".text =  with colors.scheme.default; ''
+			      @define-color cc-bg rgba(${rgb.bg}, 0.95);
           @define-color noti-border-color rgba(255, 255, 255, 0.15);
           @define-color noti-bg rgb(17, 17, 27);
           @define-color noti-bg-darker rgb(43, 43, 57);
@@ -107,6 +115,8 @@ in
           @define-color text-color rgba(${rgb.fg}, 1);
           @define-color text-color-disabled rgb(150, 150, 150);
           @define-color bg-selected rgb(${rgb.fg});
+	  @define-color mpris-album-art-overlay rgba(0, 0, 0, 0.55);
+	  @define-color mpris-button-hover rgba(0, 0, 0, 0.50);
 
           * {
             font-family: FiraCode Nerd Font Mono;
@@ -231,7 +241,7 @@ in
           }
 
           .summary {
-            font-size: 12px;
+            font-size: 10px;
             font-weight: 700;
             background: transparent;
             color: rgba(${rgb.fg}, 1);
@@ -239,7 +249,7 @@ in
           }
 
           .time {
-            font-size: 12px;
+            font-size: 10px;
             font-weight: 700;
             background: transparent;
             color: @text-color;
@@ -248,7 +258,7 @@ in
           }
 
           .body {
-            font-size: 10px;
+            font-size: 12px;
             font-weight: 400;
             background: transparent;
             color: @text-color;
@@ -279,8 +289,8 @@ in
 
           .widget-title {
             color: #${hex.fg};
-            background: @noti-bg-darker;
-            padding: 5px 10px;
+            /*background: @noti-bg-darker;*/
+            padding: 0px 10px;
             margin: 10px 10px 5px 10px;
             font-size: 12px;
             border-radius: 5px;
@@ -304,13 +314,13 @@ in
             background: @noti-bg-darker;
             padding: 5px 10px;
             margin: 10px 10px 5px 10px;
-            border-radius: 5px;
-            font-size: small;
+            border-radius: 10px;
+            font-size: 12px;
             color: #${hex.fg};
           }
 
           .widget-dnd>switch {
-            border-radius: 5px;
+            border-radius: 10px;
             background: #${hex.fg};
           }
 
@@ -321,12 +331,12 @@ in
 
           .widget-dnd>switch slider {
             background: @cc-bg;
-            border-radius: 5px;
+            border-radius: 10px;
           }
 
           .widget-dnd>switch:checked slider {
             background: @cc-bg;
-            border-radius: 5px;
+            border-radius: 10px;
           }
 
           .widget-label {
@@ -334,7 +344,7 @@ in
           }
 
           .widget-label>label {
-            font-size: 10px;
+            font-size: 1rem;
             color: @text-color;
           }
 
@@ -352,24 +362,23 @@ in
 
           .widget-mpris-player {
             padding: 5px 10px;
-            margin: 10px;
+            margin: 0px;
           }
 
           .widget-mpris-title {
-            font-weight: 700;
-            font-size: 1.25rem;
+            font-size: 12px;
           }
 
           .widget-mpris-subtitle {
-            font-size: 1.1rem;
+            font-size: 10px;
           }
 
           .widget-buttons-grid {
-            font-size: x-large;
+            font-size: 14px;
             padding: 0px;
             margin: 10px 10px 5px 10px;
             border-radius: 5px;
-            background: @noti-bg-darker;
+            /*background: @noti-bg-darker;*/
           }
 
           .widget-buttons-grid>flowbox>flowboxchild>button {
@@ -396,7 +405,7 @@ in
 
           .widget-volume {
             background: @noti-bg-darker;
-            padding: 5px;
+            padding: 10px;
             margin: 10px 10px 5px 10px;
             border-radius: 5px;
             font-size: x-large;
@@ -430,8 +439,7 @@ in
 
           highlight{
             background: #${hex.active};
-          }
-        '';	
+          }'';	
 		};
 	};
 }
