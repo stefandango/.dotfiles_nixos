@@ -42,8 +42,8 @@ in
 				"widgets": [
 					"title",
 				"buttons-grid",
-				"mpris",
 				"volume",
+				"mpris",
 				"dnd",
 				"notifications"
 				],
@@ -268,7 +268,7 @@ in
           .control-center {
             background: @cc-bg;
             border: 2px solid #${hex.active};
-            border-radius: 5px;
+            border-radius: 10px;
           }
 
           .control-center-list {
@@ -351,7 +351,7 @@ in
           .widget-mpris {
             color: @text-color;
             background: @noti-bg-darker;
-            padding: 5px 10px;
+            padding: 0px 0px;
             margin: 10px 10px 5px 10px;
             border-radius: 5px;
           }
@@ -361,8 +361,8 @@ in
           }
 
           .widget-mpris-player {
-            padding: 5px 10px;
-            margin: 0px;
+            padding: 0px 0px;
+            margin: 5px;
           }
 
           .widget-mpris-title {
