@@ -30,6 +30,8 @@ in
 			swaylock        # Lock Screen
 			wl-clipboard    # Clipboard
 			wlr-randr       # Monitor Settings
+			
+			# Should be moved to own files
 			swaynotificationcenter #loaded in seperate nix file
 			libnotify
 		];
@@ -180,7 +182,7 @@ in
 		# bind = $mainMod, M, exit, 
 		#bind = $mainMod, E, exec, dolphin
 		bind = SUPERSHIFT, SPACE, togglefloating, 
-		bind = $mainMod, D, exec, wofi --show drun
+		bind = $mainMod, D, exec, pkill rofi || rofi -show drun -theme ~/.config/rofi/launcher.rasi
 		bind = $mainMod, P, pseudo, # dwindle
 		bind = $mainMod, J, togglesplit, # dwindle
 		bind=SUPERSHIFT,R,exec,${pkgs.hyprland}/bin/hyprctl reload 

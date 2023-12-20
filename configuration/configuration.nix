@@ -16,6 +16,7 @@ in
       ../modules/greetd.nix
       ../modules/swaync.nix	
       ../modules/hyprland.nix
+      ../modules/rofi.nix
     ];
 
 
@@ -102,11 +103,10 @@ in
 	vegur
 	source-code-pro
 	corefonts
-	jetbrains-mono
 	font-awesome
 	(nerdfonts.override {
 		fonts = [
-			"FiraCode"
+			"FiraCode" "JetBrainsMono"
 		];
 	})
 	];
