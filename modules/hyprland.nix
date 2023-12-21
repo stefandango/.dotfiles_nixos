@@ -1,4 +1,4 @@
-{ config, lib, system, pkgs, hyprland, vars, host, ... }:
+{config, lib, system, pkgs, hyprland, vars, host, ... }:
 
 let
   colors = import ../theme/colors.nix;
@@ -25,15 +25,20 @@ in
 		};
 
 		systemPackages = with pkgs; [
-			grimblast       # Screenshot
-			swayidle        # Idle Daemon
-			swaylock        # Lock Screen
-			wl-clipboard    # Clipboard
-			wlr-randr       # Monitor Settings
+			grimblast       	# Screenshot
+			swayidle        	# Idle Daemon
+			swaylock-effects        # Lock Screen
+			wl-clipboard    	# Clipboard
+			wlr-randr       	# Monitor Settings
+			waybar			# Bar
+			hyprland-autoname-workspaces
 			
 			# Should be moved to own files
 			swaynotificationcenter #loaded in seperate nix file
 			libnotify
+			
+			#Other
+			font-manager
 		];
 
 	};
@@ -61,7 +66,7 @@ in
 	home-manager.users.${vars.user} =
 	let
 	execute =''
-	exec-once=${pkgs.swayidle}/bin/swayidle -w timeout 600 '${pkgs.swaylock}/bin/swaylock -f' timeout 1200 '${pkgs.systemd}/bin/systemctl suspend' after-resume '${config.programs.hyprland.package}/bin/hyprctl dispatch dpms on' before-sleep '${pkgs.swaylock}/bin/swaylock -f && ${config.programs.hyprland.package}/bin/hyprctl dispatch dpms off'
+	exec-once=${pkgs.swayidle}/bin/swayidle -w timeout 600 '~/Scripts/swaylock.sh'
 	'';
 	in
 	let
@@ -187,8 +192,9 @@ in
 		bind = $mainMod, J, togglesplit, # dwindle
 		bind=SUPERSHIFT,R,exec,${pkgs.hyprland}/bin/hyprctl reload 
      		bind=SUPER,F,fullscreen,
-		bind=SUPER,L,exec,${pkgs.swaylock}/bin/swaylock jk
+		bind=SUPER,L,exec,~/Scripts/swaylock.sh
 		bind=SUPER,N,exec,${pkgs.swaynotificationcenter}/bin/swaync-client -t
+		bind = SUPERSHIFT, E,exec, pkill rofi || .config/rofi/powermenu.sh
 
         	bind=,print,exec,${pkgs.grimblast}/bin/grimblast --notify --freeze --wait 1 copysave area ~/Pictures/$(date +%Y-%m-%dT%H%M%S).png
 
@@ -258,37 +264,12 @@ in
 		#bind=,escape,submap,reset
 		#submap=reset		
 		exec-once=${pkgs.swaynotificationcenter}/bin/swaync
-
+		exec-once=${pkgs.openrazer-daemon}/bin/openrazer-daemon
 		${execute}
 		'';
 	in
 	{      
 		xdg.configFile."hypr/hyprland.conf".text = hyprlandConf;
-
-		programs.swaylock.settings = {
-			color = "000000f0";
-			font-size = "24";
-			indicator-idle-visible = true;
-			indicator-radius = 100;
-			indicator-thickness = 20;
-			inside-color = "00000000";
-			inside-clear-color = "00000000";
-			inside-ver-color = "00000000";
-			inside-wrong-color = "00000000";
-			key-hl-color = "79b360";
-			line-color = "000000f0";
-			line-clear-color = "000000f0";
-			line-ver-color = "000000f0";
-			line-wrong-color = "000000f0";
-			ring-color = "ffffff50";
-			ring-clear-color = "bbbbbb50";
-			ring-ver-color = "bbbbbb50";
-			ring-wrong-color = "b3606050";
-			text-color = "ffffff";
-			text-ver-color = "ffffff";
-			text-wrong-color = "ffffff";
-			show-failed-attempts = true;
-		};
 
 	};
 }

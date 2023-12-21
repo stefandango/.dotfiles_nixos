@@ -14,6 +14,7 @@ in
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ../modules/greetd.nix
+      ../modules/scripts.nix
       ../modules/swaync.nix	
       ../modules/hyprland.nix
       ../modules/rofi.nix
@@ -22,7 +23,7 @@ in
 
   users.users.${vars.user} = {
 		isNormalUser = true;
-		extraGroups = [ "wheel" "video" "audio" "networkmanager" "lp" ];
+		extraGroups = [ "wheel" "video" "audio" "networkmanager" "lp" "input" "openrazer" ];
  	};
 
   boot = {
@@ -46,8 +47,8 @@ in
 	opengl = {
 		enable = true;
 		extraPackages = with pkgs; [
-			intel-media-driver
-			vaapiIntel
+			#intel-media-driver
+			#vaapiIntel
 			#rocm-opencl-icd
 			#rocm-opencl-runtime
 			amdvlk
@@ -100,10 +101,11 @@ in
  nixpkgs.config.allowUnfree = true;	
 
   fonts.packages = with pkgs;[
-	vegur
 	source-code-pro
 	corefonts
 	font-awesome
+	noto-fonts
+	noto-fonts-color-emoji
 	(nerdfonts.override {
 		fonts = [
 			"FiraCode" "JetBrainsMono"
@@ -140,6 +142,12 @@ in
     pavucontrol
     pipewire
     pulseaudio
+    docker
+    jq
+    (python3.withPackages (ps: with ps; [
+	requests
+	openrazer
+    ]))
   ] ++
   (with unstable; [
    #APPS
@@ -151,7 +159,7 @@ in
   #		enable = true;
   #	 	xwayland.enable = true;
   #	 };
-
+  hardware.openrazer.enable = true; 
   hardware.pulseaudio.enable = false;
   services = {
 	pipewire = {
