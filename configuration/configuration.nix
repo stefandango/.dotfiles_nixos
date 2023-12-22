@@ -23,7 +23,7 @@ in
 
   users.users.${vars.user} = {
 		isNormalUser = true;
-		extraGroups = [ "wheel" "video" "audio" "networkmanager" "lp" "input" "openrazer" ];
+		extraGroups = [ "wheel" "video" "audio" "networkmanager" "lp" "input" "openrazer" "docker" ];
  	};
 
   boot = {
@@ -124,36 +124,37 @@ in
 	};  
 
   systemPackages = with pkgs; [
-    # TERMINAL
-    terminal
-    btop
-    coreutils
-    killall
-    lshw
-    nix-tree
-    xdg-utils
-    vim 
-    wget
-    git
-    kitty
-    neofetch
-    # VIDEO/AUDIO
-    alsa-utils
-    pavucontrol
-    pipewire
-    pulseaudio
-    docker
-    jq
-    (python3.withPackages (ps: with ps; [
-	requests
-	openrazer
-    ]))
-  ] ++
-  (with unstable; [
-   #APPS
-   firefox
- ]);
+# TERMINAL
+	  terminal
+		  btop
+		  coreutils
+		  killall
+		  lshw
+		  nix-tree
+		  xdg-utils
+		  vim 
+		  wget
+		  git
+		  kitty
+		  neofetch
+# VIDEO/AUDIO
+		  alsa-utils
+		  pavucontrol
+		  pipewire
+		  pulseaudio
+		  docker
+		  jq
+		  (python3.withPackages (ps: with ps; [
+					 requests
+					 openrazer
+		  ]))
+		  ] ++
+		  (with unstable; [
+#APPS
+		   firefox
+		  ]);
   };
+  virtualisation.docker.enable = true;
 
   #programs.hyprland = {
   #		enable = true;

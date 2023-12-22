@@ -13,12 +13,12 @@ if None == viper:
     print('')
     exit()
 
-icon = ''
+icon = '󰍽'
 battery_level = viper.battery_level
 cssClass = ''
 if viper.is_charging or battery_level == 0:
     cssClass = 'charging'
-    icon = ''
+    icon = '󰍿'
     content = (" {} ".format(icon))
     print("{\"text\": \"" + content + "\", \"class\": \"" + cssClass + "\"}")
     exit()

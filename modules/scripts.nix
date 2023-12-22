@@ -22,12 +22,22 @@ in
 				recursive = true;
 				executable = true;
 			};
-			"Scripts/viper_batter.py" = {
+			"Scripts/viper_battery.py" = {
 				source = ./scripts/viper_battery.py;
 				recursive = true;
 				executable = true;
 			};
+			"Scripts/waybar-docker.sh" = {
+				source = ./scripts/waybar-docker.sh;
+				recursive = true;
+				executable = true;
+			};
 				
+			"Scripts/waybar-clipboard.sh" = {
+				source = ./scripts/waybar-clipboard.sh;
+				recursive = true;
+				executable = true;
+			};
 			};	
 		};
 

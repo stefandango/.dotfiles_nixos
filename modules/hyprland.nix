@@ -32,7 +32,9 @@ in
 			wlr-randr       	# Monitor Settings
 			waybar			# Bar
 			hyprland-autoname-workspaces
-			
+			networkmanagerapplet
+			cliphist		
+	
 			# Should be moved to own files
 			swaynotificationcenter #loaded in seperate nix file
 			libnotify
@@ -195,8 +197,8 @@ in
 		bind=SUPER,L,exec,~/Scripts/swaylock.sh
 		bind=SUPER,N,exec,${pkgs.swaynotificationcenter}/bin/swaync-client -t
 		bind = SUPERSHIFT, E,exec, pkill rofi || .config/rofi/powermenu.sh
-
         	bind=,print,exec,${pkgs.grimblast}/bin/grimblast --notify --freeze --wait 1 copysave area ~/Pictures/$(date +%Y-%m-%dT%H%M%S).png
+		bind=SUPER,Y,exec,pkill rofi || cliphist list | rofi -dmenu -theme $HOME/.config/rofi/clipboard.rasi | cliphist decode | wl-copy
 
         	bind=,XF86AudioLowerVolume,exec,${pkgs.pamixer}/bin/pamixer -d 10
         	bind=,XF86AudioRaiseVolume,exec,${pkgs.pamixer}/bin/pamixer -i 10
@@ -263,8 +265,14 @@ in
 
 		#bind=,escape,submap,reset
 		#submap=reset		
+		exec-once=${pkgs.waybar}/bin/waybar
 		exec-once=${pkgs.swaynotificationcenter}/bin/swaync
 		exec-once=${pkgs.openrazer-daemon}/bin/openrazer-daemon
+		exec-once=${pkgs.networkmanager}/bin/nm-applet
+		exec-once=${pkgs.hyprland-autoname-workspaces}/bin/hyprland-autoname-workspaces
+		exec-once = wl-clipboard-history -t   
+		exec-once = wl-paste --watch cliphist store    
+		exec-once = rm "$HOME/.cache/cliphist/db"   #it'll delete history at every restart 
 		${execute}
 		'';
 	in

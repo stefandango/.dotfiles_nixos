@@ -60,6 +60,11 @@ font: "JetBrainsMono Nerd Font Semi-Bold 10";
 	recursive = true;
 	};
 
+".config/rofi/clipboard.rasi" = {
+	source = ./rofi/clipboard.rasi;
+	recursive = true;
+	};
+
 		
 			};	
 		};
