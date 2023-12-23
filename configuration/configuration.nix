@@ -15,6 +15,7 @@ in
       ./hardware-configuration.nix
       ../modules/greetd.nix
       ../modules/scripts.nix
+      ../modules/waybar.nix
       ../modules/swaync.nix	
       ../modules/hyprland.nix
       ../modules/rofi.nix
@@ -147,6 +148,7 @@ in
 		  (python3.withPackages (ps: with ps; [
 					 requests
 					 openrazer
+				 	 pyprland
 		  ]))
 		  ] ++
 		  (with unstable; [

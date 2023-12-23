@@ -1,0 +1,196 @@
+* {
+    border: none;
+    border-radius: 0;
+    font-family: JetBrainsMono SemiBold Nerd Font Complete Mono, monospace;
+    font-weight: bold;
+    font-size: 12px;
+    min-height: 0;
+}
+
+window#waybar {
+    background: transparent;
+    color: #ABB2BF;
+    transition: background-color 0.2s;
+}
+
+tooltip {
+    background: #1e1e2e;
+    border-radius: 10px;
+    border-width: 2px;
+    border-style: solid;
+    border-color: #11111b;
+}
+
+#workspaces button {
+    background: transparent;
+    padding: 5px;
+    color: #6c7680;
+    margin-right: 5px;
+}
+
+#workspaces button.active {
+    color: #a6adc8;
+    border-bottom: 2px solid #98C379;
+}
+
+#workspaces button.focused {
+    color: #a6adc8;
+    background: #eba0ac;
+    border-radius: 10px;
+}
+
+#workspaces button.urgent {
+    color: #11111b;
+    background: #a6e3a1;
+    border-radius: 10px;
+}
+
+#workspaces button:hover {
+    background: #11111b;
+    color: #cdd6f4;
+    border-radius: 10px;
+}
+
+#custom-weather,
+#window,
+#clock,
+#battery,
+#pulseaudio,
+#workspaces,
+#network,
+#tray,
+#custom-disks,
+#memory,
+#cpu,
+#temperature,
+#custom-logout,
+#custom-notification
+{
+    background: #1e1e2e;
+    padding: 0 12px;
+    margin: 5px 0px;
+    margin-top: 10px;
+    border: 1px solid #181825;
+
+}
+#keyboard-state label.locked {
+    background-color: #E06C75; 
+    color: #282C34;
+    padding: 0 15px;
+    border-radius: 12px;
+    margin: 10px;
+    font-size: 12px;
+
+}
+
+#keyboard-state label {
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+}
+
+#custom-docker {
+    background-color: #E5C07B;
+    color: #282C34;
+    padding: 0 12px;
+    border-radius: 10px;
+    margin: 5px 0px;
+    margin-top: 10px;
+}
+
+#custom-razerviperbattery.battery {
+    padding: 0 12px;
+    border-radius: 10px;
+    margin: 5px 0px;
+    margin-top: 10px;
+    
+}
+
+#custom-razerviperbattery.warning {
+    background-color: #E5C07B;
+    color: #282C34;
+    padding: 0 12px;
+    border-radius: 10px;
+    margin: 5px 0px;
+    margin-top: 10px;
+}
+
+#custom-razerviperbattery.alert {
+    background-color: #E06C75;
+    color: #282C34;
+    padding: 0 12px;
+    border-radius: 10px;
+    margin: 5px 0px;
+    margin-top: 10px;
+}
+#custom-razerviperbattery.charging {
+    background-color: #98C379;
+    color: #282C34;
+    padding: 0 12px;
+    border-radius: 10px;
+    margin: 5px 0px;
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+#custom-clipboard {
+    padding: 0 15px;
+    border-radius: 10px;
+    margin: 5px 5px;
+    margin-top: 10px;
+    padding: 0 12px;
+    background: rgba(30, 30, 30, 0.5);
+}
+
+#workspaces {
+    background: #1e1e2e;
+    border-radius: 10px;
+    margin-left: 10px;
+    padding-right: 0px;
+    padding-left: 5px;
+}
+
+
+#custom-system, #custom-logout, #custom-notifications {
+    margin-right: 10px;
+    margin-left: 5px;
+    font-size: 16px;
+    border-radius: 10px;
+}
+
+#custom-disks
+{
+    border-radius: 10px 0px 0px 10px;
+    margin-left: 5px;
+    border-right: 0px;
+}
+
+#window {
+    border-radius: 10px;
+    margin-left: 60px;
+    margin-right: 60px;
+}
+
+#clock {
+    color: #fab387;
+    border-radius: 10px 0px 0px 10px;
+    margin-left: 5px;
+    border-right: 0px;
+}
+
+#network {
+    border-radius: 0px 10px 10px 0px;
+    border-right: 0px;
+}
+
+#pulseaudio {
+    border-left: 0px;
+    border-right: 0px;
+}
+
+#custom-weather {
+    border-radius: 0px 10px 10px 0px;
+    border-right: 0px;
+    margin-left: 0px;
+}
+

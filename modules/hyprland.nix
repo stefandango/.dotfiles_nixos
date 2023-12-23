@@ -30,7 +30,6 @@ in
 			swaylock-effects        # Lock Screen
 			wl-clipboard    	# Clipboard
 			wlr-randr       	# Monitor Settings
-			waybar			# Bar
 			hyprland-autoname-workspaces
 			networkmanagerapplet
 			cliphist		
@@ -268,7 +267,7 @@ in
 		exec-once=${pkgs.waybar}/bin/waybar
 		exec-once=${pkgs.swaynotificationcenter}/bin/swaync
 		exec-once=${pkgs.openrazer-daemon}/bin/openrazer-daemon
-		exec-once=${pkgs.networkmanager}/bin/nm-applet
+		exec-once=${pkgs.networkmanagerapplet}/bin/nm-applet --indicator
 		exec-once=${pkgs.hyprland-autoname-workspaces}/bin/hyprland-autoname-workspaces
 		exec-once = wl-clipboard-history -t   
 		exec-once = wl-paste --watch cliphist store    

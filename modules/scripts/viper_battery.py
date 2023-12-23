@@ -27,6 +27,8 @@ else:
         cssClass = 'warning'
         if battery_level < 15:
             cssClass = 'alert'
+    else:
+        cssClass = 'battery'
 
     content = (" {} {}%".format(icon, viper.battery_level))
     print("{\"text\": \"" + content + "\", \"class\": \"" + cssClass + "\"}")
