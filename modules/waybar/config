@@ -57,13 +57,13 @@
 			"return-type": "json",
 			"exec": "~/Scripts/waybar-docker.sh",
 			"interval": 10,
-			"on-click": "kitty -T popup_term ~/.local/bin/docker_showcontainers.sh"
+			"on-click": "pypr toggle lazydocker"
 		}, 
 		"custom/disks": {
 			"exec": "~/Scripts/waybar-diskinfo.sh",
 			"return-type": "json",
 			"format": "  {}",
-			"on-click": "kitty -T popup_term -e ~/.local/bin/btop.sh",
+			"on-click": "pypr toggle systeminfo",
 			"interval": 30,
 			"tooltip": true
 		},
@@ -122,17 +122,17 @@
 			"scroll-step": 5,
 			"on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
 			"on-click-middle": "pactl set-source-mute @DEFAULT_SOURCE@ toggle",
-			"on-click-right": "pavucontrol",
+			"on-click-right": "pypr toggle pavucontrol",
 			"tooltip": false
 		},
 		"temperature": { 
 			"thermal-zone": 2, "hwmon-path": "/sys/class/hwmon/hwmon2/temp1_input", 
 			"critical-threshold": 80, 
-			"on-click": "kitty -T popup_term -e ~/.local/bin/btop.sh",
+			"on-click": "pypr toggle systeminfo",
 			"format-critical": "{temperatureC}°C ", 
 			"format": "" }, 
 		"cpu": { 
-			"on-click": "kitty -T popup_term -e ~/.local/bin/btop.sh",
+			"on-click": "pypr toggle systeminfo",
 			"tooltip": false, 
 			"format": "  {}%" 
 		}, 

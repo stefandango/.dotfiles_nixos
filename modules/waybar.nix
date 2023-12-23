@@ -27,6 +27,10 @@ in
 					recursive = true;
 				};
 
+				".config/hyprland-autoname-workspaces/config.toml" = {
+					source = ./waybar/config.toml;
+					recursive = true;
+				};
 		
 			};	
 		};

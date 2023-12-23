@@ -16,6 +16,7 @@ in
       ../modules/greetd.nix
       ../modules/scripts.nix
       ../modules/waybar.nix
+      ../modules/pyprland.nix
       ../modules/swaync.nix	
       ../modules/hyprland.nix
       ../modules/rofi.nix
@@ -144,11 +145,11 @@ in
 		  pipewire
 		  pulseaudio
 		  docker
+		  lazydocker
 		  jq
 		  (python3.withPackages (ps: with ps; [
 					 requests
 					 openrazer
-				 	 pyprland
 		  ]))
 		  ] ++
 		  (with unstable; [

@@ -63,7 +63,7 @@ in
 		AllowSuspendThenHibernate=no
 		AllowHybridSleep=yes
 		''; 
-	
+ 
 	home-manager.users.${vars.user} =
 	let
 	execute =''
@@ -262,6 +262,20 @@ in
 		#binde =,up,resizeactive,0 -20		
 		#binde =,down,resizeactive,0 20
 
+		$scratchpad = class:^(scratchpad)$
+       		windowrulev2 = float,$scratchpad
+       		windowrulev2 = workspace special silent,$scratchpad
+       		windowrulev2 = center,$scratchpad
+
+
+		$pavucontrol = class:^(pavucontrol)$
+       		windowrulev2 = float,$pavucontrol
+       		windowrulev2 = size 50% 40%,$pavucontrol
+       		windowrulev2 = move 50% 6%,$pavucontrol
+       		windowrulev2 = workspace special silent,$pavucontrol
+       		windowrulev2 = opacity 0.80,$pavucontrol
+
+
 		#bind=,escape,submap,reset
 		#submap=reset		
 		exec-once=${pkgs.waybar}/bin/waybar
@@ -269,6 +283,7 @@ in
 		exec-once=${pkgs.openrazer-daemon}/bin/openrazer-daemon
 		exec-once=${pkgs.networkmanagerapplet}/bin/nm-applet --indicator
 		exec-once=${pkgs.hyprland-autoname-workspaces}/bin/hyprland-autoname-workspaces
+		exec-once=pypr
 		exec-once = wl-clipboard-history -t   
 		exec-once = wl-paste --watch cliphist store    
 		exec-once = rm "$HOME/.cache/cliphist/db"   #it'll delete history at every restart 
@@ -277,6 +292,7 @@ in
 	in
 	{      
 		xdg.configFile."hypr/hyprland.conf".text = hyprlandConf;
+
 
 	};
 }
