@@ -200,13 +200,11 @@ in
 		bind=SUPER,Y,exec,pkill rofi || cliphist list | rofi -dmenu -theme $HOME/.config/rofi/clipboard.rasi | cliphist decode | wl-copy
 		bind=SUPER,code:49,exec,pypr toggle term
 
-        	bind=,XF86AudioLowerVolume,exec,${pkgs.pamixer}/bin/pamixer -d 10
-        	bind=,XF86AudioRaiseVolume,exec,${pkgs.pamixer}/bin/pamixer -i 10
-        	bind=,XF86AudioMute,exec,${pkgs.pamixer}/bin/pamixer -t
-        	bind=SUPER_L,c,exec,${pkgs.pamixer}/bin/pamixer --default-source -t
-        	bind=,XF86AudioMicMute,exec,${pkgs.pamixer}/bin/pamixer --default-source -t
-        	bind=,XF86MonBrightnessDown,exec,${pkgs.light}/bin/light -U 10
-        	bind=,XF86MonBrightnessUP,exec,${pkgs.light}/bin/light -A 10
+        	bind=,XF86AudioLowerVolume,exec,pactl set-sink-volume @DEFAULT_SINK@ -10% 
+        	bind=,XF86AudioRaiseVolume,exec,pactl set-sink-volume @DEFAULT_SINK@ +5%
+         	bind=,XF86AudioMute,exec,pactl set-sink-mute @DEFAULT_SINK@ toggle 
+	
+        	bind=,XF86AudioMicMute,exec, pactl set-source-mute @DEFAULT_SOURCE@ 1
 
 		# Move focus with mainMod + arrow keys
 		bind = $mainMod, left, movefocus, l
@@ -256,12 +254,14 @@ in
 		bindm = $mainMod, mouse:272, movewindow
 		bindm = $mainMod, mouse:273, resizewindow
 		
-		#bind = $mainMod,R,submap,resize
-		#submap=resize
-		#binde =,right,resizeactive,20 0		
-		#binde =,left,resizeactive,-20 0		
-		#binde =,up,resizeactive,0 -20		
-		#binde =,down,resizeactive,0 20
+		bind = SUPER,R,submap,resize
+		submap=resize
+		binde =,right,resizeactive,20 0		
+		binde =,left,resizeactive,-20 0		
+		binde =,up,resizeactive,0 -20		
+		binde =,down,resizeactive,0 20
+		bind=,escape,submap,reset
+		submap=reset		
 
 		$scratchpad = class:^(scratchpad)$
        		windowrulev2 = float,$scratchpad
@@ -277,8 +277,6 @@ in
        		windowrulev2 = opacity 0.80,$pavucontrol
 
 
-		#bind=,escape,submap,reset
-		#submap=reset		
 		exec-once=${pkgs.waybar}/bin/waybar
 		exec-once=${pkgs.swaynotificationcenter}/bin/swaync
 		exec-once=${pkgs.openrazer-daemon}/bin/openrazer-daemon
