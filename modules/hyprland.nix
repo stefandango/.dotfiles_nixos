@@ -198,6 +198,7 @@ in
 		bind = SUPERSHIFT, E,exec, pkill rofi || .config/rofi/powermenu.sh
         	bind=,print,exec,${pkgs.grimblast}/bin/grimblast --notify --freeze --wait 1 copysave area ~/Pictures/$(date +%Y-%m-%dT%H%M%S).png
 		bind=SUPER,Y,exec,pkill rofi || cliphist list | rofi -dmenu -theme $HOME/.config/rofi/clipboard.rasi | cliphist decode | wl-copy
+		bind=SUPER,code:49,exec,pypr toggle term
 
         	bind=,XF86AudioLowerVolume,exec,${pkgs.pamixer}/bin/pamixer -d 10
         	bind=,XF86AudioRaiseVolume,exec,${pkgs.pamixer}/bin/pamixer -i 10

@@ -34,6 +34,15 @@ in
 							"plugins": ["scratchpads", "magnify"]
 						},
 						"scratchpads": {
+							"term": {
+								"command": "kitty --class scratchpad",
+								"margin": 50,
+								"unfocus": "hide",
+								"animation": "fromTop",
+								"lazy": true,
+								"size": "60% 80%"
+
+							},
 							"systeminfo": {
 								"command": "kitty --class scratchpad -e btop",
 								"margin": 50,

@@ -148,13 +148,13 @@
 			},
 			"tooltip": true,
 			"tooltip-format": "Network:{ifname}\nIP:{ipaddr}\nRate: {bandwidthUpBits} / {bandwidthDownBits}",
-			"on-click": "swaymsg -q exec '$networkmenu'",
 		},
 		"memory": {
 			"interval": 30,
 			"format": "󰍛 {avail:0.1f}GB",
 			"tooltip": true,
-			"tooltip-format": "{used:0.1f}GB / {total:0.1f}GB"
+			"tooltip-format": "{used:0.1f}GB / {total:0.1f}GB",
+			"on-click": "pypr toggle systeminfo"
 		},
 		"keyboard-state": {
 			"numlock": false,
