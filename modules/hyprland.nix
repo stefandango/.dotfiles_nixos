@@ -33,7 +33,8 @@ in
 			hyprland-autoname-workspaces
 			networkmanagerapplet
 			cliphist		
-	
+			swww	
+
 			# Should be moved to own files
 			swaynotificationcenter #loaded in seperate nix file
 			libnotify
@@ -41,8 +42,6 @@ in
 			#Other
 			font-manager
 			
-			#Themes
-			volantes-cursors
 		];
 
 	};
@@ -167,6 +166,11 @@ in
 			force_default_wallpaper = -1 # Set to 0 to disable the anime mascot wallpapers
 			#no_vfr=false
 			vrr = 1
+			disable_hyprland_logo=true
+			disable_splash_rendering=true
+			mouse_move_enables_dpms=true
+			key_press_enables_dpms=true
+			background_color=0x111111
 		}
 
 		# Example per-device config
@@ -281,6 +285,7 @@ in
        		windowrulev2 = opacity 0.80,$pavucontrol
 
 
+		exec-once=${pkgs.swww}/bin/swww init
 		exec-once=${pkgs.waybar}/bin/waybar
 		exec-once=${pkgs.swaynotificationcenter}/bin/swaync
 		exec-once=${pkgs.openrazer-daemon}/bin/openrazer-daemon
@@ -289,7 +294,8 @@ in
 		exec-once=pypr
 		exec-once = wl-clipboard-history -t   
 		exec-once = wl-paste --watch cliphist store    
-		exec-once = rm "$HOME/.cache/cliphist/db"   #it'll delete history at every restart 
+		exec-once = rm "$HOME/.cache/cliphist/db"   #it'll delete history at every restart
+		exec-once = sleep 2 && ~/Scripts/swww_random.sh ~/Pictures/Wallpapers/
 		${execute}
 		'';
 	in

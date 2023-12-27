@@ -38,6 +38,12 @@ in
 				recursive = true;
 				executable = true;
 			};
+			"Scripts/swww_random.sh" = {	
+				source = ./scripts/swww_random.sh;
+				recursive = true;
+				executable = true;
+			};
+
 			};	
 		};
 
