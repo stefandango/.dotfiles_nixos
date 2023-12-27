@@ -40,6 +40,9 @@ in
 			
 			#Other
 			font-manager
+			
+			#Themes
+			volantes-cursors
 		];
 
 	};
@@ -199,6 +202,7 @@ in
         	bind=,print,exec,${pkgs.grimblast}/bin/grimblast --notify --freeze --wait 1 copysave area ~/Pictures/$(date +%Y-%m-%dT%H%M%S).png
 		bind=SUPER,Y,exec,pkill rofi || cliphist list | rofi -dmenu -theme $HOME/.config/rofi/clipboard.rasi | cliphist decode | wl-copy
 		bind=SUPER,code:49,exec,pypr toggle term
+		bind=SUPER,Z,exec, pypr zoom
 
         	bind=,XF86AudioLowerVolume,exec,pactl set-sink-volume @DEFAULT_SINK@ -10% 
         	bind=,XF86AudioRaiseVolume,exec,pactl set-sink-volume @DEFAULT_SINK@ +5%

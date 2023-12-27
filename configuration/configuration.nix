@@ -20,6 +20,7 @@ in
       ../modules/swaync.nix	
       ../modules/hyprland.nix
       ../modules/rofi.nix
+      ../theme/theming.nix
     ];
 
 
