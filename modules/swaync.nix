@@ -40,8 +40,8 @@ in
 				"hide-on-action": true,
 				"script-fail-notify": true,
 				"widgets": [
-					"title",
-				"buttons-grid",
+    "menubar#label",
+/*					"title", */
 				"volume",
 				"mpris",
 				"dnd",
@@ -67,38 +67,60 @@ in
 					"volume": {
 						"label": "󰕾"
 					},
-					"buttons-grid": {
-						"actions": [
-						{
-							"label": "󰐥",
-							"command": "systemctl poweroff"
+					"menubar#label": {
+						"menu#power-buttons": {
+							"label": "", 
+							"position": "right",
+							"actions": [ 
+							{
+								"label": " Reboot",
+								"command": "systemctl reboot"
+							},
+							{
+								"label": " Lock",
+								"command": "~/Scripts/swaylock.sh"
+							},
+							{
+								"label": " Logout",
+								"command": "${pkgs.hyprland}/bin/hyprctl dispatch exit"
+							},
+							{
+								"label": " Shut down",
+								"command": "systemctl poweroff"
+							}
+							]
 						},
-						{
-							"label": "󰜉",
-							"command": "systemctl reboot"
+						"menu#powermode-buttons": {
+							"label": "󰍜", 
+							"position": "left",
+							"actions": [ 
+							{
+								"label": "󰕾 Toggle sound",
+								"command": "${pkgs.pulseaudio}/bin/pactl set-sink-mute @DEFAULT_SINK@ toggle"
+							},
+							{
+								"label": "󰍬 Toggle mic",
+								"command": "${pkgs.pulseaudio}/bin/pactl set-source-mute @DEFAULT_SOURCE@ toggle"
+							},
+	{
+								"label": "󰸉 Switch wallpaper",
+								"command": "pkill swww_random.sh || ~/Scripts/swww_random.sh ~/Pictures/Wallpapers/ &"
+							}
+
+							]
 						},
-						{
-							"label": "󰌾",
-							"command": "${pkgs.swaylock}/bin/swaylock"
-						},
-						{
-							"label": "󰍃",
-							"command": "${pkgs.hyprland}/bin/hyprctl dispatch exit"
-						},
-						{
-							"label": "󰕾",
-							"command": "${pkgs.pulseaudio}/bin/pactl set-sink-mute @DEFAULT_SINK@ toggle"
-						},
-						{
-							"label": "󰍬",
-							"command": "${pkgs.pulseaudio}/bin/pactl set-source-mute @DEFAULT_SOURCE@ toggle"
-						},
-						{
-							"label": "󰹑",
-							"command": "${pkgs.grimblast}/bin/grimblast --notify --freeze --wait 1 copysave area ~/Pictures/$(date +%Y-%m-%dT%H%M%S).png"
+						"buttons#topbar-buttons": {
+							"position": "left",
+							"actions": [
+							{
+							
+								"label": "󰹑",
+								"command": "${pkgs.grimblast}/bin/grimblast --notify --freeze --wait 1 copysave area ~/Pictures/$(date +%Y-%m-%dT%H%M%S).png"
+							}
+							]
 						}
-						]
 					}
+
 				}
 			}			
 			'';
@@ -439,7 +461,71 @@ in
 
           highlight{
             background: #${hex.active};
-          }'';	
+          }
+.power-buttons{
+  /*background-color: @noti-bg;
+  padding: 8px;
+  margin: 8px;
+  border-radius: 12px;*/
+  font-size: 14px;
+            padding: 0px;
+            margin: 10px 10px 5px 10px;
+            border-radius: 5px;
+
+}
+
+
+.power-buttons>button {
+  background: transparent;
+  border: none;
+}
+
+.power-buttons>button:hover {
+  background: @noti-bg-hover;
+}
+
+.widget-menubar>box>.menu-button-bar>button{
+  border: none;
+  background: transparent;
+}
+
+.topbar-buttons>button{
+  border: none;
+  background: transparent;
+}
+
+.widget-buttons-grid{
+  padding: 8px;
+  margin: 8px;
+  border-radius: 12px;
+  background-color: @noti-bg;
+}
+
+.widget-buttons-grid>flowbox>flowboxchild>button{
+  background: @noti-bg;
+  border-radius: 12px;
+}
+
+.widget-buttons-grid>flowbox>flowboxchild>button:hover {
+  background: @noti-bg-hover;
+}
+
+.powermode-buttons{
+  background-color: @noti-bg;
+  padding: 8px;
+  margin: 8px;
+  border-radius: 12px;
+}
+
+.powermode-buttons>button {
+  background: transparent;
+  border: none;
+}
+
+.powermode-buttons>button:hover {
+  background: @noti-bg-hover;
+}
+'';	
 		};
 	};
 }
