@@ -21,6 +21,7 @@ in
       ../modules/hyprland.nix
       ../modules/rofi.nix
       ../theme/theming.nix
+      ../modules/git.nix
     ];
 
 
