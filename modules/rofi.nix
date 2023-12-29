@@ -33,8 +33,8 @@ in
 					/* Text Font */
 * {
 /*    font: "JetBrainsMono SemiBold Nerd Font Complete Mono 12"; */
-/* font: "MonoLisaSemiBold Nerd Font Semi-Bold 12"; */
-font: "JetBrainsMono Nerd Font Semi-Bold 10";
+font: "MonoLisaSemiBold Nerd Font Semi-Bold 12";
+/* font: "JetBrainsMono Nerd Font Semi-Bold 10"; */
 }
 				'';
 				};

@@ -33,7 +33,8 @@ in
 			hyprland-autoname-workspaces
 			networkmanagerapplet
 			cliphist		
-			swww	
+			swww			# Wallpaper daemon	
+			insync			# Gdrive integration
 
 			# Should be moved to own files
 			swaynotificationcenter #loaded in seperate nix file
@@ -271,6 +272,8 @@ in
 		bind=,escape,submap,reset
 		submap=reset		
 
+				
+		windowrulev2 = float,title:^(Insync)(.*)$
 		$scratchpad = class:^(scratchpad)$
        		windowrulev2 = float,$scratchpad
        		windowrulev2 = workspace special silent,$scratchpad
@@ -296,6 +299,7 @@ in
 		exec-once = wl-paste --watch cliphist store    
 		exec-once = rm "$HOME/.cache/cliphist/db"   #it'll delete history at every restart
 		exec-once = sleep 2 && ~/Scripts/swww_random.sh ~/Pictures/Wallpapers/
+		exec-once = sleep 3 && insync start --qt-qpa-platform=xcb --no-daemon
 		${execute}
 		'';
 	in

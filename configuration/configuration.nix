@@ -140,11 +140,15 @@ in
 		  git
 		  kitty
 		  neofetch
+		  unzip
+	
 # VIDEO/AUDIO
 		  alsa-utils
 		  pavucontrol
 		  pipewire
 		  pulseaudio
+
+# APPS
 		  docker
 		  lazydocker
 		  jq

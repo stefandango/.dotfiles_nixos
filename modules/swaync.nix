@@ -69,15 +69,15 @@ in
 					},
 					"menubar#label": {
 						"menu#power-buttons": {
-							"label": "", 
+							"label": "⏻", 
 							"position": "right",
 							"actions": [ 
 							{
-								"label": " Reboot",
+								"label": " Reboot",
 								"command": "systemctl reboot"
 							},
 							{
-								"label": " Lock",
+								"label": " Lock",
 								"command": "~/Scripts/swaylock.sh"
 							},
 							{
@@ -85,7 +85,7 @@ in
 								"command": "${pkgs.hyprland}/bin/hyprctl dispatch exit"
 							},
 							{
-								"label": " Shut down",
+								"label": "⏻ Shut down",
 								"command": "systemctl poweroff"
 							}
 							]
@@ -141,8 +141,8 @@ in
 	  @define-color mpris-button-hover rgba(0, 0, 0, 0.50);
 
           * {
-            font-family: FiraCode Nerd Font Mono;
-            font-weight: bolder;
+            font-family: MonoLisa Nerd Font Semi-Bold;
+            /*font-weight: bolder;*/
           }
 
           .control-center .notification-row:focus,
