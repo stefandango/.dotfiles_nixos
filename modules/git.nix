@@ -6,6 +6,11 @@ let
 in
 {
 	home-manager.users.${vars.user} = {
+		home =  {
+			packages = with pkgs; [
+				meld
+			];
+		};
 		programs.git = {
 			enable = true;
 			userEmail = "5796872+stefandango@users.noreply.github.com";
@@ -23,14 +28,14 @@ in
 					cmd = "nvim -d \"$LOCAL\" \"REMOTE\"";
 				};
 				diff = {
-					tool = "p4merge";
+					tool = "meld";
 				};
 				merge = {
 					ff = false;
-					tool = "p4merge";
+					tool = "meld";
 				};
 				mergetool = {
-					cmd = "p4merge $BASE $LOCAL $REMOTE $MERGED";
+					cmd = "meld $BASE $LOCAL $REMOTE $MERGED";
 					keepBackup = false;
 				};
 			};

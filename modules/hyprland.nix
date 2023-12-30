@@ -42,6 +42,7 @@ in
 			
 			#Other
 			font-manager
+			#obsidian
 			
 		];
 

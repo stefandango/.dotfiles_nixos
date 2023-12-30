@@ -22,6 +22,7 @@ in
       ../modules/rofi.nix
       ../theme/theming.nix
       ../modules/git.nix
+      ../modules/kitty.nix
     ];
 
 
