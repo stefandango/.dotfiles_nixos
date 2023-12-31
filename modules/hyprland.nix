@@ -122,8 +122,8 @@ in
 
 				blur {
 					enabled = true
-						size = 3
-						passes = 1
+					size = 5
+					passes = 1
 				}
 
 			drop_shadow = yes
@@ -287,8 +287,9 @@ in
        		windowrulev2 = move 50% 6%,$pavucontrol
        		windowrulev2 = workspace special silent,$pavucontrol
        		windowrulev2 = opacity 0.80,$pavucontrol
-
-
+		
+		windowrulev2 = opacity 0.9 0.9,class:^(Code|Slack|WebCord|Spotify|Kitty)$	
+		
 		exec-once=${pkgs.swww}/bin/swww init
 		exec-once=${pkgs.waybar}/bin/waybar
 		exec-once=${pkgs.swaynotificationcenter}/bin/swaync

@@ -23,6 +23,7 @@ in
       ../theme/theming.nix
       ../modules/git.nix
       ../modules/kitty.nix
+      ../modules/zsh.nix
     ];
 
 
