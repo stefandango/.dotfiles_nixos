@@ -127,7 +127,9 @@ in
 		TERMINAL = "${vars.terminal}";
 		EDITOR = "${vars.editor}";
 		VISUAL = "${vars.editor}";
-	};  
+	};
+  sessionVariables = {
+};  
 
   systemPackages = with pkgs; [
 # TERMINAL

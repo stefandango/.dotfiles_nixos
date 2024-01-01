@@ -38,6 +38,9 @@ in
 					cmd = "meld $BASE $LOCAL $REMOTE $MERGED";
 					keepBackup = false;
 				};
+				credentials = {
+					helper = "cache";
+				};
 			};
 		};
 	};

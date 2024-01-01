@@ -9,6 +9,8 @@
 	home-manager.users.${vars.user} = {
 		home = {
 			packages = with pkgs; [
+				bat
+				lsd
 				oh-my-posh
 			];
 			file = {
@@ -119,6 +121,13 @@
 			syntaxHighlighting.enable = true;
 			enableCompletion = true;
 			histSize = 100000;
+			histFile = "../../.local/share/zsh/history";
+			
+			shellAliases = {
+				ls = "lsd";
+				la = "lsd -al";
+				ll = "lsd -l";
+			};
 
 			ohMyZsh = {                               # Plug-ins
 				enable = true;
@@ -128,6 +137,7 @@
 			shellInit = ''
 				eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)"
 			'';
+			
 		};
 	};
 }
