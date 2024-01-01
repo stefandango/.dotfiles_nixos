@@ -152,7 +152,7 @@ tooltip {
 
 
 #custom-system, #custom-logout, #custom-notifications {
-    margin-right: 10px;
+    margin-right: 20px;
     margin-left: 5px;
     font-size: 16px;
     border-radius: 10px;
@@ -174,7 +174,7 @@ tooltip {
 #clock {
     color: #fab387;
     border-radius: 10px 0px 0px 10px;
-    margin-left: 5px;
+    margin-left: 20px;
     border-right: 0px;
 }
 

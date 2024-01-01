@@ -73,19 +73,19 @@ in
 							"position": "right",
 							"actions": [ 
 							{
-								"label": " Reboot",
+								"label": "\tReboot",
 								"command": "systemctl reboot"
 							},
 							{
-								"label": " Lock",
+								"label": "\tLock",
 								"command": "~/Scripts/swaylock.sh"
 							},
 							{
-								"label": " Logout",
+								"label": "\tLogout",
 								"command": "${pkgs.hyprland}/bin/hyprctl dispatch exit"
 							},
 							{
-								"label": "⏻ Shut down",
+								"label": "⏻\tShut down",
 								"command": "systemctl poweroff"
 							}
 							]
@@ -95,16 +95,16 @@ in
 							"position": "left",
 							"actions": [ 
 							{
-								"label": "󰕾 Toggle sound",
+								"label": "󰕾\tToggle sound",
 								"command": "${pkgs.pulseaudio}/bin/pactl set-sink-mute @DEFAULT_SINK@ toggle"
 							},
 							{
-								"label": "󰍬 Toggle mic",
+								"label": "󰍬\tToggle mic",
 								"command": "${pkgs.pulseaudio}/bin/pactl set-source-mute @DEFAULT_SOURCE@ toggle"
 							},
 	{
-								"label": "󰸉 Switch wallpaper",
-								"command": "pkill swww_random.sh || ~/Scripts/swww_random.sh ~/Pictures/Wallpapers/ &"
+								"label": "󰸉\tSwitch wallpaper",
+								"command": "pkill swww_random.sh && ~/Scripts/swww_random.sh ~/Pictures/Wallpapers/ &"
 							}
 
 							]

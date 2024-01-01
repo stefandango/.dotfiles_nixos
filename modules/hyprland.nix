@@ -122,7 +122,7 @@ in
 
 				blur {
 					enabled = true
-					size = 5
+					size = 8
 					passes = 1
 				}
 
