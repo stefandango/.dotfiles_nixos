@@ -28,7 +28,7 @@ DEFAULT="{icon}"
 "emerge: (.+?/.+?)-.*" = "{match1}"
 
 [initial_title_in_class."kitty"]
-"zsh" = "Zsh"
+"zsh" = ""
 
 [title_in_class."(firefox|chrom.*)"]
 "(?i)youtube" = "ꟳ"

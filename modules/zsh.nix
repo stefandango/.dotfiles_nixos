@@ -108,6 +108,12 @@ in
 				'';
 				};
 			};
+		file = {
+			".config/lsd/colors.yaml" = {
+				text = ''
+				'';
+			};
+		};
 		};
 	};
 
