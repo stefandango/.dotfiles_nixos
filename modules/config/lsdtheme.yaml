@@ -1,0 +1,41 @@
+# onedark.yml
+
+theme:
+  default: "dark"
+  dark:
+    ls_colors:
+      # Directory
+      di: "38;5;67"
+      # Executable
+      ex: "38;5;214"
+      # Symbolic Link
+      ln: "38;5;175"
+      # Pipe
+      pi: "38;5;67"
+      # Socket
+      so: "38;5;197"
+      # Block device driver
+      bd: "38;5;141"
+      # Character device driver
+      cd: "38;5;141"
+      # Orphaned symbolic link
+      or: "38;5;174"
+      # Missing file
+      mi: "38;5;15"
+      # Directory writable to others, with sticky bit
+      su: "38;5;67;48;5;34"
+      # Regular file
+      fi: "38;5;15"
+      # Directory writable to others, without sticky bit
+      ow: "38;5;245"
+      # Directory not writable to others, with sticky bit
+      st: "38;5;235;48;5;33"
+      # Directory not writable to others, without sticky bit
+      tw: "38;5;245"
+      # Executable with setuid bit set
+      exs: "38;5;220;48;5;124"
+      # Executable with setgid bit set
+      igs: "38;5;220;48;5;88"
+      # File with capabilities
+      cap: "38;5;160"
+

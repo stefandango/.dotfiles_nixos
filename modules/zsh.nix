@@ -110,8 +110,14 @@ in
 			};
 		file = {
 			".config/lsd/colors.yaml" = {
-				text = ''
-				'';
+				source = ./config/lsdtheme.yaml;
+				recursive = true;	
+			};
+		};
+		file = {
+			".config/lsd/config.yaml" = {
+				source = ./config/lsdconfig.yaml;
+				recursive = true;
 			};
 		};
 		};
