@@ -65,6 +65,13 @@ in
 								"unfocus": "hide",
 								"animation": "fromTop",
 								"lazy": true
+							},
+							"files": {
+								"command": "thunar",
+								"margin": 50,
+								"unfocus": "hide",
+								"animation": "fromTop",
+								"lazy": true
 							}
 						}
 					}

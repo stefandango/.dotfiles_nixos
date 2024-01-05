@@ -35,6 +35,8 @@ in
 			cliphist		
 			swww			# Wallpaper daemon	
 			insync			# Gdrive integration
+			xfce.thunar		# File explorer GUI
+			xfce.thunar-volman	# Auto manage removable drives etc..
 
 			# Should be moved to own files
 			swaynotificationcenter #loaded in seperate nix file
@@ -209,6 +211,7 @@ in
 		bind=SUPER,Y,exec,pkill rofi || cliphist list | rofi -dmenu -theme $HOME/.config/rofi/clipboard.rasi | cliphist decode | wl-copy
 		bind=SUPER,code:49,exec,pypr toggle term
 		bind=SUPER,Z,exec, pypr zoom
+		bind=SUPER,E,exec,pypr toggle files
 
         	bind=,XF86AudioLowerVolume,exec,pactl set-sink-volume @DEFAULT_SINK@ -10% 
         	bind=,XF86AudioRaiseVolume,exec,pactl set-sink-volume @DEFAULT_SINK@ +5%
@@ -280,14 +283,20 @@ in
        		windowrulev2 = workspace special silent,$scratchpad
        		windowrulev2 = center,$scratchpad
 
-
 		$pavucontrol = class:^(pavucontrol)$
        		windowrulev2 = float,$pavucontrol
        		windowrulev2 = size 50% 40%,$pavucontrol
        		windowrulev2 = move 50% 6%,$pavucontrol
        		windowrulev2 = workspace special silent,$pavucontrol
        		windowrulev2 = opacity 0.80,$pavucontrol
-		
+
+		$thunar = class:^(thunar)$
+		windowrulev2 = float,$thunar
+		#windowrulev2 = size 60% 60%,$thunar
+		#windowrulev2 = move 50% 6%,$thunar
+		#windowrulev2 = workspace special silent,$thunar	
+		windowrulev2 = opacity 0.90,$thunar
+	
 		windowrulev2 = opacity 0.9 0.9,class:^(Code|Slack|WebCord|Spotify|Kitty)$	
 		
 		exec-once=${pkgs.swww}/bin/swww init

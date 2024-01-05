@@ -134,6 +134,7 @@ in
 			syntaxHighlighting.enable = true;
 			enableCompletion = true;
 			histSize = 1000;
+			histFile = "~/.local/share/zsh/history";
 			
 			shellAliases = {
 				ls = "lsd";
