@@ -25,6 +25,7 @@ in
       ../modules/git.nix
       ../modules/kitty.nix
       ../modules/zsh.nix
+      #../modules/apps.nix
     ];
 
 
@@ -106,19 +107,19 @@ in
 	};
 
  nixpkgs.config.allowUnfree = true;	
-
-  fonts.packages = with pkgs;[
-	source-code-pro
-	corefonts
-	font-awesome
-	noto-fonts
-	noto-fonts-color-emoji
-	(nerdfonts.override {
-		fonts = [
-			"FiraCode" "JetBrainsMono"
-		];
-	})
-	];
+ nixpkgs.config.allowUnfreePredicate = (pkg: true);
+ fonts.packages = with pkgs;[
+	 source-code-pro
+		 corefonts
+		 font-awesome
+		 noto-fonts
+		 noto-fonts-color-emoji
+		 (nerdfonts.override {
+		  fonts = [
+		  "FiraCode" "JetBrainsMono"
+		  ];
+		  })
+ ];
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget

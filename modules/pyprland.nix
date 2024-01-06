@@ -71,7 +71,8 @@ in
 								"margin": 50,
 								"unfocus": "hide",
 								"animation": "fromTop",
-								"lazy": true
+								"lazy": true,
+								"size": "60% 80%"
 							}
 						}
 					}
