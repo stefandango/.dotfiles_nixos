@@ -107,7 +107,7 @@ in
 	};
 
  nixpkgs.config.allowUnfree = true;	
- nixpkgs.config.allowUnfreePredicate = (pkg: true);
+ #nixpkgs.config.allowUnfreePredicate = (pkg: true);
  fonts.packages = with pkgs;[
 	 source-code-pro
 		 corefonts
@@ -213,7 +213,7 @@ in
   # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
+  #  services.openssh.enable = true;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];

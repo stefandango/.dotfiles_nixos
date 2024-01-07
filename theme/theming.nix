@@ -46,8 +46,8 @@
 
     qt.enable = true;
     qt.platformTheme = "gtk";
-    qt.style.name = "adwaita-dark";
-    qt.style.package = pkgs.adwaita-qt;
+    #gt.style.name = "adwaita-dark";
+    #qt.style.package = pkgs.adwaita-qt;
   };
 
   environment.variables = {
