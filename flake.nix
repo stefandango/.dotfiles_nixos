@@ -18,7 +18,11 @@
 		hyprland = {
 			url = "github:hyprwm/Hyprland";
 			inputs.nixpkgs.follows = "nixpkgs-unstable";
-		};	
+		};
+		#obsidian = {
+		#	url = "github:obsidianmd/obsidian-releases";
+		#	inputs.nixpkgs.follows = "nixpkgs-unstable";
+		#};	
 	};
 
 	outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, home-manager, nixvim, hyprland, ... }:

@@ -25,7 +25,7 @@ in
       ../modules/git.nix
       ../modules/kitty.nix
       ../modules/zsh.nix
-      #../modules/apps.nix
+      ../modules/apps.nix
     ];
 
 
@@ -189,6 +189,7 @@ in
 	};
  };
  
+  services.flatpak.enable = true;          
 
   nix = {
 		settings = {
