@@ -152,5 +152,56 @@ in
 			'';
 			
 		};
+		tmux = {
+			enable = true;
+			terminal = "tmux-256color";
+			  historyLimit = 50000;
+			  plugins = with pkgs;
+			  [
+			  #{
+				  #plugin = tmux-super-fingers;
+				  #extraConfig = "set -g @super-fingers-key f";
+			  #}
+		          tmuxPlugins.onedark-theme
+			  tmuxPlugins.better-mouse-mode
+			  ];
+			  extraConfig = ''
+				  unbind C-b
+				  set-option -g prefix C-a
+				  # Default start tab is 1 instead of 0
+				  set -g base-index 1
+				  bind r source-file ~/.config/tmux/tmux.conf
+
+
+				# vim-like pane switching
+				  bind -r ^ last-window
+				  bind -r k select-pane -U
+				  bind -r j select-pane -D
+				  bind -r h select-pane -L
+				  bind -r l select-pane -R
+
+				  # Allow use of mouse
+				  set -g mouse on
+
+				# Super useful when using "grouped sessions" and multi-monitor setup
+				  setw -g aggressive-resize on
+				  
+				  
+				# Increase tmux messages display duration from 750ms to 4s
+				  set -g display-time 4000
+
+				  set -s escape-time 0
+
+				# Easier and faster switching between next/prev window
+				  bind C-p previous-window
+				  bind C-n next-window
+
+				# Enable VIM kyes in copy mode
+				  setw -g mode-keys vi
+
+				#  bind-key -r f run-shell "tmux neww tmux-sessionizer"
+				  '';
+		};
 	};
+
 }
