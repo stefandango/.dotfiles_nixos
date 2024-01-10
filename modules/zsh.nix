@@ -14,6 +14,7 @@ in
 				bat
 				lsd
 				oh-my-posh
+				fzf
 			];
 			file = {
 				".config/oh-my-posh/ohmyposhv3-v2.json" = with color.scheme.default; {
@@ -150,7 +151,6 @@ in
 			shellInit = ''
 				eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)"
 			'';
-			
 		};
 		tmux = {
 			enable = true;
@@ -164,6 +164,7 @@ in
 			  #}
 		          tmuxPlugins.onedark-theme
 			  tmuxPlugins.better-mouse-mode
+			  tmuxPlugins.yank
 			  ];
 			  extraConfig = ''
 				  unbind C-b
@@ -199,7 +200,7 @@ in
 				# Enable VIM kyes in copy mode
 				  setw -g mode-keys vi
 
-				#  bind-key -r f run-shell "tmux neww tmux-sessionizer"
+				  bind-key -r f run-shell "tmux neww ~/Scripts/tmux-sessionizer"
 				  '';
 		};
 	};
