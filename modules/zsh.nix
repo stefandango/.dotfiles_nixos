@@ -151,6 +151,9 @@ in
 			shellInit = ''
 				eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)"
 			'';
+			promptInit = ''
+				bindkey -s ^f "~/Scripts/tmux-sessionizer\n"
+			'';
 		};
 		tmux = {
 			enable = true;
@@ -158,13 +161,8 @@ in
 			  historyLimit = 50000;
 			  plugins = with pkgs;
 			  [
-			  #{
-				  #plugin = tmux-super-fingers;
-				  #extraConfig = "set -g @super-fingers-key f";
-			  #}
 		          tmuxPlugins.onedark-theme
 			  tmuxPlugins.better-mouse-mode
-			  tmuxPlugins.yank
 			  ];
 			  extraConfig = ''
 				  unbind C-b
@@ -203,6 +201,8 @@ in
 				  bind-key -r f run-shell "tmux neww ~/Scripts/tmux-sessionizer"
 				  '';
 		};
-	};
+
+};
+
 
 }
