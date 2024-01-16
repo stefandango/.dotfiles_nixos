@@ -158,15 +158,15 @@ in
 			};
 			initExtra = ''
 bindkey -s ^f '~/Scripts/tmux-sessionizer\n'
-eval '$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)'
+eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)"
 			'';
 		};
 	};
 	};
-
-#	users.users.${vars.user} = {
-#		shell = pkgs.zsh;
-#	};
+	programs.zsh.enable = true;
+	users.users.${vars.user} = {
+		shell = pkgs.zsh;
+	};
 }
 
 
