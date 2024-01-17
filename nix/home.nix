@@ -7,7 +7,7 @@
 	home.packages = [];
 
 	home.stateVersion = "23.11";
-
+	xdg.enable = true;
 	programs.home-manager.enable = true;
 
 }

@@ -141,6 +141,13 @@ in
 			history = {
 				path = ".local/share/zsh/history";
 				size = 1000;
+				save = 1000;
+				share = true;
+				ignoreAllDups = true;
+				
+			};
+			historySubstringSearch = {
+				enable = true;
 			};
 			oh-my-zsh = {
 				enable = true;

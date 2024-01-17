@@ -148,6 +148,7 @@ in
 		  kitty
 		  neofetch
 		  unzip
+	          xdg-ninja
 	
 # VIDEO/AUDIO
 		  alsa-utils
@@ -159,6 +160,7 @@ in
 		  docker
 		  lazydocker
 		  jq
+		  dotnet-sdk_8	
 		  (python3.withPackages (ps: with ps; [
 					 requests
 					 openrazer
@@ -171,10 +173,6 @@ in
   };
   virtualisation.docker.enable = true;
 
-  #programs.hyprland = {
-  #		enable = true;
-  #	 	xwayland.enable = true;
-  #	 };
   hardware.openrazer.enable = true; 
   hardware.pulseaudio.enable = false;
   services = {
@@ -225,6 +223,8 @@ in
 
   home-manager.users.${vars.user} = {
     home.stateVersion = "23.11"; # <---- SETTING GOES HERE
+
+   # xdg.enable = true;
   };
 
   # Copy the NixOS configuration file and link it from the resulting system
