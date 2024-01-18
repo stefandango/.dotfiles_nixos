@@ -25,6 +25,7 @@ in
       ../modules/git.nix
       ../modules/kitty.nix
       ../modules/zsh.nix
+      #../modules/nvim.nix
       ../modules/apps.nix
     ];
 
