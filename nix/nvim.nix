@@ -1,4 +1,4 @@
-{ lib, pkgs, vars, nixvim, ... }:
+{ lib, pkgs, vars, ... }:
 
 let
 	colors = import ../theme/colors.nix;

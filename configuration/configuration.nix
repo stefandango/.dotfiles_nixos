@@ -2,7 +2,7 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ config, lib, pkgs, unstable, home-manager, hyprland, nixvim, vars, ... }:
+{ config, lib, inputs, pkgs, unstable, home-manager, hyprland, nixvim, vars, ... }:
 #{ lib, inputs, pkgs, unstable, home-manager, hyprland, nixvim, ... }:
 
 let
@@ -12,6 +12,8 @@ in
 {
   imports =
     [ # Include the results of the hardware scan.
+      inputs.home-manager.nixosModules.home-manager
+      #inputs.nixvim.nixosModules.nixvim
       ./hardware-configuration.nix
       ../modules/env.nix
       ../modules/greetd.nix
@@ -25,7 +27,6 @@ in
       ../modules/git.nix
       ../modules/kitty.nix
       ../modules/zsh.nix
-      #../modules/nvim.nix
       ../modules/apps.nix
     ];
 
@@ -108,7 +109,7 @@ in
 	};
 
  nixpkgs.config.allowUnfree = true;	
- #nixpkgs.config.allowUnfreePredicate = (pkg: true);
+
  fonts.packages = with pkgs;[
 	 source-code-pro
 		 corefonts
@@ -188,7 +189,7 @@ in
 	};
  };
  
-  services.flatpak.enable = true;          
+  #services.flatpak.enable = true;          
 
   nix = {
 		settings = {
@@ -221,12 +222,14 @@ in
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
 
+  home-manager = {
+		extraSpecialArgs = { inherit inputs;  };
+		users = {
+			stefan = import ../nix;
+		};
+	}; 
 
-  home-manager.users.${vars.user} = {
-    home.stateVersion = "23.11"; # <---- SETTING GOES HERE
 
-   # xdg.enable = true;
-  };
 
   # Copy the NixOS configuration file and link it from the resulting system
   # (/run/current-system/configuration.nix). This is useful in case you
