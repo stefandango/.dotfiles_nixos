@@ -47,29 +47,52 @@ in
 			undofile = true;
 			ignorecase = true;
 			smartcase = true;
+            hlsearch = false;
+            incsearch = true;
+            mouse = "a";
+            signcolumn = "yes";
+            colorcolumn = "120";
+            cmdheight = 0;
+
 		};
 		extraConfigLua = ''
-			vim.opt.smartcase = true
-			vim.opt.ignorecase = true
-			vim.opt.hlsearch = false
-			vim.opt.incsearch = true
-			vim.opt.mouse = 'a'
-			vim.opt.signcolumn = "yes"
 			vim.opt.isfname:append("@-@")
-
-			vim.opt.colorcolumn = "120"
-			vim.opt.cmdheight = 0
 			vim.opt.shortmess:append('I')
+
+            require('neoscroll').setup()
 
 		'';
 		clipboard = {
 			register = "unnamedplus";
 			providers.wl-copy.enable = true;
 		};
-		
+
 		globals = {
 			mapleader = " ";
 			maplocalleader = " ";
 		};
+
+        plugins = {
+            nvim-tree = {
+                enable = true;
+                sortBy = "case_sensitive";
+                view = {
+                    relativenumber = true;
+                    number = true;
+                    float = {
+                        enable = true;
+                        openWinConfig = {
+                            border = "rounded";
+                            relative = "editor";
+                        };
+                    };
+
+                };
+            };
+        };
+
+        extraPlugins = with pkgs.vimPlugins; [
+            neoscroll-nvim
+        ];
 	};
 }
