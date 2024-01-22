@@ -9,11 +9,11 @@ in
 		viAlias = true;
 		vimAlias = true;
 		defaultEditor = true;
-		colorschemes.rose-pine = {
-			enable = true;
-			package = pkgs.vimPlugins.rose-pine;
-			transparentBackground = true;
-		};
+		#colorschemes.rose-pine = {
+		#	enable = true;
+		#	package = pkgs.vimPlugins.rose-pine;
+		#	transparentBackground = true;
+		#};
 		autoCmd = [
 		{
 			event = "VimEnter";
@@ -79,6 +79,7 @@ in
         extraPlugins = with pkgs.vimPlugins; [
             neoscroll-nvim
             nvim-tree-lua
+            onedark-nvim
         ];
 
 		extraConfigLua = ''
@@ -128,6 +129,16 @@ in
                         dotfiles = false,
                     },
             })
+
+        require('onedark').setup {
+            style = 'warmer',
+                  transparent = true,
+                  -- Lualine options --
+                      lualine = {
+                          transparent = true, -- lualine center bar transparency
+                      },
+        }
+        require('onedark').load()
 
 		'';
 
