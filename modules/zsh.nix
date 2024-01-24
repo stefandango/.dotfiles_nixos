@@ -115,7 +115,7 @@ in
 		file = {
 			".config/lsd/colors.yaml" = {
 				source = ./config/lsdtheme.yaml;
-				recursive = true;	
+				recursive = true;
 			};
 		};
 		file = {
@@ -137,14 +137,14 @@ in
 			};
 			enableAutosuggestions = true;
 			enableCompletion = true;
-     			syntaxHighlighting.enable = true;     
+     			syntaxHighlighting.enable = true;
 			history = {
 				path = ".local/share/zsh/history";
 				size = 1000;
 				save = 1000;
 				share = true;
 				ignoreAllDups = true;
-				
+
 			};
 			historySubstringSearch = {
 				enable = true;
@@ -170,10 +170,53 @@ eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)"
 		};
 	};
 	};
-	programs.zsh.enable = true;
+
+    programs =  {
+        zsh.enable = true;
+        tmux = {
+            enable = true;
+            historyLimit = 50000;
+             plugins = with pkgs;
+             [
+                 tmuxPlugins.onedark-theme
+                     tmuxPlugins.better-mouse-mode
+             ];
+             extraConfig = ''
+                 unbind C-b
+                 set-option -g prefix C-a
+# Default start tab is 1 instead of 0
+                 set -g base-index 1
+                 bind r source-file ~/.config/tmux/tmux.conf
+# vim-like pane switching
+                 bind -r ^ last-window
+                 bind -r k select-pane -U
+                 bind -r j select-pane -D
+                 bind -r h select-pane -L
+                 bind -r l select-pane -R
+# Allow use of mouse
+                 set -g mouse on
+# Super useful when using "grouped sessions" and multi-monitor setup
+                 setw -g aggressive-resize on
+
+
+# Increase tmux messages display duration from 750ms to 4s
+                 set -g display-time 4000
+                 set -s escape-time 0
+# Easier and faster switching between next/prev window
+                 bind C-p previous-window
+                 bind C-n next-window
+# Enable VIM kyes in copy mode
+                 setw -g mode-keys vi
+                 bind-key -r f run-shell "tmux neww ~/Scripts/tmux-sessionizer"
+                 '';
+        };
+    };
+
+
 	users.users.${vars.user} = {
 		shell = pkgs.zsh;
 	};
+
 }
 
 
