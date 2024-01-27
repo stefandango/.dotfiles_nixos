@@ -1,0 +1,6 @@
+: 1706357112:0;vim
+: 1706357289:0;sudo nixos-rebuild switch --flake #stefan
+: 1706357296:0;sudo nixos-rebuild switch --flake .#stefan
+: 1706357420:0;vim
+: 1706357458:0;sudo nixos-rebuild switch --flake .#stefan
+: 1706357605:0;git add .

@@ -492,6 +492,7 @@ in
                    # "<Tab>" = "cmp.mapping.confirm({ select = true })";
                 };
                 sources = [
+                {name = "copilot";}
                 {name = "nvim_lsp";}
                 {name = "luasnip";}
                 {name = "path";}
@@ -503,6 +504,12 @@ in
             trouble.enable = true;
             cmp-nvim-lsp-signature-help.enable = true;
 
+            copilot-lua = {
+                enable = true;
+                panel.enabled = false;
+                suggestion.enabled = false;
+            };
+            copilot-cmp.enable = true;
         };
 
         extraPlugins = with pkgs.vimPlugins; [
