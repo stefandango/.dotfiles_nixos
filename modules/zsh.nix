@@ -139,7 +139,7 @@ in
 			enableCompletion = true;
      			syntaxHighlighting.enable = true;
 			history = {
-				path = ".local/share/zsh/history";
+				#path = ".local/share/zsh/history";
 				size = 1000;
 				save = 1000;
 				share = true;
