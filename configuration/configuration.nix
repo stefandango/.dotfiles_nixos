@@ -20,7 +20,7 @@ in
       ../modules/scripts.nix
       ../modules/waybar.nix
       ../modules/pyprland.nix
-      ../modules/swaync.nix	
+      ../modules/swaync.nix
       ../modules/hyprland.nix
       ../modules/rofi.nix
       ../theme/theming.nix
@@ -108,7 +108,7 @@ in
 		sudo.wheelNeedsPassword = false;
 	};
 
- nixpkgs.config.allowUnfree = true;	
+ nixpkgs.config.allowUnfree = true;
 
  fonts.packages = with pkgs;[
 	 source-code-pro
@@ -133,7 +133,7 @@ in
 		VISUAL = "${vars.editor}";
 	};
   sessionVariables = {
-};  
+};
 
   systemPackages = with pkgs; [
 # TERMINAL
@@ -144,14 +144,14 @@ in
 		  lshw
 		  nix-tree
 		  xdg-utils
-		  vim 
+		  vim
 		  wget
 		  git
 		  kitty
 		  neofetch
 		  unzip
 	          xdg-ninja
-	
+
 # VIDEO/AUDIO
 		  alsa-utils
 		  pavucontrol
@@ -162,7 +162,7 @@ in
 		  docker
 		  lazydocker
 		  jq
-		  dotnet-sdk_8	
+		  dotnet-sdk_8
 		  (python3.withPackages (ps: with ps; [
 					 requests
 					 openrazer
@@ -175,7 +175,11 @@ in
   };
   virtualisation.docker.enable = true;
 
-  hardware.openrazer.enable = true; 
+  #hardware.openrazer.enable = true;
+  hardware.openrazer = {
+    enable = true;
+    mouseBatteryNotifier = false;
+  };
   hardware.pulseaudio.enable = false;
   services = {
 	pipewire = {
@@ -188,8 +192,8 @@ in
 		jack.enable = true;
 	};
  };
- 
-  #services.flatpak.enable = true;          
+
+  #services.flatpak.enable = true;
 
   nix = {
 		settings = {
@@ -227,7 +231,7 @@ in
 		users = {
 			stefan = import ../nix;
 		};
-	}; 
+	};
 
 
 
@@ -253,6 +257,6 @@ in
   #
   # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
   system.stateVersion = "23.11"; # Did you read the comment?
-  
+
 }
 
