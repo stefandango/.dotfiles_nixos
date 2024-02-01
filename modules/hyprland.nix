@@ -276,7 +276,9 @@ in
 		bind=,escape,submap,reset
 		submap=reset
 
+        #Steam
         windowrule=float,title:^(Steam)$
+        windowrule=float,title:^(Friends List)$
 
 		windowrulev2 = float,title:^(Insync)(.*)$
 		$scratchpad = class:^(scratchpad)$
