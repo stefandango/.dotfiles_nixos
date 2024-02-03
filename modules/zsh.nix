@@ -15,6 +15,7 @@ in
 				lsd
 				oh-my-posh
 				fzf
+                ripgrep
                 gh
 			];
 
