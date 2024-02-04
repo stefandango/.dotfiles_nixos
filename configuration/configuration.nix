@@ -150,7 +150,9 @@ in
 		  kitty
 		  neofetch
 		  unzip
-	          xdg-ninja
+          zip
+          gnupg
+	      xdg-ninja
 
 # VIDEO/AUDIO
 		  alsa-utils
