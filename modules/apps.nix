@@ -2,9 +2,9 @@
 {
     environment.systemPackages = with pkgs; [
         obsidian
-        vscode-fhs
     ] ++
     (with unstable; [
+        vscode-fhs
         jetbrains.rider
     ]);
     nixpkgs.config.permittedInsecurePackages = [
