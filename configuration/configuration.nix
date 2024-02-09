@@ -166,6 +166,7 @@ in
 		  lazydocker
 		  jq
 		  dotnet-sdk_8
+          nodejs_21
 		  (python3.withPackages (ps: with ps; [
 					 requests
 					 openrazer
