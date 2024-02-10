@@ -167,6 +167,7 @@ in
 		  jq
 		  dotnet-sdk_8
           nodejs_21
+		   firefox
 		  (python3.withPackages (ps: with ps; [
 					 requests
 					 openrazer
@@ -174,7 +175,6 @@ in
 		  ] ++
 		  (with unstable; [
 #APPS
-		   firefox
 		  ]);
   };
   virtualisation.docker.enable = true;
