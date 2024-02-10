@@ -218,6 +218,8 @@ in
      enable = true;
      enableSSHSupport = true;
    };
+    programs.steam.enable = true;
+    programs.steam.gamescopeSession.enable = true;
 
   # List services that you want to enable:
 
