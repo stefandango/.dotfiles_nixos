@@ -2,6 +2,8 @@
 {
     environment.systemPackages = with pkgs; [
         obsidian
+        insomnia
+        spotify
     ] ++
     (with unstable; [
         vscode-fhs
