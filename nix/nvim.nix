@@ -296,6 +296,12 @@ in
           options.desc = "Code action";
       }
       {
+          mode = "v";
+          key = "<leader>ca";
+          action = "<CMD>lua vim.lsp.buf.code_action()<CR>";
+          options.desc = "Code action";
+      }
+      {
           mode = "n";
           key = "<leader>rn";
           action = "<CMD>lua vim.lsp.buf.rename()<CR>";
@@ -435,7 +441,15 @@ in
                     eslint.enable = true;
                     jsonls.enable = true;
                     #ltex.enable = true;
-                    omnisharp.enable = true;
+                    #omnisharp.enable = true;
+                    omnisharp = {
+                        enable = true;
+                        settings = {
+                            enableRoslynAnalyzers = true;
+                            organizeImportsOnFormat = true;
+                            enableImportCompletion = true;
+                        };
+                    };
                     #rust-analyzer.enable = true;
                 };
             };
