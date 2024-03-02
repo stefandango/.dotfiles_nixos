@@ -18,9 +18,6 @@ in
                 ripgrep
                 gh
 			];
-
-
-
 			file = {
 				".config/oh-my-posh/ohmyposhv3-v2.json" = with color.scheme.default; {
 					text = ''
@@ -166,6 +163,8 @@ in
 				];
 			};
 			initExtra = ''
+export PATH="$PATH:/home/stefan/.dotnet/tools"
+
 bindkey -s ^f '~/Scripts/tmux-sessionizer\n'
 eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)"
 			'';

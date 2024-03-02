@@ -4,6 +4,7 @@
         obsidian
         insomnia
         spotify
+        beekeeper-studio
     ] ++
     (with unstable; [
         vscode-fhs

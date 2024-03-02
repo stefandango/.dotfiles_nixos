@@ -7,7 +7,7 @@
 		"gtk-layer-shell": true,
 		"height": 40,
 		"modules-left": [
-			"clock",    
+			"clock",
 			"custom/weather",
 		],
 		"modules-center": [
@@ -53,12 +53,12 @@
 			"return-type" : "json"
 		},
 		"custom/docker": {
-			"format": "<span font='20' rise='-4000'></span>  {}",
+			"format": "<span font='16' rise='-4000'></span>  {}",
 			"return-type": "json",
 			"exec": "~/Scripts/waybar-docker.sh",
 			"interval": 10,
 			"on-click": "pypr toggle lazydocker"
-		}, 
+		},
 		"custom/disks": {
 			"exec": "~/Scripts/waybar-diskinfo.sh",
 			"return-type": "json",
@@ -125,21 +125,21 @@
 			"on-click-right": "pypr toggle pavucontrol",
 			"tooltip": false
 		},
-		"temperature": { 
-			"thermal-zone": 2, "hwmon-path": "/sys/class/hwmon/hwmon2/temp1_input", 
-			"critical-threshold": 80, 
+		"temperature": {
+			"thermal-zone": 2, "hwmon-path": "/sys/class/hwmon/hwmon2/temp1_input",
+			"critical-threshold": 80,
 			"on-click": "pypr toggle systeminfo",
-			"format-critical": "{temperatureC}°C ", 
-			"format": "" }, 
-		"cpu": { 
+			"format-critical": "{temperatureC}°C ",
+			"format": "" },
+		"cpu": {
 			"on-click": "pypr toggle systeminfo",
-			"tooltip": false, 
-			"format": "  {}%" 
-		}, 
-		"network": { 
-			"format": "{icon}  {ifname}", 
-			"format-wifi": "{icon}  {essid}", 
-			"format-ethernet": "{icon}", 
+			"tooltip": false,
+			"format": "  {}%"
+		},
+		"network": {
+			"format": "{icon}  {ifname}",
+			"format-wifi": "{icon}  {essid}",
+			"format-ethernet": "{icon}",
 			"format-disconnected": "Offline",
 			"format-icons": {
 				"wifi": [""],
