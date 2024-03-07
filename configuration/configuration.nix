@@ -166,7 +166,6 @@ in
 		  docker
 		  lazydocker
 		  jq
-		  dotnet-sdk_8
           #dotnet-runtime_8
           omnisharp-roslyn
           nodejs_21
@@ -177,7 +176,7 @@ in
 		  ]))
 		  ] ++
 		  (with unstable; [
-#APPS
+		    dotnet-sdk_8
 		  ]);
   };
   virtualisation.docker.enable = true;
