@@ -5,6 +5,8 @@
         insomnia
         spotify
         beekeeper-studio
+        dbeaver
+
     ] ++
     (with unstable; [
         vscode-fhs

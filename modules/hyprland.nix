@@ -300,7 +300,7 @@ in
 		#windowrulev2 = workspace special silent,$thunar
 		windowrulev2 = opacity 0.90,$thunar
 
-		windowrulev2 = opacity 0.9 0.9,class:^(Code|Slack|WebCord|Spotify|Kitty)$
+		windowrulev2 = opacity 0.9 0.9,class:^(Slack|WebCord|Spotify|Kitty)$
 
 		exec-once=${pkgs.swww}/bin/swww init
 		exec-once=${pkgs.waybar}/bin/waybar
