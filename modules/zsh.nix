@@ -166,6 +166,10 @@ in
 export PATH="$PATH:/home/stefan/.dotnet/tools"
 
 bindkey -s ^f '~/Scripts/tmux-sessionizer\n'
+
+# Set github copilot alias
+eval "$(gh copilot alias -- zsh)"
+
 eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)"
 			'';
 		};
