@@ -6,6 +6,7 @@
         spotify
         beekeeper-studio
         dbeaver
+        github-copilot-intellij-agent
 
     ] ++
     (with unstable; [
