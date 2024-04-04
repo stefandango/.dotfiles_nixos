@@ -14,7 +14,7 @@
 			url = "github:nix-community/nixvim/nixos-23.11";
 			inputs.nixpkgs.follows = "nixpkgs";
 		};
-		
+
 		hyprland = {
 			url = "github:hyprwm/Hyprland";
 			inputs.nixpkgs.follows = "nixpkgs-unstable";
@@ -33,7 +33,7 @@
 	in
 	{
 		nixosConfigurations = (
-			import ./configuration {	
+			import ./configuration {
 			inherit (nixpkgs) lib;
 			inherit inputs nixpkgs nixpkgs-unstable home-manager hyprland nixvim vars;
 			}

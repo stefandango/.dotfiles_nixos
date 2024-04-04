@@ -223,6 +223,16 @@ in
     programs.steam.enable = true;
     programs.steam.gamescopeSession.enable = true;
 
+    nixpkgs.config.packageOverrides = pkgs: {
+    steam = pkgs.steam.override {
+      extraPkgs = pkgs: with pkgs; [
+        pango
+        libthai
+        harfbuzz
+      ];
+    };
+  };
+
   # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
