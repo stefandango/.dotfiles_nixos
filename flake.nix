@@ -38,12 +38,6 @@
 			inherit inputs nixpkgs nixpkgs-unstable home-manager hyprland nixvim vars;
 			}
 		);
-		#homeConfigurations = (
-		#	import ./nix {
-		#		inherit (nixpkgs) lib;
-		#		inherit inputs nixpkgs nixpkgs-unstable nixvim home-manager;
-		#	}
-		##);
 	};
 
 }

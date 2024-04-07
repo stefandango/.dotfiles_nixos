@@ -2,4 +2,10 @@
 
 My first nixos setup.. still needs cleanup.
 
-TODO: Guide for restoring install based on this flake setup...
+## Guide to install NixOS
+
+// TODO..
+
+## Guide to install to MacOs
+
+// TODO...
