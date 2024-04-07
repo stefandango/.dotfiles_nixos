@@ -19,6 +19,15 @@ in
                 gh
 			];
 			file = {
+
+                
+			"Scripts/tmux-sessionizer" = {
+				source = ./scripts/tmux-sessionizer;
+				recursive = true;
+				executable = true;
+			};
+
+
 				".config/oh-my-posh/ohmyposhv3-v2.json" = with color.scheme.default; {
 					text = ''
 {
@@ -221,6 +230,7 @@ eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)"
 	users.users.${vars.user} = {
 		shell = pkgs.zsh;
 	};
+    
 
 }
 

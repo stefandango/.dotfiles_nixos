@@ -43,11 +43,11 @@ in
 				recursive = true;
 				executable = true;
 			};
-			"Scripts/tmux-sessionizer" = {
-				source = ./scripts/tmux-sessionizer;
-				recursive = true;
-				executable = true;
-			};
+			#"Scripts/tmux-sessionizer" = {
+			#	source = ./scripts/tmux-sessionizer;
+			#	recursive = true;
+			#	executable = true;
+			#};
 
 			};	
 		};
