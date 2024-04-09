@@ -7,22 +7,29 @@ in
 {
     imports =
     [ 
-      inputs.home-manager.nixosModules.home-manager    
-      ../modules/env.nix
-      ../theme/theming.nix
-      ../modules/git.nix
-      ../modules/kitty.nix
-      ../modules/zsh.nix
+      inputs.home-manager.darwinModules.home-manager    
+      #../theme/theming.nix
+      #../modules/git.nix
+      #../modules/kitty.nix
+      #../modules/zsh.nix
     ];
   users.users.user.home = "/Users/user";
-      environment = {
-  variables = {
-		TERMINAL = "${vars.terminal}";
-		EDITOR = "${vars.editor}";
-		VISUAL = "${vars.editor}";
-	};
 
     # Auto upgrade nix package and the daemon service.
   services.nix-daemon.enable = true;
-  nix.package = pkgs.nix;
+  #nix.package = pkgs.nix;
+  # The platform the configuration will be used on.
+  nixpkgs.hostPlatform = "x86_64-darwin";
+
+    nix = {
+		settings = {
+			experimental-features = "nix-command flakes";
+			auto-optimise-store = true;
+		};
+#		gc = {
+#			automatic = true;
+#			dates = "weekly";
+#			options = "--delete-older-than 2d";
+#		};
+	};
 }

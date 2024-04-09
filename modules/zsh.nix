@@ -193,7 +193,7 @@ eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)"
              plugins = with pkgs;
              [
                  tmuxPlugins.onedark-theme
-                     tmuxPlugins.better-mouse-mode
+                tmuxPlugins.better-mouse-mode
              ];
              extraConfig = ''
                  unbind C-b

@@ -1,4 +1,4 @@
-{ lib, inputs, nixpkgs, home-manager, nixvim, darwing, vars }:
+{ lib, inputs, nixpkgs, home-manager, nixvim, darwin, vars }:
 
 let
 	system = "x86_64-darwin";
@@ -10,14 +10,14 @@ let
 	lib = nixpkgs.lib;
 	in
 	{
-		stefanMac = lib.nixosSystem {
+		stefanMac = darwin.lib.darwinSystem {
 			inherit system;
 			specialArgs =  {
-				inherit inputs system unstable hyprland vars;
+				inherit inputs system vars;
 			};
 			modules = [ 
 				./configuration.nix 
-				home-manager.nixosModules.home-manager {
+				home-manager.darwinModules.home-manager {
 					home-manager.useGlobalPkgs = true;
 					home-manager.useUserPackages = true;
 				}
