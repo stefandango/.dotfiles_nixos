@@ -8,28 +8,32 @@ in
     imports =
     [ 
       inputs.home-manager.darwinModules.home-manager    
-      #../theme/theming.nix
       #../modules/git.nix
       #../modules/kitty.nix
       #../modules/zsh.nix
     ];
-  users.users.user.home = "/Users/user";
+    users.users.stefan = {
+      name = "stefan";
+      home = "/Users/stefan";
+    };
+    programs.zsh.enable = true;
+      environment = {
+    shells = with pkgs; [ bash zsh ];
+    loginShell = pkgs.zsh;
+    systemPackages = [ pkgs.coreutils ];
+    systemPath = [ "/opt/homebrew/bin" ];
+    pathsToLink = [ "/Applications" ];
+  };
 
     # Auto upgrade nix package and the daemon service.
   services.nix-daemon.enable = true;
   #nix.package = pkgs.nix;
   # The platform the configuration will be used on.
   nixpkgs.hostPlatform = "x86_64-darwin";
+  system.stateVersion = 4;
 
-    nix = {
-		settings = {
-			experimental-features = "nix-command flakes";
-			auto-optimise-store = true;
-		};
-#		gc = {
-#			automatic = true;
-#			dates = "weekly";
-#			options = "--delete-older-than 2d";
-#		};
-	};
+  nix.extraOptions = ''
+    experimental-features = nix-command flakes
+  ''; 
+
 }

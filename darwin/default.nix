@@ -10,7 +10,7 @@ let
 	lib = nixpkgs.lib;
 	in
 	{
-		stefanMac = darwin.lib.darwinSystem {
+		Stefans-MacBook-Pro = darwin.lib.darwinSystem {
 			inherit system;
 			specialArgs =  {
 				inherit inputs system vars;
@@ -20,8 +20,15 @@ let
 				home-manager.darwinModules.home-manager {
 					home-manager.useGlobalPkgs = true;
 					home-manager.useUserPackages = true;
+					home-manager.users.stefan.imports = [
+						({pkgs, ...}: {
+							home.stateVersion = "23.11";
+							home.packages = [ pkgs.ripgrep ];
+						})
+
+					];
 				}
 
 			];
-		};
+	};
 	}
