@@ -16,7 +16,7 @@ in
 				oh-my-posh
 				fzf
                 ripgrep
-                gh
+                #gh
 			];
 			file = {
 
@@ -177,7 +177,7 @@ export PATH="$PATH:/home/stefan/.dotnet/tools"
 bindkey -s ^f '~/Scripts/tmux-sessionizer\n'
 
 # Set github copilot alias
-eval "$(gh copilot alias -- zsh)"
+#eval "$(gh copilot alias -- zsh)"
 
 eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)"
 			'';
@@ -189,12 +189,12 @@ eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)"
         zsh.enable = true;
         tmux = {
             enable = true;
-            historyLimit = 50000;
-             plugins = with pkgs;
-             [
-                 tmuxPlugins.onedark-theme
-                tmuxPlugins.better-mouse-mode
-             ];
+            #historyLimit = 50000;
+            # plugins = with pkgs;
+            # [
+            #     tmuxPlugins.onedark-theme
+            #    tmuxPlugins.better-mouse-mode
+            # ];
              extraConfig = ''
                  unbind C-b
                  set-option -g prefix C-a

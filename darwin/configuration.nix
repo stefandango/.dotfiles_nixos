@@ -8,23 +8,23 @@ in
     imports =
     [ 
       inputs.home-manager.darwinModules.home-manager    
-      #../modules/git.nix
-      #../modules/kitty.nix
-      #../modules/zsh.nix
+      ../modules/git.nix
+      ../modules/kitty.nix
+      ../modules/zsh.nix
     ];
     users.users.stefan = {
       name = "stefan";
       home = "/Users/stefan";
     };
     programs.zsh.enable = true;
-      environment = {
+    environment = {
     shells = with pkgs; [ bash zsh ];
-    loginShell = pkgs.zsh;
+    #loginShell = pkgs.zsh;
     systemPackages = [ pkgs.coreutils ];
     systemPath = [ "/opt/homebrew/bin" ];
-    pathsToLink = [ "/Applications" ];
+    pathsToLink = [ "/Applications" ]; 
   };
-
+  fonts.fonts = [ (pkgs.nerdfonts.override { fonts = [ "Meslo" ]; }) ];
     # Auto upgrade nix package and the daemon service.
   services.nix-daemon.enable = true;
   #nix.package = pkgs.nix;
