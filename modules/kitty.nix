@@ -14,7 +14,7 @@ in
           enable_audio_bell="no";
           resize_debounce_time="0";
 		      background_opacity = lib.mkForce "0.85";
-		      font_family = "MonoLisa Nerd Font";
+		      font_family = "JetBrainsMonoNL Nerd Font Mono SemiBold";
           font_size = "16.0";
 
         };

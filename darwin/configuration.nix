@@ -24,7 +24,8 @@ in
     systemPath = [ "/opt/homebrew/bin" ];
     pathsToLink = [ "/Applications" ]; 
   };
-  fonts.fonts = [ (pkgs.nerdfonts.override { fonts = [ "Meslo" ]; }) ];
+  fonts.fontDir.enable = true; # DANGER
+  fonts.fonts = [ (pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; }) ];
     # Auto upgrade nix package and the daemon service.
   services.nix-daemon.enable = true;
   #nix.package = pkgs.nix;

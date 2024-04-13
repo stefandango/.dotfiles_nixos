@@ -195,7 +195,8 @@ eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)"
             #     tmuxPlugins.onedark-theme
             #    tmuxPlugins.better-mouse-mode
             # ];
-             extraConfig = ''
+            
+            extraConfig = ''
                  unbind C-b
                  set-option -g prefix C-a
 # Default start tab is 1 instead of 0
@@ -211,6 +212,10 @@ eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)"
                  set -g mouse on
 # Super useful when using "grouped sessions" and multi-monitor setup
                  setw -g aggressive-resize on
+                 set-option default-terminal "screen-256color"
+                 #set -g status-utf8 on
+                 #set -g utf8 on
+                 
 
 
 # Increase tmux messages display duration from 750ms to 4s
