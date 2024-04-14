@@ -20,21 +20,76 @@ in
     environment = {
     shells = with pkgs; [ bash zsh ];
     #loginShell = pkgs.zsh;
-    systemPackages = [ pkgs.coreutils ];
+    systemPackages = [ 
+      pkgs.coreutils     
+      pkgs.dotnet-sdk_8
+      pkgs.tmuxPlugins.onedark-theme
+      pkgs.tmuxPlugins.better-mouse-mode
+
+      ];
     systemPath = [ "/opt/homebrew/bin" ];
     pathsToLink = [ "/Applications" ]; 
   };
+
+  
   fonts.fontDir.enable = true; # DANGER
   fonts.fonts = [ (pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; }) ];
-    # Auto upgrade nix package and the daemon service.
+  # Auto upgrade nix package and the daemon service.
   services.nix-daemon.enable = true;
+  
   #nix.package = pkgs.nix;
   # The platform the configuration will be used on.
-  nixpkgs.hostPlatform = "x86_64-darwin";
+
+    system.defaults = {
+    finder = {
+      _FXShowPosixPathInTitle = true;
+      AppleShowAllExtensions = true;
+    };
+    trackpad = {
+      Clicking = true;
+      TrackpadThreeFingerDrag = true;
+    };
+    #dock.autohide = true;
+    NSGlobalDomain.AppleShowAllExtensions = true;
+    #NSGlobalDomain.InitialKeyRepeat = 14;
+    #NSGlobalDomain.KeyRepeat = 1;
+    dock = {
+        autohide = false;
+        show-recents = false;
+        launchanim = true;
+        mouse-over-hilite-stack = true;
+        orientation = "bottom";
+        tilesize = 48;
+        magnification = true;
+        largesize = 80;
+      };
+  };
+    homebrew = {
+    enable = true;
+    caskArgs.no_quarantine = true;
+    global.brewfile = true;
+    masApps = { };
+    casks = [ 
+      "raycast"
+      "hiddenbar"
+      "CleanMyMac"
+     ];
+    #taps = [ "fujiapple852/trippy" ];
+    #brews = [ "trippy" ];
+  };
   system.stateVersion = 4;
+  nixpkgs.hostPlatform = "x86_64-darwin";
 
-  nix.extraOptions = ''
-    experimental-features = nix-command flakes
-  ''; 
+  nix = {
+        gc = {
+          user = "root";
+          automatic = true;
+          interval = { Weekday = 0; Hour = 2; Minute = 0; };
+          options = "--delete-older-than 30d";
+        };
 
+        extraOptions = ''
+          experimental-features = nix-command flakes
+        ''; 
+  };
 }

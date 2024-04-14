@@ -215,7 +215,9 @@ eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)"
                  set-option default-terminal "screen-256color"
                  #set -g status-utf8 on
                  #set -g utf8 on
-                 
+
+                 run-shell ${pkgs.tmuxPlugins.onedark-theme}/share/tmux-plugins/onedark-theme/tmux-onedark-theme.tmux
+                 run-shell ${pkgs.tmuxPlugins.better-mouse-mode}/share/tmux-plugins/better-mouse-mode/scroll_copy_mode.tmux
 
 
 # Increase tmux messages display duration from 750ms to 4s
