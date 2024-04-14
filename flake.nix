@@ -19,9 +19,13 @@
 			url = "github:hyprwm/Hyprland";
 			inputs.nixpkgs.follows = "nixpkgs-unstable";
 		};
+		darwin = {
+      		url = "github:lnl7/nix-darwin";
+      		inputs.nixpkgs.follows = "nixpkgs";
+    	};
 	};
 
-	outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, home-manager, nixvim, hyprland, ... }:
+	outputs = inputs @ { self, darwin, nixpkgs, nixpkgs-unstable, home-manager, nixvim, hyprland, ... }:
 
 	let
 	vars = {
@@ -38,12 +42,13 @@
 			inherit inputs nixpkgs nixpkgs-unstable home-manager hyprland nixvim vars;
 			}
 		);
-		#homeConfigurations = (
-		#	import ./nix {
-		#		inherit (nixpkgs) lib;
-		#		inherit inputs nixpkgs nixpkgs-unstable nixvim home-manager;
-		#	}
-		##);
+
+		darwinConfigurations = (
+			import ./darwin {
+				inherit (nixpkgs) lib;
+				inherit inputs nixpkgs home-manager nixvim darwin vars;
+			}
+		);
 	};
 
 }

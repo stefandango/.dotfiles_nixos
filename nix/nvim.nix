@@ -1,8 +1,8 @@
 { lib, pkgs, vars, ... }:
 
-let
-colors = import ../theme/colors.nix;
-in
+#let
+#colors = import ../theme/colors.nix;
+#in
 {
     programs.nixvim = {
         enable = true;

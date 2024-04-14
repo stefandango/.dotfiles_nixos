@@ -16,9 +16,18 @@ in
 				oh-my-posh
 				fzf
                 ripgrep
-                gh
+                #gh
 			];
 			file = {
+
+                
+			"Scripts/tmux-sessionizer" = {
+				source = ./scripts/tmux-sessionizer;
+				recursive = true;
+				executable = true;
+			};
+
+
 				".config/oh-my-posh/ohmyposhv3-v2.json" = with color.scheme.default; {
 					text = ''
 {
@@ -168,7 +177,7 @@ export PATH="$PATH:/home/stefan/.dotnet/tools"
 bindkey -s ^f '~/Scripts/tmux-sessionizer\n'
 
 # Set github copilot alias
-eval "$(gh copilot alias -- zsh)"
+#eval "$(gh copilot alias -- zsh)"
 
 eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)"
 			'';
@@ -180,13 +189,14 @@ eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)"
         zsh.enable = true;
         tmux = {
             enable = true;
-            historyLimit = 50000;
-             plugins = with pkgs;
-             [
-                 tmuxPlugins.onedark-theme
-                     tmuxPlugins.better-mouse-mode
-             ];
-             extraConfig = ''
+            #historyLimit = 50000;
+            # plugins = with pkgs;
+            # [
+            #     tmuxPlugins.onedark-theme
+            #    tmuxPlugins.better-mouse-mode
+            # ];
+            
+            extraConfig = ''
                  unbind C-b
                  set-option -g prefix C-a
 # Default start tab is 1 instead of 0
@@ -202,6 +212,12 @@ eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)"
                  set -g mouse on
 # Super useful when using "grouped sessions" and multi-monitor setup
                  setw -g aggressive-resize on
+                 set-option default-terminal "screen-256color"
+                 #set -g status-utf8 on
+                 #set -g utf8 on
+
+                 run-shell ${pkgs.tmuxPlugins.onedark-theme}/share/tmux-plugins/onedark-theme/tmux-onedark-theme.tmux
+                 run-shell ${pkgs.tmuxPlugins.better-mouse-mode}/share/tmux-plugins/better-mouse-mode/scroll_copy_mode.tmux
 
 
 # Increase tmux messages display duration from 750ms to 4s
@@ -221,6 +237,7 @@ eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)"
 	users.users.${vars.user} = {
 		shell = pkgs.zsh;
 	};
+    
 
 }
 
