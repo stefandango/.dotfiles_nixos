@@ -77,6 +77,7 @@ in
     #taps = [ "fujiapple852/trippy" ];
     #brews = [ "trippy" ];
   };
+  security.pam.enableSudoTouchIdAuth = true;
   system.stateVersion = 4;
   nixpkgs.hostPlatform = "x86_64-darwin";
 

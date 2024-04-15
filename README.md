@@ -17,6 +17,8 @@ My first nixos setup.. still needs cleanup.
 - Docker
 - Homebrew
 - Little Snitch
+- Spotify
+- Arc
 
 ### GUI Apps i *do* use nix for
 - Kitty
