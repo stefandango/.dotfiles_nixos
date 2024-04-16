@@ -28,7 +28,7 @@ My first nixos setup.. still needs cleanup.
 - CleanMyMac X*
 
 
-* Homebrew (via nix)
+*Homebrew (via nix)*
 
 // TODO...
-1. Update flake.nix to new setup... 
+1. Update flake.nix to new setup...
