@@ -25,6 +25,7 @@ in
       pkgs.dotnet-sdk_8
       pkgs.tmuxPlugins.onedark-theme
       pkgs.tmuxPlugins.better-mouse-mode
+      pkgs.tree
 
       ];
     systemPath = [ "/opt/homebrew/bin" ];
