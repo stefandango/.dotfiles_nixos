@@ -17,6 +17,8 @@ My first nixos setup.. still needs cleanup.
 - Docker
 - Homebrew
 - Little Snitch
+- Spotify
+- Arc
 
 ### GUI Apps i *do* use nix for
 - Kitty
@@ -25,8 +27,7 @@ My first nixos setup.. still needs cleanup.
 - Hiddenbar*
 - CleanMyMac X*
 
-
-* Homebrew (via nix)
+\**Homebrew (via nix)*
 
 // TODO...
-1. Update flake.nix to new setup... 
+1. Update flake.nix to new setup...

@@ -25,6 +25,7 @@ in
       pkgs.dotnet-sdk_8
       pkgs.tmuxPlugins.onedark-theme
       pkgs.tmuxPlugins.better-mouse-mode
+      pkgs.tree
 
       ];
     systemPath = [ "/opt/homebrew/bin" ];
@@ -77,6 +78,7 @@ in
     #taps = [ "fujiapple852/trippy" ];
     #brews = [ "trippy" ];
   };
+  security.pam.enableSudoTouchIdAuth = true;
   system.stateVersion = 4;
   nixpkgs.hostPlatform = "x86_64-darwin";
 
