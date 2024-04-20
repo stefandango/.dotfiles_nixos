@@ -20,7 +20,7 @@ in
     environment = {
     shells = with pkgs; [ bash zsh ];
     #loginShell = pkgs.zsh;
-    systemPackages = [ 
+    systemPackages = [  
       pkgs.coreutils     
       pkgs.dotnet-sdk_8
       pkgs.tmuxPlugins.onedark-theme

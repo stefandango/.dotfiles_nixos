@@ -8,6 +8,9 @@ My first nixos setup.. still needs cleanup.
 
 ## Nix-Darwin
 
+Very usefull install guide her: https://www.youtube.com/watch?v=LE5JR4JcvMg
+
+
 ### Apps i dont use nix for
 - Magnet
 - Safari extensions
