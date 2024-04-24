@@ -1,4 +1,4 @@
-{ lib, inputs, nixpkgs, home-manager, nixvim, darwin, vars }:
+{ lib, inputs, nixpkgs, nixpkgs-unstable, home-manager, nixvim, darwin, vars }:
 
 let
 system = "x86_64-darwin";
@@ -6,6 +6,11 @@ pkgs = import nixpkgs {
     inherit system;
     config.allowUnfree = true;
 };
+unstable = import nixpkgs-unstable {
+	inherit system;
+	config.allowUnfree = true;
+};
+
 
 lib = nixpkgs.lib;
 in
@@ -15,7 +20,7 @@ in
         inherit system;
 
         specialArgs =  {
-            inherit inputs system vars;
+            inherit inputs system unstable vars;
         };
         modules = [
             ./configuration.nix
@@ -37,7 +42,7 @@ in
                          programs.bat.config.theme = "TwoDark";
                          programs.zsh.shellAliases = {
                          nixswitch = "darwin-rebuild switch --flake ~/Dev/.dotfiles_nixos/.#";
-                         nixup = "pushd ~/Dev/.dotfiles_nixos; nix flake update --flake ~/Dev/.dotfiles_nixos/.#; nixswitch; popd";
+                         nixup = "pushd ~/Dev/.dotfiles_nixos; nix flake update; nixswitch; popd";
                          };
                          })
 

@@ -1,4 +1,4 @@
-{ config, lib, inputs, pkgs, home-manager, nixvim, darwin, vars, ... }:
+{ config, lib, inputs, pkgs, unstable, home-manager, nixvim, darwin, vars, ... }:
 
 let
 system = "x86_64-darwin";
@@ -20,14 +20,16 @@ in
     environment = {
     shells = with pkgs; [ bash zsh ];
     #loginShell = pkgs.zsh;
-    systemPackages = [ 
-      pkgs.coreutils     
-      pkgs.dotnet-sdk_8
-      pkgs.tmuxPlugins.onedark-theme
-      pkgs.tmuxPlugins.better-mouse-mode
-      pkgs.tree
+    systemPackages = with pkgs; [  
+      coreutils     
+      tmuxPlugins.onedark-theme
+      tmuxPlugins.better-mouse-mode
+      tree
 
-      ];
+      ] ++
+      (with unstable; [
+		    dotnet-sdk_8
+		  ]);
     systemPath = [ "/opt/homebrew/bin" ];
     pathsToLink = [ "/Applications" ]; 
   };

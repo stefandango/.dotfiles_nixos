@@ -1,5 +1,5 @@
 {
-	description = "My first flake... will be tweaked!!";
+	description = "My nix configuration for both linux and macos setups...";
 
 	inputs = {
 		nixpkgs.url = "github:nixos/nixpkgs/release-23.11";
@@ -46,7 +46,7 @@
 		darwinConfigurations = (
 			import ./darwin {
 				inherit (nixpkgs) lib;
-				inherit inputs nixpkgs home-manager nixvim darwin vars;
+				inherit inputs nixpkgs nixpkgs-unstable home-manager nixvim darwin vars;
 			}
 		);
 	};
