@@ -155,6 +155,7 @@ in
           gnupg
           pinentry
 	      xdg-ninja
+          tree
 
 # VIDEO/AUDIO
 		  alsa-utils
