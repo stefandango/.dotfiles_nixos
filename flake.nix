@@ -37,14 +37,14 @@
 	in
 	{
 		nixosConfigurations = (
-			import ./configuration {
+			import ./configuration/nixos {
 			inherit (nixpkgs) lib;
 			inherit inputs nixpkgs nixpkgs-unstable home-manager hyprland nixvim vars;
 			}
 		);
 
 		darwinConfigurations = (
-			import ./darwin {
+			import ./configuration/darwin {
 				inherit (nixpkgs) lib;
 				inherit inputs nixpkgs nixpkgs-unstable home-manager nixvim darwin vars;
 			}

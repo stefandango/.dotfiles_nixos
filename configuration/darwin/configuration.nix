@@ -6,11 +6,11 @@ terminal = pkgs.${vars.terminal};
 in
 {
     imports =
-    [ 
-      inputs.home-manager.darwinModules.home-manager    
-      ../modules/git.nix
-      ../modules/kitty.nix
-      ../modules/zsh.nix
+    [
+      inputs.home-manager.darwinModules.home-manager
+      ../../modules/git.nix
+      ../../modules/kitty.nix
+      ../../modules/zsh.nix
     ];
     users.users.stefan = {
       name = "stefan";
@@ -20,8 +20,8 @@ in
     environment = {
     shells = with pkgs; [ bash zsh ];
     #loginShell = pkgs.zsh;
-    systemPackages = with pkgs; [  
-      coreutils     
+    systemPackages = with pkgs; [
+      coreutils
       tmuxPlugins.onedark-theme
       tmuxPlugins.better-mouse-mode
       tree
@@ -31,15 +31,15 @@ in
 		    dotnet-sdk_8
 		  ]);
     systemPath = [ "/opt/homebrew/bin" ];
-    pathsToLink = [ "/Applications" ]; 
+    pathsToLink = [ "/Applications" ];
   };
 
-  
+
   fonts.fontDir.enable = true; # DANGER
   fonts.fonts = [ (pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; }) ];
   # Auto upgrade nix package and the daemon service.
   services.nix-daemon.enable = true;
-  
+
   #nix.package = pkgs.nix;
   # The platform the configuration will be used on.
 
@@ -72,7 +72,7 @@ in
     caskArgs.no_quarantine = true;
     global.brewfile = true;
     masApps = { };
-    casks = [ 
+    casks = [
       "raycast"
       "hiddenbar"
       "CleanMyMac"
@@ -94,6 +94,6 @@ in
 
         extraOptions = ''
           experimental-features = nix-command flakes
-        ''; 
+        '';
   };
 }

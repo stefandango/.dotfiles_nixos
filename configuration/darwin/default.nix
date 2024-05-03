@@ -29,7 +29,7 @@ in
                 home-manager.useUserPackages = true;
                 home-manager.users.stefan.imports = [
                     inputs.nixvim.homeManagerModules.nixvim
-                        ../nix/nvim.nix
+                        ../../nix/nvim.nix
                         ({pkgs, ...}: {
 
                          home.stateVersion = "23.11";
