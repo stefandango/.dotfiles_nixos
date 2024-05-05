@@ -15,19 +15,20 @@ in
       inputs.home-manager.nixosModules.home-manager
       #inputs.nixvim.nixosModules.nixvim
       ./hardware-configuration.nix
-      ../../modules/env.nix
-      ../../modules/greetd.nix
-      ../../modules/scripts.nix
-      ../../modules/waybar.nix
-      ../../modules/pyprland.nix
-      ../../modules/swaync.nix
-      ../../modules/hyprland.nix
-      ../../modules/rofi.nix
-      ../../theme/theming.nix
-      ../../modules/git.nix
-      ../../modules/kitty.nix
-      ../../modules/zsh.nix
-      ../../modules/apps.nix
+      # ../../modules/env.nix
+      # ../../modules/greetd.nix
+      # ../../modules/scripts.nix
+      # ../../modules/waybar.nix
+      # ../../modules/pyprland.nix
+      # ../../modules/swaync.nix
+      # ../../modules/hyprland.nix
+      # ../../modules/rofi.nix
+      # ../../theme/theming.nix
+      # ../../modules/git.nix
+      # ../../modules/kitty.nix
+      # ../../modules/zsh.nix
+      # ../../modules/apps.nix
+      ../../modules/nixos
     ];
 
 
@@ -156,6 +157,7 @@ in
           pinentry
 	      xdg-ninja
           tree
+          cmatrix
 
 # VIDEO/AUDIO
 		  alsa-utils
