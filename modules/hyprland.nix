@@ -1,4 +1,4 @@
-{config, lib, system, pkgs, hyprland, vars, host, ... }:
+{config, lib, system, pkgs, vars, host, ... }:
 
 let
   colors = import ../theme/colors.nix;
@@ -58,7 +58,7 @@ in
 	programs = {
 		hyprland = {                            # Window Manager
 			enable = true;
-			package = hyprland.packages.${pkgs.system}.hyprland;
+			#package = hyprland.packages.${pkgs.system}.hyprland;
 			#nvidiaPatches = true;
 			xwayland.enable = true;
 		};

@@ -2,7 +2,7 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ config, lib, inputs, pkgs, unstable, home-manager, hyprland, nixvim, vars, ... }:
+{ config, lib, inputs, pkgs, unstable, home-manager, nixvim, vars, ... }:
 #{ lib, inputs, pkgs, unstable, home-manager, hyprland, nixvim, ... }:
 
 let
