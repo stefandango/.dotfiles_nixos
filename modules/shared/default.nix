@@ -2,7 +2,7 @@
 {
   # You can import other home-manager modules here
   imports = [
-    #./nvim.nix
+    ./git.nix
   ];
 # Other stuff here
 }

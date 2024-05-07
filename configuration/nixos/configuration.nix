@@ -28,6 +28,7 @@ in
       # ../../modules/kitty.nix
       # ../../modules/zsh.nix
       # ../../modules/apps.nix
+      ../../modules/shared
       ../../modules/nixos
     ];
 
@@ -158,6 +159,8 @@ in
 	      xdg-ninja
           tree
           cmatrix
+          protontricks
+          winetricks
 
 # VIDEO/AUDIO
 		  alsa-utils

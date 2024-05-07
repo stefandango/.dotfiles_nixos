@@ -12,7 +12,7 @@
       ../hyprland.nix
       ../rofi.nix
       ../../theme/theming.nix
-      ../git.nix
+      #../git.nix
       ../kitty.nix
       ../zsh.nix
       ../apps.nix

@@ -8,9 +8,10 @@ in
     imports =
     [
       inputs.home-manager.darwinModules.home-manager
-      ../../modules/git.nix
-      ../../modules/kitty.nix
-      ../../modules/zsh.nix
+          ../../modules/shared
+          #../../modules/git.nix
+          ../../modules/kitty.nix
+          ../../modules/zsh.nix
     ];
     users.users.stefan = {
       name = "stefan";
