@@ -11,7 +11,7 @@ in
           ../../modules/shared
           #../../modules/git.nix
           ../../modules/kitty.nix
-          ../../modules/zsh.nix
+          #../../modules/zsh.nix
     ];
     users.users.stefan = {
       name = "stefan";

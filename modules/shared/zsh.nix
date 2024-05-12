@@ -4,7 +4,7 @@
 
 { config, pkgs, vars, ... }:
 let
-color = import ../theme/colors.nix;
+color = import ../../theme/colors.nix;
 in
 {
 
@@ -20,9 +20,9 @@ in
 			];
 			file = {
 
-                
+
 			"Scripts/tmux-sessionizer" = {
-				source = ./scripts/tmux-sessionizer;
+				source = ../scripts/tmux-sessionizer;
 				recursive = true;
 				executable = true;
 			};
@@ -122,13 +122,13 @@ in
 			};
 		file = {
 			".config/lsd/colors.yaml" = {
-				source = ./config/lsdtheme.yaml;
+				source = ../config/lsdtheme.yaml;
 				recursive = true;
 			};
 		};
 		file = {
 			".config/lsd/config.yaml" = {
-				source = ./config/lsdconfig.yaml;
+				source = ../config/lsdconfig.yaml;
 				recursive = true;
 			};
 		};
@@ -195,7 +195,7 @@ eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)"
             #     tmuxPlugins.onedark-theme
             #    tmuxPlugins.better-mouse-mode
             # ];
-            
+
             extraConfig = ''
                  unbind C-b
                  set-option -g prefix C-a
@@ -237,7 +237,7 @@ eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)"
 	users.users.${vars.user} = {
 		shell = pkgs.zsh;
 	};
-    
+
 
 }
 

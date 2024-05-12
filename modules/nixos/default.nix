@@ -14,7 +14,7 @@
       ../../theme/theming.nix
       #../git.nix
       ../kitty.nix
-      ../zsh.nix
+      #../zsh.nix
       ../apps.nix
   ];
 # Other stuff here
