@@ -4,6 +4,7 @@
   imports = [
     ./git.nix
     ./zsh.nix
+    ./kitty.nix
   ];
 # Other stuff here
 }

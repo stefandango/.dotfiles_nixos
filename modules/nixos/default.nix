@@ -13,7 +13,7 @@
       ../rofi.nix
       ../../theme/theming.nix
       #../git.nix
-      ../kitty.nix
+      #../kitty.nix
       #../zsh.nix
       ../apps.nix
   ];

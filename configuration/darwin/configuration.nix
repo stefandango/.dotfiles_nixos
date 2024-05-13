@@ -10,7 +10,7 @@ in
       inputs.home-manager.darwinModules.home-manager
           ../../modules/shared
           #../../modules/git.nix
-          ../../modules/kitty.nix
+          #../../modules/kitty.nix
           #../../modules/zsh.nix
     ];
     users.users.stefan = {
