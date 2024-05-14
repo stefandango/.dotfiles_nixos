@@ -85,6 +85,21 @@ in
                     }
                 },
                 {
+                    "type": "node",
+                    "style": "powerline",
+                    "powerline_symbol": "",
+                    "invert_powerline": false,
+                    "foreground": "#ffffff",
+                    "background": "#6CA35E",
+                    "leading_diamond": "",
+                    "trailing_diamond": "",
+                    "properties": {
+                        "display_version": true,
+                        "prefix": "  "
+                    }
+                },
+
+                {
                     "type": "root",
                     "style": "powerline",
                     "powerline_symbol": "",
