@@ -269,58 +269,57 @@
             options.desc = "Toggle NvimTree";
         }
 
+#LSP
+        {
+            mode = "n";
+            key = "gd";
+            action = "<CMD>lua vim.lsp.buf.hover()<CR>";
+            options.desc = "Hover documentation";
+        }
+        {
+            mode = "n";
+            key = "gD";
+            action = "<CMD>lua vim.lsp.buf.definition()<CR>";
+            options.desc = "Goto definition";
+        }
+        {
+            mode = "n";
+            key = "<leader>e";
+            action = "<CMD>lua vim.diagnostic.open_float()<CR>";
+            options.desc = "Diagnostic float";
+        }
+        {
+            mode = "n";
+            key = "<leader>ca";
+            action = "<CMD>lua vim.lsp.buf.code_action()<CR>";
+            options.desc = "Code action";
+        }
+        {
+            mode = "v";
+            key = "<leader>ca";
+            action = "<CMD>lua vim.lsp.buf.code_action()<CR>";
+            options.desc = "Code action";
+        }
+        {
+            mode = "n";
+            key = "<leader>rn";
+            action = "<CMD>lua vim.lsp.buf.rename()<CR>";
+            options.desc = "Rename";
+        }
 
-        #LSP
-      {
-        mode = "n";
-        key = "gd";
-        action = "<CMD>lua vim.lsp.buf.hover()<CR>";
-        options.desc = "Hover documentation";
-      }
-      {
-        mode = "n";
-        key = "gD";
-        action = "<CMD>lua vim.lsp.buf.definition()<CR>";
-        options.desc = "Goto definition";
-      }
-      {
-          mode = "n";
-          key = "<leader>e";
-          action = "<CMD>lua vim.diagnostic.open_float()<CR>";
-          options.desc = "Diagnostic float";
-      }
-      {
-          mode = "n";
-          key = "<leader>ca";
-          action = "<CMD>lua vim.lsp.buf.code_action()<CR>";
-          options.desc = "Code action";
-      }
-      {
-          mode = "v";
-          key = "<leader>ca";
-          action = "<CMD>lua vim.lsp.buf.code_action()<CR>";
-          options.desc = "Code action";
-      }
-      {
-          mode = "n";
-          key = "<leader>rn";
-          action = "<CMD>lua vim.lsp.buf.rename()<CR>";
-          options.desc = "Rename";
-      }
-
-      #Trouble
-      {
-          mode = "n";
-          key = "<leader>gr";
-          action = "<CMD>TroubleToggle lsp_references<CR>";
-          options.desc = "Show all references";
-      }
-      {
-          mode = "n";
-          key = "<leader>q";
-          action = "<CMD>TroubleToggle document_diagnostics<CR>";
-          options.desc = "Show document diagnostic overview";
-      }
+#Trouble
+        {
+            mode = "n";
+            key = "<leader>gr";
+            action = "<CMD>TroubleToggle lsp_references<CR>";
+            options.desc = "Show all references";
+        }
+        {
+            mode = "n";
+            key = "<leader>q";
+            action = "<CMD>TroubleToggle document_diagnostics<CR>";
+            options.desc = "Show document diagnostic overview";
+        }
       {
           mode = "n";
           key = "<leader>Q";
@@ -385,6 +384,7 @@
       ];
 
         plugins = {
+            #neotest.enable = true;
             treesitter = {
                 enable = true;
                 nixvimInjections = true;
