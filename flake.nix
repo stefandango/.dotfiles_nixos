@@ -15,10 +15,6 @@
 			inputs.nixpkgs.follows = "nixpkgs";
 		};
 
-	#	hyprland = {
-	#		url = "github:hyprwm/Hyprland";
-	#		inputs.nixpkgs.follows = "nixpkgs-unstable";
-	#	};
 		darwin = {
       		url = "github:lnl7/nix-darwin";
       		inputs.nixpkgs.follows = "nixpkgs";
