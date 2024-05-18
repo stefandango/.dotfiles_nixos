@@ -45,7 +45,8 @@
     };
 
     qt.enable = true;
-    qt.platformTheme = "gtk";
+    #qt.platformTheme = "gtk";
+    qt.platformTheme.name = "gtk";
     #gt.style.name = "adwaita-dark";
     #qt.style.package = pkgs.adwaita-qt;
   };

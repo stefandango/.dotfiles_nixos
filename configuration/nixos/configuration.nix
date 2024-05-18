@@ -174,7 +174,7 @@ in
 		  jq
           #dotnet-runtime_8
           omnisharp-roslyn
-          nodejs_21
+          #nodejs_21
 		   firefox
 		  (python3.withPackages (ps: with ps; [
 					 requests
@@ -190,7 +190,8 @@ in
   #hardware.openrazer.enable = true;
   hardware.openrazer = {
     enable = true;
-    mouseBatteryNotifier = false;
+    #mouseBatteryNotifier = false;
+    batteryNotifier.enable = true;
   };
   hardware.pulseaudio.enable = false;
   services = {

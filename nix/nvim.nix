@@ -38,7 +38,7 @@
             desc = "Spell Checking";
         }
         ];
-        options = {
+        opts = {
             number = true;
             relativenumber = true;
             hidden = true;
@@ -398,9 +398,9 @@
             barbar.enable = true;
             indent-blankline = {
                 enable = true;
-                scope.enabled = true;
+                settings.scope.enabled = true;
             };
-            comment-nvim.enable = true;
+            comment.enable = true;
             gitgutter.enable = true;
             fugitive.enable = true;
             nvim-autopairs.enable = true;
@@ -415,7 +415,7 @@
             };
             telescope = {
                 enable = true;
-                extraOptions = {
+                settings = {
                     pickers.find_files = {
                         hidden = true;
                     };
@@ -470,50 +470,38 @@
             luasnip.enable = true;
             cmp-nvim-lsp.enable = true;
             cmp_luasnip.enable = true;
-            nvim-cmp = {
+            cmp = {
                 enable = true;
-                snippet.expand = "luasnip";
-                mapping = {
-                    "<C-d>" = "cmp.mapping.scroll_docs(-4)";
-                    "<C-f>" = "cmp.mapping.scroll_docs(4)";
-                    "<C-Space>" = "cmp.mapping.complete()";
-                    "<C-e>" = "cmp.mapping.close()";
-                    "<Tab>" = {
-                        modes = ["i" "s"];
-                        action = "cmp.mapping.select_next_item()";
-                    };
-                    "<S-Tab>" = {
-                        modes = ["i" "s"];
-                        action = "cmp.mapping.select_prev_item()";
-                    };
-                    "<Down>" = {
-                        modes = ["i" "s"];
-                        action = "cmp.mapping.select_next_item()";
-                    };
-                    "<Up>" = {
-                        modes = ["i" "s"];
-                        action = "cmp.mapping.select_prev_item()";
-                    };
-                    "<C-j>" = {
-                        modes = ["i" "s"];
-                        action = "cmp.mapping.select_next_item()";
-                    };
-                    "<C-k>" = {
-                        modes = ["i" "s"];
-                        action = "cmp.mapping.select_prev_item()";
-                    };
-                    "<CR>" = "cmp.mapping.confirm({ select = true })";
-                   # "<Tab>" = "cmp.mapping.confirm({ select = true })";
+                settings = {
+                    snippet.expand = ''function(args) require('luasnip').lsp_expand(args.body) end'';
                 };
-                sources = [
-                {name = "copilot";}
-                {name = "nvim_lsp";}
-                {name = "luasnip";}
-                {name = "path";}
-                {name = "buffer";}
-                {name = "nvim_lua";}
-                {name = "nvim_lsp_signature_help";}
-                ];
+                settings = {
+                    # completion = {
+                    #     completeopt = "menu,menuone,noselect";
+                    # };
+                    mapping = {
+                            "<C-d>" = "cmp.mapping.scroll_docs(-4)";
+                            "<C-f>" = "cmp.mapping.scroll_docs(4)";
+                            "<C-Space>" = "cmp.mapping.complete()";
+                            "<C-e>" = "cmp.mapping.close()";
+                            "<Tab>" = "cmp.mapping.select_next_item()";
+                            "<S-Tab>" = "cmp.mapping.select_prev_item()";
+                            "<Down>" = "cmp.mapping.select_next_item()";
+                            "<Up>" = "cmp.mapping.select_prev_item()";
+                            "<C-j>" = "cmp.mapping.select_next_item()";
+                            "<C-k>" = "cmp.mapping.select_prev_item()";
+                            "<CR>" = "cmp.mapping.confirm({ select = true })";
+                        };
+                    sources = [
+                    {name = "copilot";}
+                    {name = "nvim_lsp";}
+                    {name = "luasnip";}
+                    {name = "path";}
+                    {name = "buffer";}
+                    {name = "nvim_lua";}
+                    {name = "nvim_lsp_signature_help";}
+                    ];
+                };
             };
             trouble.enable = true;
             cmp-nvim-lsp-signature-help.enable = true;

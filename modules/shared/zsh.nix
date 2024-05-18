@@ -158,7 +158,8 @@ in
 				la = "lsd -al";
 				ll = "lsd -l";
 			};
-			enableAutosuggestions = true;
+			#enableAutosuggestions = true;
+            autosuggestion.enable = true;
 			enableCompletion = true;
      			syntaxHighlighting.enable = true;
 			history = {
