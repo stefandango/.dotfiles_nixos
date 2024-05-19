@@ -381,10 +381,29 @@
           action = "<CMD>lua require('dap').terminate()<CR>";
           options.desc = "DEBUG: Terminate debug session";
       }
+      {
+        mode = "n";
+        key = "<leader>tr";
+        action = "<CMD>lua require('neotest').run.run()<CR>";
+        options.desc = "DEBUG: Terminate debug session";
+      }
+      {
+        mode = "n";
+        key = "<leader>ts";
+        action = "<CMD>lua require('neotest').summary.toggle()<CR>";
+        options.desc = "DEBUG: Terminate debug session";
+      }
       ];
 
         plugins = {
-            #neotest.enable = true;
+            neotest = {
+                enable = true;
+                adapters = {
+                    dotnet = {
+                        enable = true;
+                    };
+                };
+            };
             treesitter = {
                 enable = true;
                 nixvimInjections = true;

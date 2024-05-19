@@ -174,6 +174,7 @@ in
 		  jq
           #dotnet-runtime_8
           omnisharp-roslyn
+          netcoredbg
           #nodejs_21
 		   firefox
 		  (python3.withPackages (ps: with ps; [
