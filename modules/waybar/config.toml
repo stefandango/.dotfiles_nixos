@@ -14,7 +14,7 @@ client_fullscreen = "[{icon}]{delim}"
 
 [class_active]
 DEFAULT="{icon}"
-"(?i)firefox" = "<span color='orange'> {class}</span>"
+"(?i)firefox" = "<span color='orange'></span>"
 
 # [initial_class]
 # "DEFAULT" = " {class}: {title}"

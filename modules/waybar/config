@@ -70,7 +70,7 @@
 		},
 		"custom/logout": {
 			"interval": "once",
-			"on-click": "~/.config/rofi/powermenu.sh",
+			"on-click": "pkill rofi || ~/.config/rofi/powermenu.sh",
 			"format": "⏻",
 		},
 		"custom/razerviperbattery": {
