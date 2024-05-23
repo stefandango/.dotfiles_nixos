@@ -384,7 +384,8 @@
       {
         mode = "n";
         key = "<leader>tr";
-        action = "<CMD>lua require('neotest').run.run()<CR>";
+        #action = "<CMD>lua require('neotest').run.run()<CR>";
+        action = "<CMD>lua require('neotest').run.run({ vim.fn.expand('%'), dotnet_additional_args = { '--runtime win-x64' } })<CR>";
         options.desc = "DEBUG: Terminate debug session";
       }
       {
@@ -402,6 +403,9 @@
                     dotnet = {
                         enable = true;
                     };
+                };
+                settings = {
+                    log_level = "info";
                 };
             };
             treesitter = {
@@ -460,7 +464,6 @@
                     eslint.enable = true;
                     jsonls.enable = true;
                     #ltex.enable = true;
-                    #omnisharp.enable = true;
                     omnisharp = {
                         enable = true;
                         settings = {

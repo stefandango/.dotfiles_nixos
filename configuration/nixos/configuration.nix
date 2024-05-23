@@ -134,9 +134,9 @@ in
 		EDITOR = "${vars.editor}";
 		VISUAL = "${vars.editor}";
 	};
-  sessionVariables = {
-    DOTNET_ROOT = "${pkgs.dotnet-sdk_8}";
-};
+#   sessionVariables = {
+#     DOTNET_ROOT = "${pkgs.dotnet-sdk_8}";
+# };
 
   systemPackages = with pkgs; [
 # TERMINAL
@@ -175,7 +175,7 @@ in
           #dotnet-runtime_8
           omnisharp-roslyn
           netcoredbg
-          #nodejs_21
+          nodejs_22
 		   firefox
 		  (python3.withPackages (ps: with ps; [
 					 requests
@@ -183,7 +183,7 @@ in
 		  ]))
 		  ] ++
 		  (with unstable; [
-		    dotnet-sdk_8
+		    #dotnet-sdk_8
 		  ]);
   };
   virtualisation.docker.enable = true;

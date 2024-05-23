@@ -5,7 +5,7 @@
         insomnia
         spotify
         beekeeper-studio
-        dbeaver
+        dbeaver-bin
         github-copilot-intellij-agent
 
     ] ++

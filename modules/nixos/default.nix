@@ -16,6 +16,7 @@
       #../kitty.nix
       #../zsh.nix
       ../apps.nix
+      ./dotnet.nix
   ];
 # Other stuff here
 }
