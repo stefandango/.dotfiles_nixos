@@ -381,6 +381,7 @@
           action = "<CMD>lua require('dap').terminate()<CR>";
           options.desc = "DEBUG: Terminate debug session";
       }
+      # Neotest (STILL work in progress)
       {
         mode = "n";
         key = "<leader>tr";
@@ -394,20 +395,47 @@
         action = "<CMD>lua require('neotest').summary.toggle()<CR>";
         options.desc = "DEBUG: Terminate debug session";
       }
+#GITHUB COPILOT Chat
+      {
+          mode = "n";
+          key = "<leader>ct";
+          action = "<CMD>CopilotChatToggle<CR>";
+          options.desc = "CopilotChat - Toggle";
+      }
+
+      {
+          mode = "n";
+          key = "<leader>cq";
+          action = "<CMD>lua require('CopilotChat').ask(vim.fn.input('Quick Chat: '), { selection = require('CopilotChat.select').buffer })<CR>";
+          options.desc = "CopilotChat - Quick chat";
+      }
+      {
+            mode = "v";
+            key = "<leader>ch";
+            action = "<CMD>lua require('CopilotChat.integrations.telescope').pick(require('CopilotChat.actions').help_actions())<CR>";
+            options.desc = "CopilotChat - Quick help";
+      }
+      {
+            mode = "n";
+            key = "<leader>ch";
+            action = "<CMD>lua require('CopilotChat.integrations.telescope').pick(require('CopilotChat.actions').help_actions())<CR>";
+            options.desc = "CopilotChat - Quick help";
+      }
+      {
+            mode = "v";
+            key = "<leader>cp";
+            action = "<CMD>lua require('CopilotChat.integrations.telescope').pick(require('CopilotChat.actions').prompt_actions())<CR>";
+            options.desc = "CopilotChat - Quick prompt actions";
+      }
+      {
+            mode = "n";
+            key = "<leader>cp";
+            action = "<CMD>lua require('CopilotChat.integrations.telescope').pick(require('CopilotChat.actions').prompt_actions())<CR>";
+            options.desc = "CopilotChat - Quick prompt actions";
+      }
       ];
 
         plugins = {
-            neotest = {
-                enable = true;
-                adapters = {
-                    dotnet = {
-                        enable = true;
-                    };
-                };
-                settings = {
-                    log_level = "info";
-                };
-            };
             treesitter = {
                 enable = true;
                 nixvimInjections = true;
@@ -534,6 +562,18 @@
                 suggestion.enabled = false;
             };
             copilot-cmp.enable = true;
+            neotest = {
+                enable = true;
+                adapters = {
+                    dotnet = {
+                        enable = true;
+                    };
+                };
+                settings = {
+                    #default_strategy = "dap";
+                    log_level = "info";
+                };
+            };
         };
 
         extraPlugins = with pkgs.vimPlugins; [
@@ -542,6 +582,13 @@
             onedark-nvim
             nvim-dap
             nvim-dap-ui
+            CopilotChat-nvim
+            #plenary-nvim
+            #nvim-nio
+            #FixCursorHold-nvim
+            #neotest
+            #neotest-plenary
+            #neotest-dotnet
         ];
 
         extraConfigLua = ''
@@ -601,6 +648,10 @@
                       },
         }
         require('onedark').load()
+
+           require("CopilotChat").setup {
+                debug = false, -- Enable debugging
+            }
 
         -- DEBUGGER STUFF (VERY UNSTABLE STILL)
 

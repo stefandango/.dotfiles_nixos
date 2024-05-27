@@ -11,7 +11,7 @@
 
       postBuild = (previousAttrs.postBuild or '''') + ''
 
-        for i in $out/sdk/*
+  for i in $out/sdk/*
          do
            i=$(basename $i)
            length=$(printf "%s" "$i" | wc -c)
