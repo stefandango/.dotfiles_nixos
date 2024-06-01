@@ -385,8 +385,8 @@
       {
         mode = "n";
         key = "<leader>tr";
-        #action = "<CMD>lua require('neotest').run.run()<CR>";
-        action = "<CMD>lua require('neotest').run.run({ vim.fn.expand('%'), dotnet_additional_args = { '--runtime win-x64' } })<CR>";
+        action = "<CMD>lua require('neotest').run.run()<CR>";
+        #action = "<CMD>lua require('neotest').run.run(vim.fn.expand('%'), dotnet_additional_args = { '--runtime win-x64' } })<CR>";
         options.desc = "DEBUG: Terminate debug session";
       }
       {
@@ -562,25 +562,6 @@
                 suggestion.enabled = false;
             };
             copilot-cmp.enable = true;
-            # neotest = {
-            #     enable = true;
-            #     adapters = {
-            #         dotnet = {
-            #             enable = true;
-            #             settings = {
-            #                 discovery_root = "solution";
-            #             };
-            #         };
-            #         plenary = {
-            #             enable = true;
-            #         };
-            #     };
-            #     settings = {
-            #         #default_strategy = "dap";
-            #         log_level = "info";
-            #
-            #     };
-            # };
         };
 
         extraPlugins = with pkgs.vimPlugins; [
@@ -668,12 +649,12 @@
                         -- See https://github.com/microsoft/debugpy/wiki/Debug-configuration-settings for values
                         args = {justMyCode = false },
                         -- Enter the name of your dap adapter, the default value is netcoredbg
-                        adapter_name = "netcoredbg"
+                        -- adapter_name = "netcoredbg"
                         },
                         -- Let the test-discovery know about your custom attributes (otherwise tests will not be picked up)
                         -- Provide any additional "dotnet test" CLI commands here. These will be applied to ALL test runs performed via neotest. These need to be a table of strings, ideally with one key-value pair per item.
                         dotnet_additional_args = {
-                        "--verbosity detailed"
+                        -- "--verbosity detailed"
                         },
                         -- Tell neotest-dotnet to use either solution (requires .sln file) or project (requires .csproj or .fsproj file) as project root
                         -- Note: If neovim is opened from the solution root, using the 'project' setting may sometimes find all nested projects, however,
@@ -689,6 +670,12 @@
         local dap = require('dap')
 
         dap.adapters.coreclr = {
+            type = 'executable',
+            command = 'netcoredbg',
+            args = {'--interpreter=vscode'}
+        }
+
+        dap.adapters.netcoredbg = {
             type = 'executable',
             command = 'netcoredbg',
             args = {'--interpreter=vscode'}
