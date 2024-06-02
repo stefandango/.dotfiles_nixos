@@ -639,6 +639,9 @@
 
            require("CopilotChat").setup {
                 debug = false, -- Enable debugging
+                window = {
+                    layout = 'vertical'
+                },
             }
 
         require("neotest").setup({
@@ -662,6 +665,9 @@
                             discovery_root = "solution" -- Default
                 }),
                     require("neotest-plenary")
+                },
+                summary = {
+        open = "botright split | vertical resize 100"
                 }
         })
 
@@ -770,7 +776,7 @@
 
             local dap_breakpoint = {
                 error = {
-                    text = "🟥",
+                    text = "🔴",
                     texthl = "LspDiagnosticsSignError",
                     linehl = "",
                     numhl = "",
@@ -782,7 +788,7 @@
                     numhl = "",
                 },
                 stopped = {
-                    text = "⭐️",
+                    text = "👉",
                     texthl = "LspDiagnosticsSignInformation",
                     linehl = "DiagnosticUnderlineInfo",
                     numhl = "LspDiagnosticsSignInformation",
