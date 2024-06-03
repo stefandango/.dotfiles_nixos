@@ -386,7 +386,6 @@
         mode = "n";
         key = "<leader>tr";
         action = "<CMD>lua require('neotest').run.run()<CR>";
-        #action = "<CMD>lua require('neotest').run.run(vim.fn.expand('%'), dotnet_additional_args = { '--runtime win-x64' } })<CR>";
         options.desc = "DEBUG: Terminate debug session";
       }
       {
@@ -526,9 +525,6 @@
                     snippet.expand = ''function(args) require('luasnip').lsp_expand(args.body) end'';
                 };
                 settings = {
-                    # completion = {
-                    #     completeopt = "menu,menuone,noselect";
-                    # };
                     mapping = {
                             "<C-d>" = "cmp.mapping.scroll_docs(-4)";
                             "<C-f>" = "cmp.mapping.scroll_docs(4)";
@@ -667,7 +663,7 @@
                     require("neotest-plenary")
                 },
                 summary = {
-        open = "botright split | vertical resize 100"
+        open = "botright split | vertical resize 80"
                 }
         })
 
@@ -798,8 +794,6 @@
         vim.fn.sign_define("DapBreakpoint", dap_breakpoint.error)
             vim.fn.sign_define("DapStopped", dap_breakpoint.stopped)
             vim.fn.sign_define("DapBreakpointRejected", dap_breakpoint.rejected)
-
             '';
-
     };
 }
