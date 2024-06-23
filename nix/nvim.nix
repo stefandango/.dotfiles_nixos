@@ -317,13 +317,13 @@
         {
             mode = "n";
             key = "<leader>q";
-            action = "<CMD>TroubleToggle document_diagnostics<CR>";
+            action = "<CMD>Trouble diagnostics toggle<CR>";
             options.desc = "Show document diagnostic overview";
         }
       {
           mode = "n";
           key = "<leader>Q";
-          action = "<CMD>TroubleToggle document_diagnostics<CR>";
+          action = "<CMD>Trouble diagnostics toggle filter.buf=0<CR>";
           options.desc = "Show workspace diagnostic overview";
       }
       # DEBUGGER (work in progress..)
@@ -392,6 +392,12 @@
         mode = "n";
         key = "<leader>ts";
         action = "<CMD>lua require('neotest').summary.toggle()<CR>";
+        options.desc = "DEBUG: Terminate debug session";
+      }
+      {
+        mode = "n";
+        key = "<leader>tf";
+        action = "<CMD>lua require('neotest').run.run(vim.fn.expand('%'))<CR>";
         options.desc = "DEBUG: Terminate debug session";
       }
 #GITHUB COPILOT Chat

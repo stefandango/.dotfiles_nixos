@@ -56,7 +56,7 @@ in
   };
 
   hardware = {
-	opengl = {
+	graphics = {
 		enable = true;
 		extraPackages = with pkgs; [
 			#intel-media-driver
@@ -68,8 +68,8 @@ in
 		extraPackages32 = with pkgs; [
 			driversi686Linux.amdvlk
 		];
-		driSupport = true;
-		driSupport32Bit = true;
+		#driSupport = true;
+		#driSupport32Bit = true;
 	};
   };
   networking.hostName = "nixos"; # Define your hostname.
