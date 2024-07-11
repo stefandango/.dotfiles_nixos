@@ -29,7 +29,7 @@
 			"custom/logout"
 		],
 		"clock": {
-			"format": "{:󰥔 %R   %d/%m}",
+			"format": "🕑 {:%R 📅 %d/%m}",
 			"tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
             "on-click": "xdg-open https://calendar.google.com/calendar/u/0/r/week"
 		},
@@ -70,7 +70,7 @@
 		},
 		"custom/logout": {
 			"interval": "once",
-			"on-click": "~/.config/rofi/powermenu.sh",
+			"on-click": "pkill rofi || ~/.config/rofi/powermenu.sh",
 			"format": "⏻",
 		},
 		"custom/razerviperbattery": {

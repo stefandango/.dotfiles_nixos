@@ -2,30 +2,26 @@
 	description = "My nix configuration for both linux and macos setups...";
 
 	inputs = {
-		nixpkgs.url = "github:nixos/nixpkgs/release-23.11";
+		nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 		nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
 		home-manager = {
-				url = "github:nix-community/home-manager/release-23.11";
+				url = "github:nix-community/home-manager";
 			inputs.nixpkgs.follows = "nixpkgs";
 		};
 
 		nixvim = {
-			url = "github:nix-community/nixvim/nixos-23.11";
+			url = "github:nix-community/nixvim";
 			inputs.nixpkgs.follows = "nixpkgs";
 		};
 
-		hyprland = {
-			url = "github:hyprwm/Hyprland";
-			inputs.nixpkgs.follows = "nixpkgs-unstable";
-		};
 		darwin = {
       		url = "github:lnl7/nix-darwin";
       		inputs.nixpkgs.follows = "nixpkgs";
     	};
 	};
 
-	outputs = inputs @ { self, darwin, nixpkgs, nixpkgs-unstable, home-manager, nixvim, hyprland, ... }:
+	outputs = inputs @ { self, darwin, nixpkgs, nixpkgs-unstable, home-manager, nixvim, ... }:
 
 	let
 	vars = {
@@ -39,7 +35,7 @@
 		nixosConfigurations = (
 			import ./configuration/nixos {
 			inherit (nixpkgs) lib;
-			inherit inputs nixpkgs nixpkgs-unstable home-manager hyprland nixvim vars;
+			inherit inputs nixpkgs nixpkgs-unstable home-manager nixvim vars;
 			}
 		);
 

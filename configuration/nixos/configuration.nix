@@ -2,7 +2,7 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ config, lib, inputs, pkgs, unstable, home-manager, hyprland, nixvim, vars, ... }:
+{ config, lib, inputs, pkgs, unstable, home-manager, nixvim, vars, ... }:
 #{ lib, inputs, pkgs, unstable, home-manager, hyprland, nixvim, ... }:
 
 let
@@ -15,19 +15,21 @@ in
       inputs.home-manager.nixosModules.home-manager
       #inputs.nixvim.nixosModules.nixvim
       ./hardware-configuration.nix
-      ../../modules/env.nix
-      ../../modules/greetd.nix
-      ../../modules/scripts.nix
-      ../../modules/waybar.nix
-      ../../modules/pyprland.nix
-      ../../modules/swaync.nix
-      ../../modules/hyprland.nix
-      ../../modules/rofi.nix
-      ../../theme/theming.nix
-      ../../modules/git.nix
-      ../../modules/kitty.nix
-      ../../modules/zsh.nix
-      ../../modules/apps.nix
+      # ../../modules/env.nix
+      # ../../modules/greetd.nix
+      # ../../modules/scripts.nix
+      # ../../modules/waybar.nix
+      # ../../modules/pyprland.nix
+      # ../../modules/swaync.nix
+      # ../../modules/hyprland.nix
+      # ../../modules/rofi.nix
+      # ../../theme/theming.nix
+      # ../../modules/git.nix
+      # ../../modules/kitty.nix
+      # ../../modules/zsh.nix
+      # ../../modules/apps.nix
+      ../../modules/shared
+      ../../modules/nixos
     ];
 
 
@@ -54,7 +56,7 @@ in
   };
 
   hardware = {
-	opengl = {
+	graphics = {
 		enable = true;
 		extraPackages = with pkgs; [
 			#intel-media-driver
@@ -66,8 +68,8 @@ in
 		extraPackages32 = with pkgs; [
 			driversi686Linux.amdvlk
 		];
-		driSupport = true;
-		driSupport32Bit = true;
+		#driSupport = true;
+		#driSupport32Bit = true;
 	};
   };
   networking.hostName = "nixos"; # Define your hostname.
@@ -132,9 +134,9 @@ in
 		EDITOR = "${vars.editor}";
 		VISUAL = "${vars.editor}";
 	};
-  sessionVariables = {
-    DOTNET_ROOT = "${pkgs.dotnet-sdk_8}";
-};
+#   sessionVariables = {
+#     DOTNET_ROOT = "${pkgs.dotnet-sdk_8}";
+# };
 
   systemPackages = with pkgs; [
 # TERMINAL
@@ -156,6 +158,9 @@ in
           pinentry
 	      xdg-ninja
           tree
+          cmatrix
+          protontricks
+          winetricks
 
 # VIDEO/AUDIO
 		  alsa-utils
@@ -169,7 +174,8 @@ in
 		  jq
           #dotnet-runtime_8
           omnisharp-roslyn
-          nodejs_21
+          netcoredbg
+          nodejs_22
 		   firefox
 		  (python3.withPackages (ps: with ps; [
 					 requests
@@ -177,7 +183,7 @@ in
 		  ]))
 		  ] ++
 		  (with unstable; [
-		    dotnet-sdk_8
+		    #dotnet-sdk_8
 		  ]);
   };
   virtualisation.docker.enable = true;
@@ -185,7 +191,8 @@ in
   #hardware.openrazer.enable = true;
   hardware.openrazer = {
     enable = true;
-    mouseBatteryNotifier = false;
+    #mouseBatteryNotifier = false;
+    batteryNotifier.enable = true;
   };
   hardware.pulseaudio.enable = false;
   services = {

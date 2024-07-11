@@ -38,7 +38,7 @@
             desc = "Spell Checking";
         }
         ];
-        options = {
+        opts = {
             number = true;
             relativenumber = true;
             hidden = true;
@@ -269,62 +269,61 @@
             options.desc = "Toggle NvimTree";
         }
 
+#LSP
+        {
+            mode = "n";
+            key = "gd";
+            action = "<CMD>lua vim.lsp.buf.hover()<CR>";
+            options.desc = "Hover documentation";
+        }
+        {
+            mode = "n";
+            key = "gD";
+            action = "<CMD>lua vim.lsp.buf.definition()<CR>";
+            options.desc = "Goto definition";
+        }
+        {
+            mode = "n";
+            key = "<leader>e";
+            action = "<CMD>lua vim.diagnostic.open_float()<CR>";
+            options.desc = "Diagnostic float";
+        }
+        {
+            mode = "n";
+            key = "<leader>ca";
+            action = "<CMD>lua vim.lsp.buf.code_action()<CR>";
+            options.desc = "Code action";
+        }
+        {
+            mode = "v";
+            key = "<leader>ca";
+            action = "<CMD>lua vim.lsp.buf.code_action()<CR>";
+            options.desc = "Code action";
+        }
+        {
+            mode = "n";
+            key = "<leader>rn";
+            action = "<CMD>lua vim.lsp.buf.rename()<CR>";
+            options.desc = "Rename";
+        }
 
-        #LSP
-      {
-        mode = "n";
-        key = "gd";
-        action = "<CMD>lua vim.lsp.buf.hover()<CR>";
-        options.desc = "Hover documentation";
-      }
-      {
-        mode = "n";
-        key = "gD";
-        action = "<CMD>lua vim.lsp.buf.definition()<CR>";
-        options.desc = "Goto definition";
-      }
-      {
-          mode = "n";
-          key = "<leader>e";
-          action = "<CMD>lua vim.diagnostic.open_float()<CR>";
-          options.desc = "Diagnostic float";
-      }
-      {
-          mode = "n";
-          key = "<leader>ca";
-          action = "<CMD>lua vim.lsp.buf.code_action()<CR>";
-          options.desc = "Code action";
-      }
-      {
-          mode = "v";
-          key = "<leader>ca";
-          action = "<CMD>lua vim.lsp.buf.code_action()<CR>";
-          options.desc = "Code action";
-      }
-      {
-          mode = "n";
-          key = "<leader>rn";
-          action = "<CMD>lua vim.lsp.buf.rename()<CR>";
-          options.desc = "Rename";
-      }
-
-      #Trouble
-      {
-          mode = "n";
-          key = "<leader>gr";
-          action = "<CMD>TroubleToggle lsp_references<CR>";
-          options.desc = "Show all references";
-      }
-      {
-          mode = "n";
-          key = "<leader>q";
-          action = "<CMD>TroubleToggle document_diagnostics<CR>";
-          options.desc = "Show document diagnostic overview";
-      }
+#Trouble
+        {
+            mode = "n";
+            key = "<leader>gr";
+            action = "<CMD>TroubleToggle lsp_references<CR>";
+            options.desc = "Show all references";
+        }
+        {
+            mode = "n";
+            key = "<leader>q";
+            action = "<CMD>Trouble diagnostics toggle<CR>";
+            options.desc = "Show document diagnostic overview";
+        }
       {
           mode = "n";
           key = "<leader>Q";
-          action = "<CMD>TroubleToggle document_diagnostics<CR>";
+          action = "<CMD>Trouble diagnostics toggle filter.buf=0<CR>";
           options.desc = "Show workspace diagnostic overview";
       }
       # DEBUGGER (work in progress..)
@@ -382,6 +381,63 @@
           action = "<CMD>lua require('dap').terminate()<CR>";
           options.desc = "DEBUG: Terminate debug session";
       }
+      # Neotest (STILL work in progress)
+      {
+        mode = "n";
+        key = "<leader>tr";
+        action = "<CMD>lua require('neotest').run.run()<CR>";
+        options.desc = "DEBUG: Terminate debug session";
+      }
+      {
+        mode = "n";
+        key = "<leader>ts";
+        action = "<CMD>lua require('neotest').summary.toggle()<CR>";
+        options.desc = "DEBUG: Terminate debug session";
+      }
+      {
+        mode = "n";
+        key = "<leader>tf";
+        action = "<CMD>lua require('neotest').run.run(vim.fn.expand('%'))<CR>";
+        options.desc = "DEBUG: Terminate debug session";
+      }
+#GITHUB COPILOT Chat
+      {
+          mode = "n";
+          key = "<leader>ct";
+          action = "<CMD>CopilotChatToggle<CR>";
+          options.desc = "CopilotChat - Toggle";
+      }
+
+      {
+          mode = "n";
+          key = "<leader>cq";
+          action = "<CMD>lua require('CopilotChat').ask(vim.fn.input('Quick Chat: '), { selection = require('CopilotChat.select').buffer })<CR>";
+          options.desc = "CopilotChat - Quick chat";
+      }
+      {
+            mode = "v";
+            key = "<leader>ch";
+            action = "<CMD>lua require('CopilotChat.integrations.telescope').pick(require('CopilotChat.actions').help_actions())<CR>";
+            options.desc = "CopilotChat - Quick help";
+      }
+      {
+            mode = "n";
+            key = "<leader>ch";
+            action = "<CMD>lua require('CopilotChat.integrations.telescope').pick(require('CopilotChat.actions').help_actions())<CR>";
+            options.desc = "CopilotChat - Quick help";
+      }
+      {
+            mode = "v";
+            key = "<leader>cp";
+            action = "<CMD>lua require('CopilotChat.integrations.telescope').pick(require('CopilotChat.actions').prompt_actions())<CR>";
+            options.desc = "CopilotChat - Quick prompt actions";
+      }
+      {
+            mode = "n";
+            key = "<leader>cp";
+            action = "<CMD>lua require('CopilotChat.integrations.telescope').pick(require('CopilotChat.actions').prompt_actions())<CR>";
+            options.desc = "CopilotChat - Quick prompt actions";
+      }
       ];
 
         plugins = {
@@ -398,9 +454,9 @@
             barbar.enable = true;
             indent-blankline = {
                 enable = true;
-                scope.enabled = true;
+                settings.scope.enabled = true;
             };
-            comment-nvim.enable = true;
+            comment.enable = true;
             gitgutter.enable = true;
             fugitive.enable = true;
             nvim-autopairs.enable = true;
@@ -415,7 +471,7 @@
             };
             telescope = {
                 enable = true;
-                extraOptions = {
+                settings = {
                     pickers.find_files = {
                         hidden = true;
                     };
@@ -441,7 +497,6 @@
                     eslint.enable = true;
                     jsonls.enable = true;
                     #ltex.enable = true;
-                    #omnisharp.enable = true;
                     omnisharp = {
                         enable = true;
                         settings = {
@@ -470,50 +525,35 @@
             luasnip.enable = true;
             cmp-nvim-lsp.enable = true;
             cmp_luasnip.enable = true;
-            nvim-cmp = {
+            cmp = {
                 enable = true;
-                snippet.expand = "luasnip";
-                mapping = {
-                    "<C-d>" = "cmp.mapping.scroll_docs(-4)";
-                    "<C-f>" = "cmp.mapping.scroll_docs(4)";
-                    "<C-Space>" = "cmp.mapping.complete()";
-                    "<C-e>" = "cmp.mapping.close()";
-                    "<Tab>" = {
-                        modes = ["i" "s"];
-                        action = "cmp.mapping.select_next_item()";
-                    };
-                    "<S-Tab>" = {
-                        modes = ["i" "s"];
-                        action = "cmp.mapping.select_prev_item()";
-                    };
-                    "<Down>" = {
-                        modes = ["i" "s"];
-                        action = "cmp.mapping.select_next_item()";
-                    };
-                    "<Up>" = {
-                        modes = ["i" "s"];
-                        action = "cmp.mapping.select_prev_item()";
-                    };
-                    "<C-j>" = {
-                        modes = ["i" "s"];
-                        action = "cmp.mapping.select_next_item()";
-                    };
-                    "<C-k>" = {
-                        modes = ["i" "s"];
-                        action = "cmp.mapping.select_prev_item()";
-                    };
-                    "<CR>" = "cmp.mapping.confirm({ select = true })";
-                   # "<Tab>" = "cmp.mapping.confirm({ select = true })";
+                settings = {
+                    snippet.expand = ''function(args) require('luasnip').lsp_expand(args.body) end'';
                 };
-                sources = [
-                {name = "copilot";}
-                {name = "nvim_lsp";}
-                {name = "luasnip";}
-                {name = "path";}
-                {name = "buffer";}
-                {name = "nvim_lua";}
-                {name = "nvim_lsp_signature_help";}
-                ];
+                settings = {
+                    mapping = {
+                            "<C-d>" = "cmp.mapping.scroll_docs(-4)";
+                            "<C-f>" = "cmp.mapping.scroll_docs(4)";
+                            "<C-Space>" = "cmp.mapping.complete()";
+                            "<C-e>" = "cmp.mapping.close()";
+                            "<Tab>" = "cmp.mapping.select_next_item()";
+                            "<S-Tab>" = "cmp.mapping.select_prev_item()";
+                            "<Down>" = "cmp.mapping.select_next_item()";
+                            "<Up>" = "cmp.mapping.select_prev_item()";
+                            "<C-j>" = "cmp.mapping.select_next_item()";
+                            "<C-k>" = "cmp.mapping.select_prev_item()";
+                            "<CR>" = "cmp.mapping.confirm({ select = true })";
+                        };
+                    sources = [
+                    {name = "copilot";}
+                    {name = "nvim_lsp";}
+                    {name = "luasnip";}
+                    {name = "path";}
+                    {name = "buffer";}
+                    {name = "nvim_lua";}
+                    {name = "nvim_lsp_signature_help";}
+                    ];
+                };
             };
             trouble.enable = true;
             cmp-nvim-lsp-signature-help.enable = true;
@@ -532,6 +572,13 @@
             onedark-nvim
             nvim-dap
             nvim-dap-ui
+            CopilotChat-nvim
+            #plenary-nvim
+            nvim-nio
+            FixCursorHold-nvim
+            neotest
+            neotest-plenary
+            neotest-dotnet
         ];
 
         extraConfigLua = ''
@@ -592,11 +639,51 @@
         }
         require('onedark').load()
 
+           require("CopilotChat").setup {
+                debug = false, -- Enable debugging
+                window = {
+                    layout = 'vertical'
+                },
+            }
+
+        require("neotest").setup({
+                adapters = {
+                require("neotest-dotnet")({
+                        dap = {
+                        -- Extra arguments for nvim-dap configuration
+                        -- See https://github.com/microsoft/debugpy/wiki/Debug-configuration-settings for values
+                        args = {justMyCode = false },
+                        -- Enter the name of your dap adapter, the default value is netcoredbg
+                        -- adapter_name = "netcoredbg"
+                        },
+                        -- Let the test-discovery know about your custom attributes (otherwise tests will not be picked up)
+                        -- Provide any additional "dotnet test" CLI commands here. These will be applied to ALL test runs performed via neotest. These need to be a table of strings, ideally with one key-value pair per item.
+                        dotnet_additional_args = {
+                        -- "--verbosity detailed"
+                        },
+                        -- Tell neotest-dotnet to use either solution (requires .sln file) or project (requires .csproj or .fsproj file) as project root
+                        -- Note: If neovim is opened from the solution root, using the 'project' setting may sometimes find all nested projects, however,
+                        --       to locate all test projects in the solution more reliably (if a .sln file is present) then 'solution' is better.
+                            discovery_root = "solution" -- Default
+                }),
+                    require("neotest-plenary")
+                },
+                summary = {
+        open = "botright split | vertical resize 80"
+                }
+        })
+
         -- DEBUGGER STUFF (VERY UNSTABLE STILL)
 
         local dap = require('dap')
 
         dap.adapters.coreclr = {
+            type = 'executable',
+            command = 'netcoredbg',
+            args = {'--interpreter=vscode'}
+        }
+
+        dap.adapters.netcoredbg = {
             type = 'executable',
             command = 'netcoredbg',
             args = {'--interpreter=vscode'}
@@ -691,7 +778,7 @@
 
             local dap_breakpoint = {
                 error = {
-                    text = "🟥",
+                    text = "🔴",
                     texthl = "LspDiagnosticsSignError",
                     linehl = "",
                     numhl = "",
@@ -703,7 +790,7 @@
                     numhl = "",
                 },
                 stopped = {
-                    text = "⭐️",
+                    text = "👉",
                     texthl = "LspDiagnosticsSignInformation",
                     linehl = "DiagnosticUnderlineInfo",
                     numhl = "LspDiagnosticsSignInformation",
@@ -713,8 +800,6 @@
         vim.fn.sign_define("DapBreakpoint", dap_breakpoint.error)
             vim.fn.sign_define("DapStopped", dap_breakpoint.stopped)
             vim.fn.sign_define("DapBreakpointRejected", dap_breakpoint.rejected)
-
             '';
-
     };
 }

@@ -1,4 +1,4 @@
-{config, lib, system, pkgs, hyprland, vars, host, ... }:
+{config, lib, system, pkgs, vars, host, ... }:
 
 let
   colors = import ../theme/colors.nix;
@@ -58,7 +58,7 @@ in
 	programs = {
 		hyprland = {                            # Window Manager
 			enable = true;
-			package = hyprland.packages.${pkgs.system}.hyprland;
+			#package = hyprland.packages.${pkgs.system}.hyprland;
 			#nvidiaPatches = true;
 			xwayland.enable = true;
 		};
@@ -153,11 +153,6 @@ in
 		# See https://wiki.hyprland.org/Configuring/Dwindle-Layout/ for more
 			pseudotile = yes # master switch for pseudotiling. Enabling is bound to mainMod + P in the keybinds section below
 				preserve_split = yes # you probably want this
-		}
-
-		master {
-		# See https://wiki.hyprland.org/Configuring/Master-Layout/ for more
-			new_is_master = true
 		}
 
 		gestures {

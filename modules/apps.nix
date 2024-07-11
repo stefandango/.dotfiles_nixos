@@ -2,10 +2,10 @@
 {
     environment.systemPackages = with pkgs; [
         obsidian
-        insomnia
+        #insomnia
         spotify
-        beekeeper-studio
-        dbeaver
+        #"beekeeper-studio
+        dbeaver-bin
         github-copilot-intellij-agent
 
     ] ++
