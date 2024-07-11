@@ -35,8 +35,8 @@ in
   };
 
 
-  fonts.fontDir.enable = true; # DANGER
-  fonts.fonts = [ (pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; }) ];
+  #fonts.fontDir.enable = true; # DANGER
+  fonts.packages = [ (pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; }) ];
   # Auto upgrade nix package and the daemon service.
   services.nix-daemon.enable = true;
 
