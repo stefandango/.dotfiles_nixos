@@ -172,7 +172,6 @@ in
 		  docker
 		  lazydocker
 		  jq
-          #dotnet-runtime_8
           omnisharp-roslyn
           netcoredbg
           nodejs_22
@@ -188,10 +187,8 @@ in
   };
   virtualisation.docker.enable = true;
 
-  #hardware.openrazer.enable = true;
   hardware.openrazer = {
     enable = true;
-    #mouseBatteryNotifier = false;
     batteryNotifier.enable = true;
   };
   hardware.pulseaudio.enable = false;
