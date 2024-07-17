@@ -13,21 +13,7 @@ in
   imports =
     [ # Include the results of the hardware scan.
       inputs.home-manager.nixosModules.home-manager
-      #inputs.nixvim.nixosModules.nixvim
       ./hardware-configuration.nix
-      # ../../modules/env.nix
-      # ../../modules/greetd.nix
-      # ../../modules/scripts.nix
-      # ../../modules/waybar.nix
-      # ../../modules/pyprland.nix
-      # ../../modules/swaync.nix
-      # ../../modules/hyprland.nix
-      # ../../modules/rofi.nix
-      # ../../theme/theming.nix
-      # ../../modules/git.nix
-      # ../../modules/kitty.nix
-      # ../../modules/zsh.nix
-      # ../../modules/apps.nix
       ../../modules/shared
       ../../modules/nixos
     ];
@@ -172,11 +158,10 @@ in
 		  docker
 		  lazydocker
 		  jq
-          #dotnet-runtime_8
           omnisharp-roslyn
           netcoredbg
           nodejs_22
-		   firefox
+          firefox
 		  (python3.withPackages (ps: with ps; [
 					 requests
 					 openrazer
@@ -188,10 +173,8 @@ in
   };
   virtualisation.docker.enable = true;
 
-  #hardware.openrazer.enable = true;
   hardware.openrazer = {
     enable = true;
-    #mouseBatteryNotifier = false;
     batteryNotifier.enable = true;
   };
   hardware.pulseaudio.enable = false;

@@ -16,7 +16,6 @@ in
 				oh-my-posh
 				fzf
                 ripgrep
-                #gh
 			];
 			file = {
 
