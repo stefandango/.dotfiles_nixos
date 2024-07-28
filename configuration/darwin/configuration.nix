@@ -26,6 +26,7 @@ in
       tmuxPlugins.onedark-theme
       tmuxPlugins.better-mouse-mode
       tree
+      podman
 
       ] ++
       (with unstable; [
