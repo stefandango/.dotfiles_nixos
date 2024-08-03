@@ -156,6 +156,7 @@ in
 
 # APPS
 		  docker
+          docker-compose
 		  lazydocker
 		  jq
           omnisharp-roslyn
