@@ -163,6 +163,7 @@ in
           netcoredbg
           nodejs_22
           firefox
+          warp-terminal
 		  (python3.withPackages (ps: with ps; [
 					 requests
 					 openrazer
