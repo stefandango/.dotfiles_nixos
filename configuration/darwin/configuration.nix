@@ -59,7 +59,7 @@ in
     #NSGlobalDomain.InitialKeyRepeat = 14;
     #NSGlobalDomain.KeyRepeat = 1;
     dock = {
-        autohide = false;
+        autohide = true;
         show-recents = false;
         launchanim = true;
         mouse-over-hilite-stack = true;
