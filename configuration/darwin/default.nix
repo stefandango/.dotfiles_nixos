@@ -1,7 +1,8 @@
 { lib, inputs, nixpkgs, nixpkgs-unstable, home-manager, nixvim, darwin, vars }:
 
 let
-system = "x86_64-darwin";
+#system = "x86_64-darwin";
+system = "aarch64-darwin";
 pkgs = import nixpkgs {
     inherit system;
     config.allowUnfree = true;
