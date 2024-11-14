@@ -15,6 +15,7 @@ in
         name = "stefan";
         home = "/Users/stefan";
     };
+    
     programs.zsh.enable = true;
     environment = {
         shells = with pkgs; [ bash zsh ];
@@ -23,8 +24,6 @@ in
             tmuxPlugins.onedark-theme
             tmuxPlugins.better-mouse-mode
             tree
-            podman
-
         ] ++
             (with unstable; [
                 dotnet-sdk_8
@@ -68,7 +67,6 @@ in
         casks = [
             "raycast"
             "hiddenbar"
-            "CleanMyMac"
         ];
         #taps = [ "fujiapple852/trippy" ];
         #brews = [ "trippy" ];

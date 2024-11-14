@@ -28,6 +28,9 @@ in
             home-manager.darwinModules.home-manager {
                 home-manager.useGlobalPkgs = true;
                 home-manager.useUserPackages = true;
+                home-manager.users.stefan = {
+                    home.stateVersion = "23.11";
+                };
                 home-manager.users.stefan.imports = [
                     inputs.nixvim.homeManagerModules.nixvim
                         ../../nix/nvim.nix
@@ -42,8 +45,8 @@ in
                          programs.bat.enable = true;
                          programs.bat.config.theme = "TwoDark";
                          programs.zsh.shellAliases = {
-                         nixswitch = "darwin-rebuild switch --flake ~/Dev/.dotfiles_nixos/.#";
-                         nixup = "pushd ~/Dev/.dotfiles_nixos; nix flake update; nixswitch; popd";
+                         nixswitch = "darwin-rebuild switch --flake ~/.dotfiles/.#";
+                         nixup = "pushd ~/.dotfiles; nix flake update; nixswitch; popd";
                          };
                          })
 
