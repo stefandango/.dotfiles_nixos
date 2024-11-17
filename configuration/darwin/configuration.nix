@@ -26,7 +26,10 @@ in
             tree
         ] ++
             (with unstable; [
-                dotnet-sdk_8
+                #dotnet-sdk_8
+                #dotnetCorePackages.dotnet_8.sdk
+                #dotnetCorePackages.dotnet_9.sdk
+                 
             ]);
         systemPath = [ "/opt/homebrew/bin" ];
         pathsToLink = [ "/Applications" ];
@@ -54,7 +57,7 @@ in
             launchanim = true;
             mouse-over-hilite-stack = true;
             orientation = "bottom";
-            tilesize = 48;
+            tilesize = 50;
             magnification = true;
             largesize = 80;
         };
@@ -67,7 +70,9 @@ in
         casks = [
             "raycast"
             "hiddenbar"
+            "kitty"
         ];
+        #Kitty is double installed above to fix permission error on macos
         #taps = [ "fujiapple852/trippy" ];
         #brews = [ "trippy" ];
     };
