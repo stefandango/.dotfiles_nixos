@@ -15,7 +15,7 @@ in
         name = "stefan";
         home = "/Users/stefan";
     };
-    
+
     programs.zsh.enable = true;
     environment = {
         shells = with pkgs; [ bash zsh ];
@@ -24,12 +24,13 @@ in
             tmuxPlugins.onedark-theme
             tmuxPlugins.better-mouse-mode
             tree
+            powershell
         ] ++
             (with unstable; [
                 #dotnet-sdk_8
                 #dotnetCorePackages.dotnet_8.sdk
                 #dotnetCorePackages.dotnet_9.sdk
-                 
+
             ]);
         systemPath = [ "/opt/homebrew/bin" ];
         pathsToLink = [ "/Applications" ];
@@ -71,6 +72,7 @@ in
             "raycast"
             "hiddenbar"
             "kitty"
+            "pearcleaner"
         ];
         #Kitty is double installed above to fix permission error on macos
         #taps = [ "fujiapple852/trippy" ];
