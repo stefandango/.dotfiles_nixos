@@ -73,6 +73,7 @@ in
             "hiddenbar"
             "kitty"
             "pearcleaner"
+            "devutils"
         ];
         #Kitty is double installed above to fix permission error on macos
         #taps = [ "fujiapple852/trippy" ];
