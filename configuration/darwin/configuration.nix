@@ -25,6 +25,7 @@ in
             tmuxPlugins.better-mouse-mode
             tree
             powershell
+            nodejs_23
         ] ++
             (with unstable; [
                 #dotnet-sdk_8
@@ -70,10 +71,10 @@ in
         masApps = { };
         casks = [
             "raycast"
-            "hiddenbar"
             "kitty"
             "pearcleaner"
             "devutils"
+            "bartender"
         ];
         #Kitty is double installed above to fix permission error on macos
         #taps = [ "fujiapple852/trippy" ];
