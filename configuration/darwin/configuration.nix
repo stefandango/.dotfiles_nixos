@@ -37,7 +37,10 @@ in
         pathsToLink = [ "/Applications" ];
     };
 
-    fonts.packages = [ (pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; }) ];
+    fonts.packages = [
+        #(pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; })
+        pkgs.nerd-fonts.jetbrains-mono
+    ];
     services.nix-daemon.enable = true;
 
     system.defaults = {
