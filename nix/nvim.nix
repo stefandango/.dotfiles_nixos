@@ -452,6 +452,7 @@
                    indent.enable = true;
                 };
             };
+            web-devicons.enable = true;
             lualine.enable = true;
             barbar.enable = true;
             indent-blankline = {
@@ -490,7 +491,7 @@
                 servers = {
                     html.enable = true;
                     cssls.enable = true;
-                    tsserver.enable = true;
+                    ts_ls.enable = true;
                     pyright.enable = true;
                     #gopls.enable = true;
                     bashls.enable = true;
