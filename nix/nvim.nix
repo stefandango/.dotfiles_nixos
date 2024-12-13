@@ -465,13 +465,7 @@
             nvim-autopairs.enable = true;
             markdown-preview.enable = true;
             rainbow-delimiters.enable = true;
-            nvim-colorizer = {
-                enable = true;
-                userDefaultOptions = {
-                    css = true;
-                    tailwind = "both";
-                };
-            };
+            colorizer.enable = true;
             telescope = {
                 enable = true;
                 settings = {
