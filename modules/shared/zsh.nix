@@ -16,6 +16,7 @@ in
 				oh-my-posh
 				fzf
                 ripgrep
+                lazygit
 			];
 			file = {
 
