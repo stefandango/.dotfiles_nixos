@@ -13,10 +13,10 @@ in
           confirm_os_window_close=0;
           enable_audio_bell="no";
           resize_debounce_time="0";
-		  background_opacity = lib.mkForce "0.85";
+		  background_opacity = lib.mkForce "0.95";
 		  #font_family = "JetBrainsMonoNL Nerd Font Mono SemiBold";
           font_family = "MonoLisa Nerd Font SemiBold";
-          font_size = "14.0";
+          font_size = "16.0";
 
         };
 	        extraConfig = ''
