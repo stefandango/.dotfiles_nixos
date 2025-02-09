@@ -578,6 +578,7 @@
             neotest
             neotest-plenary
             neotest-dotnet
+            #rzls-nvim -- doesnt work without roslyn configuration...
         ];
 
         extraConfigLua = ''

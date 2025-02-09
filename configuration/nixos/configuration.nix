@@ -104,11 +104,8 @@ in
 		 font-awesome
 		 noto-fonts
 		 noto-fonts-color-emoji
-		 (nerdfonts.override {
-		  fonts = [
-		  "FiraCode" "JetBrainsMono"
-		  ];
-		  })
+         pkgs.nerd-fonts.fira-code
+         pkgs.nerd-fonts.jetbrains-mono
  ];
 
   # List packages installed in system profile. To search, run:
