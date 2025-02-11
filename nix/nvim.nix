@@ -557,8 +557,10 @@
 
             copilot-lua = {
                 enable = true;
-                panel.enabled = false;
-                suggestion.enabled = false;
+                settings = {
+                    panel.enabled = false;
+                    suggestion.enabled = false;
+                };
             };
             copilot-cmp.enable = true;
         };
@@ -576,6 +578,7 @@
             neotest
             neotest-plenary
             neotest-dotnet
+            #rzls-nvim -- doesnt work without roslyn configuration...
         ];
 
         extraConfigLua = ''
