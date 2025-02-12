@@ -32,8 +32,8 @@ in
                     home.stateVersion = "23.11";
                 };
                 home-manager.users.stefan.imports = [
-                    inputs.nixvim.homeManagerModules.nixvim
-                        ../../nix/nvim.nix
+                    #inputs.nixvim.homeManagerModules.nixvim
+                    # ../../nix/nvim.nix
                         ({pkgs, ...}: {
 
                          home.stateVersion = "23.11";

@@ -22,6 +22,7 @@ in
         systemPackages = with pkgs; [
             coreutils
             tmuxPlugins.onedark-theme
+            tmuxPlugins.tokyo-night-tmux
             tmuxPlugins.better-mouse-mode
             tree
             powershell
@@ -41,7 +42,7 @@ in
         #(pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; })
         pkgs.nerd-fonts.jetbrains-mono
     ];
-    services.nix-daemon.enable = true;
+    #services.nix-daemon.enable = true;
 
     system.defaults = {
         finder = {
@@ -78,6 +79,11 @@ in
             "pearcleaner"
             "devutils"
             "bartender"
+
+            # Fonts for terminal (tmux tokyo-night)
+            "font-monaspace-nerd-font"
+            "font-noto-sans-symbols-2"
+	    #"ghostty"
         ];
         #Kitty is double installed above to fix permission error on macos
         #taps = [ "fujiapple852/trippy" ];
@@ -87,10 +93,10 @@ in
     system.stateVersion = 4;
     #nixpkgs.hostPlatform = "x86_64-darwin";
     nixpkgs.hostPlatform = "aarch64-darwin";
-
+    ids.gids.nixbld = 350;
     nix = {
         gc = {
-            user = "root";
+            #user = "root";
             automatic = true;
             interval = { Weekday = 0; Hour = 2; Minute = 0; };
             options = "--delete-older-than 30d";
