@@ -15,10 +15,11 @@ in
 				lsd
 				oh-my-posh
 				fzf
-                ripgrep
-                lazygit
+        ripgrep
+        lazygit
 				neovim-unwrapped
 				fd
+        tree-sitter
 			];
 			file = {
 
@@ -35,6 +36,10 @@ in
 				source = ../config/ohmyposhv3-v2.json;
 				recursive = true;
 			};
+      ".omnisharp/omnisharp.json" = {
+        source = ../config/omnisharp.json;
+        recursive = true;
+      };
 		};
 	file = {
 		".config/lsd/colors.yaml" = {
