@@ -81,8 +81,8 @@
                     "type": "go",
                     "style": "powerline",
                     "powerline_symbol": "",
-                    "foreground": "#c0caf5",
-                    "background": "#7dcfff",
+                    "foreground": "#ffffff",
+                    "background": "#ff6347",
                     "template": "  {{ .Full }} "
                 },
                 {
@@ -93,7 +93,7 @@
                     "background": "#7aa2f7",
                     "template": "  {{ .EnvironmentName }}",
                     "properties": {
-                      "source": "pwsh"
+                        "source": "pwsh"
                     }
                 },
                 {
@@ -130,13 +130,13 @@
                     "foreground": "#ffffff",
                     "background": "#00897b",
                     "background_templates": [
-                      "{{ if .Error }}#f7768e{{ end }}"
+                        "{{ if .Error }}#f7768e{{ end }}"
                     ],
                     "leading_diamond": "",
                     "trailing_diamond": "",
                     "template": "<#1a1b26></>  ",
                     "properties": {
-                      "always_enabled": true
+                        "always_enabled": true
                     }
                 }
             ]

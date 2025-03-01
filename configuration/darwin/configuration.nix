@@ -27,6 +27,7 @@ in
             tree
             powershell
             nodejs_23
+            go
         ] ++
             (with unstable; [
                 #dotnet-sdk_8
@@ -89,7 +90,7 @@ in
         #taps = [ "fujiapple852/trippy" ];
         #brews = [ "trippy" ];
     };
-    security.pam.enableSudoTouchIdAuth = true;
+    security.pam.services.sudo_local.touchIdAuth = true;
     system.stateVersion = 4;
     #nixpkgs.hostPlatform = "x86_64-darwin";
     nixpkgs.hostPlatform = "aarch64-darwin";
