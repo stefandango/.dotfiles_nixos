@@ -28,6 +28,7 @@ in
             powershell
             nodejs_23
             go
+            rustup
         ] ++
             (with unstable; [
                 #dotnet-sdk_8
