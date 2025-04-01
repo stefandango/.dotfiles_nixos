@@ -1,7 +1,6 @@
 { config, lib, inputs, pkgs, unstable, home-manager, nixvim, darwin, vars, ... }:
 
 let
-    #system = "x86_64-darwin";
     system = "aarch64-darwin";
     terminal = pkgs.${vars.terminal};
 in
@@ -31,8 +30,7 @@ in
             rustup
         ] ++
             (with unstable; [
-                #dotnet-sdk_8
-                #dotnetCorePackages.dotnet_8.sdk
+                #Everything is unstable currently
                 #dotnetCorePackages.dotnet_9.sdk
 
             ]);
@@ -41,10 +39,8 @@ in
     };
 
     fonts.packages = [
-        #(pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; })
         pkgs.nerd-fonts.jetbrains-mono
     ];
-    #services.nix-daemon.enable = true;
 
     system.defaults = {
         finder = {
@@ -93,7 +89,6 @@ in
     };
     security.pam.services.sudo_local.touchIdAuth = true;
     system.stateVersion = 4;
-    #nixpkgs.hostPlatform = "x86_64-darwin";
     nixpkgs.hostPlatform = "aarch64-darwin";
     ids.gids.nixbld = 350;
     nix = {

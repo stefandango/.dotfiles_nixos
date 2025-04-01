@@ -1,7 +1,3 @@
-#
-#  Shell
-#
-
 { config, pkgs, vars, ... }:
 let
 color = import ../../theme/colors.nix;
@@ -17,12 +13,11 @@ in
 				fzf
         ripgrep
         lazygit
-				neovim-unwrapped
-				fd
+        neovim-unwrapped
+        fd
         tree-sitter
 			];
 			file = {
-
 
 			"Scripts/tmux-sessionizer" = {
 				source = ../scripts/tmux-sessionizer;
@@ -68,7 +63,6 @@ programs = {
 		enableCompletion = true;
 		syntaxHighlighting.enable = true;
 		history = {
-			#path = ".local/share/zsh/history";
 			size = 1000;
 			save = 1000;
 			share = true;
@@ -110,14 +104,6 @@ programs =  {
 zsh.enable = true;
 tmux = {
 	enable = true;
-	#historyLimit = 50000;
-#     plugins = with pkgs;
-#      [
-	#     tmuxPlugins.onedark-theme
-	#    tmuxPlugins.better-mouse-mode
-	##tmuxPlugins.rose-pine
-	#    ];
-
 	extraConfig = ''
 			unbind C-b
 			set-option -g prefix C-a
@@ -157,12 +143,9 @@ tmux = {
 };
 };
 
-
 	users.users.${vars.user} = {
 		shell = pkgs.zsh;
 	};
-
-
 }
 
 
