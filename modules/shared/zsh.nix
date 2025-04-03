@@ -11,11 +11,11 @@ in
 				lsd
 				oh-my-posh
 				fzf
-        ripgrep
-        lazygit
-        neovim-unwrapped
-        fd
-        tree-sitter
+                ripgrep
+                lazygit
+                neovim-unwrapped
+                fd
+                tree-sitter
 			];
 			file = {
 
