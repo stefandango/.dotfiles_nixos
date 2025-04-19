@@ -28,11 +28,10 @@ in
             nodejs_23
             go
             rustup
+            vlc-bin
         ] ++
             (with unstable; [
                 #Everything is unstable currently
-                #dotnetCorePackages.dotnet_9.sdk
-
             ]);
         systemPath = [ "/opt/homebrew/bin" ];
         pathsToLink = [ "/Applications" ];

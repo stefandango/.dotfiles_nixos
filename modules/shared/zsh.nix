@@ -16,6 +16,7 @@ in
                 neovim-unwrapped
                 fd
                 tree-sitter
+                #netcoredbg
 			];
 			file = {
 
