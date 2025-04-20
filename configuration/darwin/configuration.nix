@@ -14,7 +14,6 @@ in
         name = "stefan";
         home = "/Users/stefan";
     };
-
     programs.zsh.enable = true;
     environment = {
         shells = with pkgs; [ bash zsh ];
@@ -76,6 +75,7 @@ in
             "pearcleaner"
             "devutils"
             "bartender"
+            "handbrake"
 
             # Fonts for terminal (tmux tokyo-night)
             "font-monaspace-nerd-font"
