@@ -76,6 +76,7 @@ in
             "devutils"
             "bartender"
             "handbrake"
+            "alt-tab"
 
             # Fonts for terminal (tmux tokyo-night)
             "font-monaspace-nerd-font"
