@@ -1,7 +1,6 @@
 { lib, inputs, nixpkgs, nixpkgs-unstable, home-manager, nixvim, darwin, vars }:
 
 let
-#system = "x86_64-darwin";
 system = "aarch64-darwin";
 pkgs = import nixpkgs {
     inherit system;
@@ -17,7 +16,6 @@ lib = nixpkgs.lib;
 in
 {
     Stefans-MacBook-Pro = darwin.lib.darwinSystem {
-
         inherit system;
 
         specialArgs =  {
@@ -32,10 +30,7 @@ in
                     home.stateVersion = "23.11";
                 };
                 home-manager.users.stefan.imports = [
-                    inputs.nixvim.homeManagerModules.nixvim
-                        ../../nix/nvim.nix
                         ({pkgs, ...}: {
-
                          home.stateVersion = "23.11";
                          home.packages = with pkgs; [
                          ripgrep

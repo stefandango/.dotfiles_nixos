@@ -1,0 +1,145 @@
+{
+    "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+    "final_space": true,
+    "console_title": true,
+    "console_title_style": "folder",
+    "blocks": [
+        {
+            "type": "prompt",
+            "alignment": "left",
+            "horizontal_offset": 0,
+            "vertical_offset": 0,
+            "segments": [
+                {
+                    "type": "path",
+                    "style": "diamond",
+                    "powerline_symbol": "",
+                    "invert_powerline": false,
+                    "foreground": "#c0caf5",
+                    "background": "#1a1b26",
+                    "leading_diamond": "",
+                    "trailing_diamond": "",
+                    "properties": {
+                        "prefix": "  ",
+                        "style": "folder"
+                    }
+                },
+                {
+                    "type": "git",
+                    "style": "powerline",
+                    "powerline_symbol": "",
+                    "invert_powerline": false,
+                    "foreground": "#1a1b26",
+                    "background": "#ff9e64",
+                    "leading_diamond": "",
+                    "trailing_diamond": "",
+                    "properties": {
+                        "display_status": true,
+                        "display_stash_count": true,
+                        "display_upstream_icon": true
+                    }
+                },
+                {
+                    "type": "dotnet",
+                    "style": "powerline",
+                    "powerline_symbol": "",
+                    "invert_powerline": false,
+                    "foreground": "#c0caf5",
+                    "background": "#565f89",
+                    "leading_diamond": "",
+                    "trailing_diamond": "",
+                    "template": "  {{ .Full }} "
+                },
+                {
+                    "type": "node",
+                    "style": "powerline",
+                    "powerline_symbol": "",
+                    "invert_powerline": false,
+                    "foreground": "#c0caf5",
+                    "background": "#9ece6a",
+                    "leading_diamond": "",
+                    "trailing_diamond": "",
+                    "template": "  {{ .Full }} "
+                },
+                {
+                    "type": "lua",
+                    "style": "powerline",
+                    "powerline_symbol": "",
+                    "foreground": "#c0caf5",
+                    "background": "#7aa2f7",
+                    "template": "  {{ .Full }} "
+                },
+                {
+                    "type": "rust",
+                    "style": "powerline",
+                    "powerline_symbol": "",
+                    "foreground": "#c0caf5",
+                    "background": "#bb9af7",
+                    "template": "  {{ .Full }} "
+                },
+                {
+                    "type": "go",
+                    "style": "powerline",
+                    "powerline_symbol": "",
+                    "foreground": "#ffffff",
+                    "background": "#ff6347",
+                    "template": "  {{ .Full }} "
+                },
+                {
+                    "type": "az",
+                    "style": "powerline",
+                    "powerline_symbol": "",
+                    "foreground": "#c0caf5",
+                    "background": "#7aa2f7",
+                    "template": "  {{ .EnvironmentName }}",
+                    "properties": {
+                        "source": "pwsh"
+                    }
+                },
+                {
+                    "type": "azd",
+                    "style": "powerline",
+                    "powerline_symbol": "",
+                    "foreground": "#c0caf5",
+                    "background": "#7aa2f7",
+                    "template": "  {{ .DefaultEnvironment }} "
+                },
+                {
+                    "type": "nix-shell",
+                    "style": "powerline",
+                    "foreground": "#c0caf5",
+                    "background": "#1a1b26",
+                    "template": "(nix-{{ .Type }})"
+                },
+                {
+                    "type": "root",
+                    "style": "powerline",
+                    "powerline_symbol": "",
+                    "invert_powerline": false,
+                    "foreground": "#c0caf5",
+                    "background": "#f7768e",
+                    "leading_diamond": "",
+                    "trailing_diamond": "",
+                    "properties": null
+                },
+                {
+                    "type": "status",
+                    "style": "diamond",
+                    "powerline_symbol": "",
+                    "invert_powerline": false,
+                    "foreground": "#ffffff",
+                    "background": "#00897b",
+                    "background_templates": [
+                        "{{ if .Error }}#f7768e{{ end }}"
+                    ],
+                    "leading_diamond": "",
+                    "trailing_diamond": "",
+                    "template": "<#1a1b26></>  ",
+                    "properties": {
+                        "always_enabled": true
+                    }
+                }
+            ]
+        }
+    ]
+}

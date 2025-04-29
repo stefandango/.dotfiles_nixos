@@ -1,7 +1,6 @@
 { config, lib, inputs, pkgs, unstable, home-manager, nixvim, darwin, vars, ... }:
 
 let
-    #system = "x86_64-darwin";
     system = "aarch64-darwin";
     terminal = pkgs.${vars.terminal};
 in
@@ -15,33 +14,31 @@ in
         name = "stefan";
         home = "/Users/stefan";
     };
-
     programs.zsh.enable = true;
     environment = {
         shells = with pkgs; [ bash zsh ];
         systemPackages = with pkgs; [
             coreutils
             tmuxPlugins.onedark-theme
+            tmuxPlugins.tokyo-night-tmux
             tmuxPlugins.better-mouse-mode
             tree
             powershell
             nodejs_23
+            go
+            rustup
+            vlc-bin
         ] ++
             (with unstable; [
-                #dotnet-sdk_8
-                #dotnetCorePackages.dotnet_8.sdk
-                #dotnetCorePackages.dotnet_9.sdk
-
+                #Everything is unstable currently
             ]);
         systemPath = [ "/opt/homebrew/bin" ];
         pathsToLink = [ "/Applications" ];
     };
 
     fonts.packages = [
-        #(pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; })
         pkgs.nerd-fonts.jetbrains-mono
     ];
-    services.nix-daemon.enable = true;
 
     system.defaults = {
         finder = {
@@ -78,19 +75,25 @@ in
             "pearcleaner"
             "devutils"
             "bartender"
+            "handbrake"
+            "alt-tab"
+
+            # Fonts for terminal (tmux tokyo-night)
+            "font-monaspace-nerd-font"
+            "font-noto-sans-symbols-2"
+	    #"ghostty"
         ];
         #Kitty is double installed above to fix permission error on macos
         #taps = [ "fujiapple852/trippy" ];
         #brews = [ "trippy" ];
     };
-    security.pam.enableSudoTouchIdAuth = true;
+    security.pam.services.sudo_local.touchIdAuth = true;
     system.stateVersion = 4;
-    #nixpkgs.hostPlatform = "x86_64-darwin";
     nixpkgs.hostPlatform = "aarch64-darwin";
-
+    ids.gids.nixbld = 350;
     nix = {
         gc = {
-            user = "root";
+            #user = "root";
             automatic = true;
             interval = { Weekday = 0; Hour = 2; Minute = 0; };
             options = "--delete-older-than 30d";

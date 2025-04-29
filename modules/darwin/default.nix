@@ -5,6 +5,5 @@
   imports = [
     #./nvim.nix
   ];
-# Other stuff here
 }
 
