@@ -575,9 +575,9 @@
             #plenary-nvim
             nvim-nio
             FixCursorHold-nvim
-            neotest
-            neotest-plenary
-            neotest-dotnet
+            #neotest
+            #neotest-plenary
+            #neotest-dotnet
             #rzls-nvim -- doesnt work without roslyn configuration...
         ];
 
