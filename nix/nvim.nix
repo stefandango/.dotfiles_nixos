@@ -510,11 +510,11 @@
                 cmp = {
                     enable = true;
                     menu = {
-                        nvim_lsp = "[🔧]";
-                        nvim_lua = "[🌙]";
-                        path = "[📂]";
-                        luasnip = "[🔍]";
-                        buffer = "[📄]";
+                        nvim_lsp = "[LSP]";
+                        nvim_lua = "[api]";
+                        path = "[path]";
+                        luasnip = "[snip]";
+                        buffer = "[buffer]";
                     };
                 };
             };
@@ -575,10 +575,10 @@
             #plenary-nvim
             nvim-nio
             FixCursorHold-nvim
-            neotest
-            neotest-plenary
-            neotest-dotnet
-            #rzls-nvim
+            #neotest
+            #neotest-plenary
+            #neotest-dotnet
+            #rzls-nvim -- doesnt work without roslyn configuration...
         ];
 
         extraConfigLua = ''
