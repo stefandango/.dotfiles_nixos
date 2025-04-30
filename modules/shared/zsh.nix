@@ -87,7 +87,7 @@ programs = {
 				"copypath"
 			];
 		};
-		initExtra = ''
+		initContent = ''
 export PATH="$PATH:/home/stefan/.dotnet/tools:/Users/stefan/.dotnet/tools"
 
 bindkey -s ^f '~/Scripts/tmux-sessionizer\n'
