@@ -77,7 +77,7 @@ in
             "bartender"
             "handbrake"
             "alt-tab"
-
+            "dbeaver-community"
             # Fonts for terminal (tmux tokyo-night)
             "font-monaspace-nerd-font"
             "font-noto-sans-symbols-2"
