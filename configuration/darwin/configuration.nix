@@ -24,7 +24,6 @@ in
             tmuxPlugins.better-mouse-mode
             tree
             powershell
-            nodejs_23
             go
             rustup
             vlc-bin
@@ -40,6 +39,7 @@ in
         pkgs.nerd-fonts.jetbrains-mono
     ];
 
+    system.primaryUser = "stefan";
     system.defaults = {
         finder = {
             _FXShowPosixPathInTitle = true;
