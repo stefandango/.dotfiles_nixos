@@ -81,7 +81,7 @@ in
             # Fonts for terminal (tmux tokyo-night)
             "font-monaspace-nerd-font"
             "font-noto-sans-symbols-2"
-	    #"ghostty"
+	    #"ghostty
         ];
         #Kitty is double installed above to fix permission error on macos
         #taps = [ "fujiapple852/trippy" ];
