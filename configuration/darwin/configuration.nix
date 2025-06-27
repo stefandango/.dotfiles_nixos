@@ -33,7 +33,9 @@ in
             ]);
         systemPath = [ "/opt/homebrew/bin" ];
         pathsToLink = [ "/Applications" ];
-    };
+        variables.EDITOR = "nvim";
+        
+        };
 
     fonts.packages = [
         pkgs.nerd-fonts.jetbrains-mono
