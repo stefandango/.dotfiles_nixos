@@ -87,7 +87,7 @@ in
         ];
         #Kitty is double installed above to fix permission error on macos
         #taps = [ "fujiapple852/trippy" ];
-        #brews = [ "trippy" ];
+        brews = [ "python" "uv" ];
     };
     security.pam.services.sudo_local.touchIdAuth = true;
     system.stateVersion = 4;

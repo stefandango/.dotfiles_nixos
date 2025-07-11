@@ -17,7 +17,7 @@ in
                 fd
                 tree-sitter
                 #netcoredbg
-			];
+        ];
 			file = {
 
 			"Scripts/tmux-sessionizer" = {
@@ -59,6 +59,7 @@ programs = {
 			ls = "lsd";
 			la = "lsd -al";
 			ll = "lsd -l";
+            claude = "/Users/stefan/.claude/local/claude";
 		};
 		autosuggestion.enable = true;
 		enableCompletion = true;
