@@ -3,7 +3,6 @@
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
 { config, lib, inputs, pkgs, unstable, home-manager, nixvim, vars, ... }:
-#{ lib, inputs, pkgs, unstable, home-manager, hyprland, nixvim, ... }:
 
 let
 system = "x86_64-linux";
@@ -45,17 +44,11 @@ in
 	graphics = {
 		enable = true;
 		extraPackages = with pkgs; [
-			#intel-media-driver
-			#vaapiIntel
-			#rocm-opencl-icd
-			#rocm-opencl-runtime
 			amdvlk
 		];
 		extraPackages32 = with pkgs; [
 			driversi686Linux.amdvlk
 		];
-		#driSupport = true;
-		#driSupport32Bit = true;
 	};
   };
   networking.hostName = "nixos"; # Define your hostname.
@@ -70,21 +63,11 @@ in
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   # Select internationalisation properties.
-  # Makes build fail GLIBC...
-  i18n = {
-		#defaultLocale = "en_DK.uft8";
-		#extraLocaleSettings = {
-		#	LC_MESSAGES = "en_US.UFT-8";
-		#	LC_TIME = "da_DK.UFT-8";
-		#	LC_MONETARY = "da_DK.UTF-8";
-		#};
-		#supportedLocales = [ "en_US.UFT-8/UTF-8" "en_DK.UFT-8/UTF-8" "da_DK.UFT-8/UFT-8" ];
-	};
+  i18n.defaultLocale = "en_US.UTF-8";
 
    console = {
      font = "Lat2-Terminus16";
      keyMap = "dk";
-  #   useXkbConfig = true; # use xkb.options in tty.
    };
 
   # Enable the X11 windowing system.
@@ -117,9 +100,6 @@ in
 		EDITOR = "${vars.editor}";
 		VISUAL = "${vars.editor}";
 	};
-#   sessionVariables = {
-#     DOTNET_ROOT = "${pkgs.dotnet-sdk_8}";
-# };
 
   systemPackages = with pkgs; [
 # TERMINAL
@@ -165,10 +145,7 @@ in
 					 requests
 					 openrazer
 		  ]))
-		  ] ++
-		  (with unstable; [
-		    #dotnet-sdk_8
-		  ]);
+		  ];
   };
   virtualisation.docker.enable = true;
 
@@ -189,7 +166,6 @@ in
 	};
  };
 
-  #services.flatpak.enable = true;
 
   nix = {
 		settings = {

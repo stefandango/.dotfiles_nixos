@@ -27,10 +27,7 @@ in
             go
             rustup
             vlc-bin
-        ] ++
-            (with unstable; [
-                #Everything is unstable currently
-            ]);
+        ];
         systemPath = [ "/opt/homebrew/bin" ];
         pathsToLink = [ "/Applications" ];
         variables.EDITOR = "nvim";
@@ -51,10 +48,7 @@ in
             Clicking = true;
             TrackpadThreeFingerDrag = true;
         };
-        #dock.autohide = true;
         NSGlobalDomain.AppleShowAllExtensions = true;
-        #NSGlobalDomain.InitialKeyRepeat = 14;
-        #NSGlobalDomain.KeyRepeat = 1;
         dock = {
             autohide = true;
             show-recents = false;
@@ -83,10 +77,8 @@ in
             # Fonts for terminal (tmux tokyo-night)
             "font-monaspace-nerd-font"
             "font-noto-sans-symbols-2"
-	    #"ghostty
         ];
-        #Kitty is double installed above to fix permission error on macos
-        #taps = [ "fujiapple852/trippy" ];
+        # Kitty is double installed above to fix permission error on macOS
         brews = [ "python" "uv" ];
     };
     security.pam.services.sudo_local.touchIdAuth = true;
@@ -95,7 +87,6 @@ in
     ids.gids.nixbld = 350;
     nix = {
         gc = {
-            #user = "root";
             automatic = true;
             interval = { Weekday = 0; Hour = 2; Minute = 0; };
             options = "--delete-older-than 30d";
