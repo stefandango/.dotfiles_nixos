@@ -17,6 +17,7 @@ in
                 fd
                 tree-sitter
                 #netcoredbg
+                gh
         ];
 			file = {
 
