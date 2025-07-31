@@ -1,59 +1,75 @@
-# .dotfiles_nixos
+# .dotfiles
 
-My first nixos setup.. still needs cleanup.
+Cross-platform Nix configuration for NixOS and macOS using Nix flakes.
 
-## Guide to install NixOS
+## Features
 
-// TODO..
-
-## Nix-Darwin
-
-Very usefull install guide her: <https://www.youtube.com/watch?v=LE5JR4JcvMg>
+- Unified configuration for both NixOS (Linux) and nix-darwin (macOS)
+- Home-manager integration for user environment management
+- Nixvim configuration for Neovim
+- Modular architecture with shared components
 
 ## Installation
 
-1. Install NIXOS(<https://nixos.org/download/>)
-2. Install Homebrew (<https://brew.sh>)
-3. Start terminal
-4. Get git and clone config
+### Prerequisites
 
-> nix-shell -p git
-> git clone <https://github.com/stefandango/.dotfiles_nixos.git> .dotfiles
+1. Install Nix with flakes support
+2. For macOS: Install Homebrew (<https://brew.sh>)
 
-5. Exit nix-shell
+### Setup
 
->exit
+1. Clone the repository:
+```bash
+nix-shell -p git
+git clone <repository_url> ~/.dotfiles
+```
 
-6. Go to the new directory and execute
+2. Navigate to the directory:
+```bash
+cd ~/.dotfiles
+```
 
-> nix run nix-darwin --extra-experimental-features nix-command --extra-experimental-features flakes -- switch --flake .
+3. Apply configuration:
 
-7. Setup raycast (replace Spotlight)
-8. Start hiddenbar
+**For macOS (Darwin):**
+```bash
+nix run nix-darwin --extra-experimental-features nix-command --extra-experimental-features flakes -- switch --flake .
+```
 
-### Apps i dont use nix for
+**For NixOS:**
+```bash
+sudo nixos-rebuild switch --flake .
+```
 
-- Magnet
-- Safari extensions
-- Editors (Rider, VSCode etc)
-- Obsidian
-- Insync
-- Docker
-- Homebrew
-- Little Snitch
-- Spotify
-- Arc
+## Usage
 
-### GUI Apps i *do* use nix for
+### Common Commands
 
-- Kitty
-- Meld
-- Raycast*
-- Hiddenbar*
-- CleanMyMac X*
+**macOS (Darwin):**
+```bash
+# Rebuild configuration
+darwin-rebuild switch --flake ~/.dotfiles/.#
 
-\**Homebrew (via nix)*
+# Update and rebuild
+pushd ~/.dotfiles; nix flake update; darwin-rebuild switch --flake ~/.dotfiles/.#; popd
 
-// TODO...
+# Using aliases (available in shell):
+nixswitch  # Rebuild configuration
+nixup      # Update flake and rebuild
+```
 
-1. Update flake.nix to new setup...
+**NixOS:**
+```bash
+# Rebuild configuration
+sudo nixos-rebuild switch --flake ~/.dotfiles/.#
+
+# Update flake inputs
+nix flake update
+```
+
+### Package Management
+
+This configuration uses a hybrid approach:
+- **Nix packages**: Core development tools and system utilities
+- **Homebrew** (macOS only): GUI applications and proprietary software
+- **Home-manager**: User environment and dotfiles management

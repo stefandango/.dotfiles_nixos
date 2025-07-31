@@ -17,7 +17,8 @@ in
                 fd
                 tree-sitter
                 #netcoredbg
-			];
+                gh
+        ];
 			file = {
 
 			"Scripts/tmux-sessionizer" = {
@@ -59,6 +60,7 @@ programs = {
 			ls = "lsd";
 			la = "lsd -al";
 			ll = "lsd -l";
+            claude = "/Users/stefan/.claude/local/claude";
 		};
 		autosuggestion.enable = true;
 		enableCompletion = true;
@@ -87,7 +89,7 @@ programs = {
 				"copypath"
 			];
 		};
-		initExtra = ''
+		initContent = ''
 export PATH="$PATH:/home/stefan/.dotnet/tools:/Users/stefan/.dotnet/tools"
 
 bindkey -s ^f '~/Scripts/tmux-sessionizer\n'

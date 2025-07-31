@@ -26,7 +26,7 @@
 	let
 	vars = {
 		user = "stefan";
-		location = "$HOME/.dotfiles_nixos";
+		location = "$HOME/.dotfiles";
 		terminal = "kitty";
 		editor = "nvim";
 	};

@@ -1,2 +1,4 @@
 flake.lock
 .DS_Store
+.netcoredbg_hist
+result
