@@ -5,22 +5,23 @@
 { lib, pkgs, ... }:
 
 {
-  # GTK theming (Linux only)
-  gtk = lib.mkIf pkgs.stdenv.isLinux {
-    enable = true;
-    
-    theme = {
-      name = "Adwaita-dark";
-    };
-    
-    iconTheme = {
-      name = "Adwaita";
-    };
-  };
+  # NOTE: GTK theming disabled due to configuration issues
+  # Uncomment and configure when ready to use
+  
+  # gtk = lib.mkIf pkgs.stdenv.isLinux {
+  #   enable = true;
+  #   
+  #   theme = {
+  #     name = "Adwaita-dark";
+  #   };
+  #   
+  #   iconTheme = {
+  #     name = "Adwaita";
+  #   };
+  # };
 
-  # Qt theming (Linux only)  
-  qt = lib.mkIf pkgs.stdenv.isLinux {
-    enable = true;
-    platformTheme.name = "gtk";
-  };
+  # qt = lib.mkIf pkgs.stdenv.isLinux {
+  #   enable = true;
+  #   platformTheme.name = "gtk";
+  # };
 }
