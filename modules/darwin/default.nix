@@ -1,9 +1,9 @@
 
 { lib, inputs, pkgs, ...}:
 {
-  # You can import other home-manager modules here
+  # Darwin-specific home-manager modules
   imports = [
-    #./nvim.nix
+    # Add Darwin-specific modules here when needed
   ];
 }
 

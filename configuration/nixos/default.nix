@@ -1,12 +1,8 @@
-{ lib, inputs, nixpkgs, nixpkgs-unstable, home-manager, nixvim, vars }:
+{ lib, inputs, nixpkgs, home-manager, nixvim, vars }:
 
 let
 	system = "x86_64-linux";
 	pkgs = import nixpkgs {
-		inherit system;
-		config.allowUnfree = true;
-	};
-	unstable = import nixpkgs-unstable {
 		inherit system;
 		config.allowUnfree = true;
 	};
@@ -17,7 +13,7 @@ let
 		stefan = lib.nixosSystem {
 			inherit system;
 			specialArgs =  {
-				inherit inputs system unstable vars;
+				inherit inputs system vars;
 			};
 			modules = [
 				./configuration.nix

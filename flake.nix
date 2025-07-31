@@ -1,12 +1,11 @@
 {
-	description = "My nix configuration for both linux and macos setups...";
+	description = "Stefan's unified Nix configuration for Linux and macOS";
 
 	inputs = {
 		nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-		nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
 		home-manager = {
-				url = "github:nix-community/home-manager";
+			url = "github:nix-community/home-manager";
 			inputs.nixpkgs.follows = "nixpkgs";
 		};
 
@@ -16,35 +15,84 @@
 		};
 
 		darwin = {
-      		url = "github:lnl7/nix-darwin";
-      		inputs.nixpkgs.follows = "nixpkgs";
-    	};
+			url = "github:lnl7/nix-darwin";
+			inputs.nixpkgs.follows = "nixpkgs";
+		};
 	};
 
-	outputs = inputs @ { self, darwin, nixpkgs, nixpkgs-unstable, home-manager, nixvim, ... }:
-
+	outputs = inputs @ { self, nixpkgs, home-manager, nixvim, darwin, ... }:
 	let
-	vars = {
-		user = "stefan";
-		location = "$HOME/.dotfiles";
-		terminal = "kitty";
-		editor = "nvim";
-	};
-	in
-	{
-		nixosConfigurations = (
-			import ./configuration/nixos {
-			inherit (nixpkgs) lib;
-			inherit inputs nixpkgs nixpkgs-unstable home-manager nixvim vars;
-			}
-		);
+		# Global variables
+		vars = {
+			user = "stefan";
+			location = "$HOME/.dotfiles";
+			terminal = "kitty";
+			editor = "nvim";
+		};
 
-		darwinConfigurations = (
-			import ./configuration/darwin {
-				inherit (nixpkgs) lib;
-				inherit inputs nixpkgs nixpkgs-unstable home-manager nixvim darwin vars;
-			}
-		);
-	};
+		# Standard lib functions
+		
+		# Systems we support
+		systems = [ "x86_64-linux" "aarch64-darwin" ];
+		
+		# Helper to generate pkgs for each system
+		forAllSystems = nixpkgs.lib.genAttrs systems;
+		pkgsFor = forAllSystems (system: import nixpkgs {
+			inherit system;
+			config.allowUnfree = true;
+		});
 
+	in {
+		# Host configurations
+		darwinConfigurations = {
+			"Stefans-MacBook-Pro" = darwin.lib.darwinSystem {
+				system = "aarch64-darwin";
+				specialArgs = { inherit inputs vars; };
+				modules = [
+					./hosts/macbook
+					./modules/shared/system.nix
+					./modules/darwin
+					home-manager.darwinModules.home-manager {
+						home-manager.useGlobalPkgs = true;
+						home-manager.useUserPackages = true;
+						home-manager.extraSpecialArgs = { inherit vars; };
+						home-manager.users.${vars.user} = import ./home;
+					}
+				];
+			};
+		};
+
+		nixosConfigurations = {
+			stefan = nixpkgs.lib.nixosSystem {
+				system = "x86_64-linux";
+				specialArgs = { inherit inputs vars; };
+				modules = [
+					./hosts/nixos-desktop
+					./modules/shared/system.nix
+					./modules/nixos
+					home-manager.nixosModules.home-manager {
+						home-manager.useGlobalPkgs = true;
+						home-manager.useUserPackages = true;
+						home-manager.extraSpecialArgs = { inherit vars; };
+						home-manager.users.${vars.user} = import ./home;
+					}
+				];
+			};
+		};
+
+		# Development shells for each system
+		devShells = forAllSystems (system: {
+			default = pkgsFor.${system}.mkShell {
+				buildInputs = with pkgsFor.${system}; [
+					nixpkgs-fmt
+					nil
+				];
+			};
+		});
+
+		# Packages we can build
+		packages = forAllSystems (system: {
+			# Add custom packages here
+		});
+	};
 }
