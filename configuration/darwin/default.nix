@@ -1,14 +1,10 @@
-{ lib, inputs, nixpkgs, nixpkgs-unstable, home-manager, nixvim, darwin, vars }:
+{ lib, inputs, nixpkgs, home-manager, nixvim, darwin, vars }:
 
 let
 system = "aarch64-darwin";
 pkgs = import nixpkgs {
     inherit system;
     config.allowUnfree = true;
-};
-unstable = import nixpkgs-unstable {
-	inherit system;
-	config.allowUnfree = true;
 };
 
 
@@ -19,7 +15,7 @@ in
         inherit system;
 
         specialArgs =  {
-            inherit inputs system unstable vars;
+            inherit inputs system vars;
         };
         modules = [
             ./configuration.nix

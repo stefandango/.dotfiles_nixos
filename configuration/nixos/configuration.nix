@@ -2,7 +2,7 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ config, lib, inputs, pkgs, unstable, home-manager, nixvim, vars, ... }:
+{ config, lib, inputs, pkgs, home-manager, nixvim, vars, ... }:
 
 let
 system = "x86_64-linux";
@@ -81,14 +81,14 @@ in
 
  nixpkgs.config.allowUnfree = true;
 
- fonts.packages = with pkgs;[
+ fonts.packages = with pkgs; [
 	 source-code-pro
-		 corefonts
-		 font-awesome
-		 noto-fonts
-		 noto-fonts-color-emoji
-         pkgs.nerd-fonts.fira-code
-         pkgs.nerd-fonts.jetbrains-mono
+	 corefonts
+	 font-awesome
+	 noto-fonts
+	 noto-fonts-color-emoji
+	 nerd-fonts.fira-code
+	 nerd-fonts.jetbrains-mono
  ];
 
   # List packages installed in system profile. To search, run:
@@ -113,7 +113,6 @@ in
 		  vim
 		  wget
 		  git
-		  kitty
 		  neofetch
 		  unzip
           zip

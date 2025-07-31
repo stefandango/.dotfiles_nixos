@@ -1,4 +1,4 @@
-{ config, lib, inputs, pkgs, unstable, home-manager, nixvim, darwin, vars, ... }:
+{ config, lib, inputs, pkgs, home-manager, nixvim, darwin, vars, ... }:
 
 let
     system = "aarch64-darwin";
@@ -27,6 +27,8 @@ in
             go
             rustup
             vlc-bin
+            direnv
+            nix-direnv
         ];
         systemPath = [ "/opt/homebrew/bin" ];
         pathsToLink = [ "/Applications" ];
@@ -34,8 +36,8 @@ in
         
         };
 
-    fonts.packages = [
-        pkgs.nerd-fonts.jetbrains-mono
+    fonts.packages = with pkgs; [
+        nerd-fonts.jetbrains-mono
     ];
 
     system.primaryUser = "stefan";
@@ -86,14 +88,24 @@ in
     nixpkgs.hostPlatform = "aarch64-darwin";
     ids.gids.nixbld = 350;
     nix = {
+        settings = {
+            experimental-features = ["nix-command" "flakes"];
+            substituters = [
+                "https://cache.nixos.org/"
+                "https://nix-community.cachix.org"
+            ];
+            trusted-public-keys = [
+                "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+                "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+            ];
+        };
+        optimise = {
+            automatic = true;
+        };
         gc = {
             automatic = true;
             interval = { Weekday = 0; Hour = 2; Minute = 0; };
             options = "--delete-older-than 30d";
         };
-
-        extraOptions = ''
-          experimental-features = nix-command flakes
-        '';
     };
 }
