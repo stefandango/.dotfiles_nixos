@@ -5,6 +5,9 @@
     ./hardware-configuration.nix
   ];
 
+  # Allow unfree packages
+  nixpkgs.config.allowUnfree = true;
+
   # NixOS-specific system configuration  
   system.stateVersion = "23.11";
   
