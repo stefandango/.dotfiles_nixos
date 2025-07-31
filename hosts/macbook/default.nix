@@ -82,5 +82,6 @@
   users.users.${vars.user} = {
     name = vars.user;
     home = "/Users/${vars.user}";
+    shell = pkgs.zsh;
   };
 }

@@ -1,10 +1,9 @@
 { lib, inputs, pkgs, ...}:
 {
-  # You can import other home-manager modules here
+  # Shared home-manager modules
   imports = [
     ./git.nix
     ./zsh.nix
     ./kitty.nix
   ];
-# Other stuff here
 }

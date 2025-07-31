@@ -24,6 +24,7 @@
   environment.variables = {
     EDITOR = vars.editor;
     TERMINAL = vars.terminal;
+    QT_QPA_PLATFORMTHEME = "gtk2";
   };
 
   # Cross-platform core packages

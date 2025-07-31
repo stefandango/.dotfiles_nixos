@@ -30,8 +30,7 @@
 			editor = "nvim";
 		};
 
-		# Import our custom lib
-		lib = import ./lib { inherit (nixpkgs) lib; inherit inputs vars; };
+		# Standard lib functions
 		
 		# Systems we support
 		systems = [ "x86_64-linux" "aarch64-darwin" ];
@@ -56,6 +55,7 @@
 					home-manager.darwinModules.home-manager {
 						home-manager.useGlobalPkgs = true;
 						home-manager.useUserPackages = true;
+						home-manager.extraSpecialArgs = { inherit vars; };
 						home-manager.users.${vars.user} = import ./home;
 					}
 				];
@@ -73,6 +73,7 @@
 					home-manager.nixosModules.home-manager {
 						home-manager.useGlobalPkgs = true;
 						home-manager.useUserPackages = true;
+						home-manager.extraSpecialArgs = { inherit vars; };
 						home-manager.users.${vars.user} = import ./home;
 					}
 				];

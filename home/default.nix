@@ -12,9 +12,7 @@
 
   # Import shared home modules
   imports = [
-    ../modules/shared/git.nix
-    ../modules/shared/zsh.nix
-    ../modules/shared/kitty.nix
+    ../modules/shared/default.nix
     ../theme/theming.nix
   ];
 
