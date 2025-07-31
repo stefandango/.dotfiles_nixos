@@ -1,4 +1,4 @@
-{ config, lib, pkgs, unstable, vars, ...}:
+{ config, lib, pkgs, vars, ...}:
 {
     environment.systemPackages = with pkgs; [
         obsidian
@@ -8,14 +8,11 @@
         #dbeaver-bin
         azuredatastudio
         github-copilot-intellij-agent
-
-    ] ++
-    (with unstable; [
         vscode-fhs
         jetbrains.rider
-    ]);
+    ];
+    
     nixpkgs.config.permittedInsecurePackages = [
         "electron-25.9.0"
     ];
-
 }
