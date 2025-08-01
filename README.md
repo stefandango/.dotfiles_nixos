@@ -6,8 +6,12 @@ Cross-platform Nix configuration for NixOS and macOS using Nix flakes.
 
 - Unified configuration for both NixOS (Linux) and nix-darwin (macOS)
 - Home-manager integration for user environment management
-- Nixvim configuration for Neovim
-- Modular architecture with shared components
+- Nixvim configuration for Neovim with LSP support
+- Modular architecture with shared cross-platform components
+- Modern audio stack with PipeWire (NixOS)
+- Gaming support with Steam and compatibility tools
+- Development environment with Docker, .NET, Node.js, Python
+- Tokyo Night themed terminal environment
 
 ## Installation
 
@@ -65,11 +69,20 @@ nixup      # Update flake and rebuild
 
 **NixOS:**
 ```bash
-# Rebuild configuration
-sudo nixos-rebuild switch --flake ~/.dotfiles/.#
+# Test configuration without applying
+nix build ~/.dotfiles#nixosConfigurations.stefan.config.system.build.toplevel
 
-# Update flake inputs
-nix flake update
+# Check configuration validity
+sudo nixos-rebuild dry-build --flake ~/.dotfiles#stefan
+
+# Apply configuration
+sudo nixos-rebuild switch --flake ~/.dotfiles#stefan
+
+# Using aliases (available in shell):
+nixbuild   # Test build configuration
+nixcheck   # Check configuration validity
+nixswitch  # Apply configuration (requires sudo)
+nixup      # Update flake and rebuild
 ```
 
 ### Package Management
@@ -86,26 +99,29 @@ This configuration uses a hybrid approach:
 ```
 .dotfiles/
 ├── flake.nix              # Main flake configuration
-├── home/                  # Home-manager configuration
+├── CLAUDE.md              # Claude Code assistant instructions
 ├── hosts/                 # Host-specific configurations
-│   ├── macbook/          # macOS configuration
 │   └── nixos-desktop/    # NixOS configuration
+├── configuration/         # Legacy configuration (unused)
 ├── modules/              # Reusable modules
-│   ├── shared/           # Cross-platform modules
+│   ├── shared/           # Cross-platform modules (git, zsh, tmux)
 │   ├── darwin/           # macOS-specific modules
 │   ├── nixos/            # NixOS-specific modules
-│   ├── config/           # Configuration files
-│   └── scripts/          # Shell scripts
-├── theme/                # UI theming configuration
-└── lib/                  # Custom Nix library functions
+│   ├── config/           # Configuration files (oh-my-posh, etc)
+│   └── scripts/          # Shell scripts (tmux-sessionizer)
+├── nix/                  # Home-manager configuration
+└── theme/                # UI theming configuration
 ```
 
 ### Key Components
 
 - **Zsh Configuration**: Custom shell with oh-my-posh prompt, aliases, and plugins
-- **Tmux Setup**: Terminal multiplexer with custom keybindings
-- **Development Tools**: Git, Neovim, ripgrep, lazygit, and more
-- **Modern CLI Tools**: bat, lsd, fzf, fd for enhanced terminal experience
+- **Tmux Setup**: Terminal multiplexer with Tokyo Night theme and custom keybindings
+- **Development Tools**: Git, Neovim (via nixvim), ripgrep, lazygit, gh (GitHub CLI)
+- **Modern CLI Tools**: bat, lsd, fzf, fd, tree-sitter for enhanced terminal experience
+- **Audio System**: PipeWire with ALSA/JACK/PulseAudio compatibility (NixOS)
+- **Gaming**: Steam with gamescope session support (NixOS)
+- **Docker**: Container development environment
 
 ## Shell Features
 
@@ -114,7 +130,7 @@ This configuration uses a hybrid approach:
 - `ls` → `lsd` (modern ls replacement)
 - `la` → `lsd -al` (list all files)
 - `ll` → `lsd -l` (long format)
-- `claude` → `/Users/stefan/.claude/local/claude` (Claude CLI)
+- `claude` → System claude binary (NixOS) or `/Users/stefan/.claude/local/claude` (macOS)
 - `nixbuild` → Test build configuration
 - `nixcheck` → Check configuration validity
 - `nixswitch` → Apply configuration (requires sudo)
@@ -181,6 +197,11 @@ Edit `/Users/stefan/.dotfiles/modules/config/ohmyposhv3-v2.json` to customize th
 3. **Flake inputs out of date**:
    - Run `nixup` to update and rebuild
    - Or manually: `nix flake update`
+
+4. **Claude command not found**:
+   - Ensure shell is reloaded after configuration changes
+   - Check that aliases are properly loaded with `alias | grep claude`
+   - The system provides `claude` binary directly on NixOS
 
 ### Getting Help
 

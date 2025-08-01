@@ -1,25 +1,170 @@
 #!/usr/bin/env bash
 
-if [[ $# -eq 1 ]]; then
-    selected=$1
-else
-    selected=$(find ~/Dev ~/Scripts ~/ -mindepth 1 -maxdepth 1 -type d | fzf)
-fi
+# tmux-sessionizer - Enhanced project session manager
+# Improved version with Git integration, better search, and error handling
 
-if [[ -z $selected ]]; then
-    exit 0
-fi
+set -euo pipefail
 
-selected_name=$(basename "$selected" | tr . _)
-tmux_running=$(pgrep tmux)
+# Configuration - can be overridden by environment variables
+SESSIONIZER_SEARCH_PATHS="${SESSIONIZER_SEARCH_PATHS:-$HOME/Dev $HOME/Scripts $HOME/.dotfiles $HOME}"
+SESSIONIZER_MAX_DEPTH="${SESSIONIZER_MAX_DEPTH:-3}"
+SESSIONIZER_INCLUDE_HIDDEN="${SESSIONIZER_INCLUDE_HIDDEN:-false}"
 
-if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
-    tmux new-session -s $selected_name -c $selected
-    exit 0
-fi
+# Function to find project directories
+find_projects() {
+    local paths=($SESSIONIZER_SEARCH_PATHS)
+    local find_args=()
+    
+    # Add hidden directory support
+    if [[ "$SESSIONIZER_INCLUDE_HIDDEN" == "true" ]]; then
+        find_args+=(-name ".*" -prune -o)
+    else
+        find_args+=(-path "*/.*" -prune -o)
+    fi
+    
+    # Find Git repositories first (higher priority)
+    for path in "${paths[@]}"; do
+        [[ -d "$path" ]] || continue
+        find "$path" "${find_args[@]}" -name ".git" -type d -prune -print0 2>/dev/null | \
+            while IFS= read -r -d '' gitdir; do
+                echo "${gitdir%/.git}"
+            done
+    done
+    
+    # Then find regular directories (excluding Git repos to avoid duplicates)
+    for path in "${paths[@]}"; do
+        [[ -d "$path" ]] || continue
+        find "$path" "${find_args[@]}" -mindepth 1 -maxdepth "$SESSIONIZER_MAX_DEPTH" -type d \
+            ! -path "*/.git/*" ! -name ".git" -print 2>/dev/null
+    done
+}
 
-if ! tmux has-session -t=$selected_name 2> /dev/null; then
-    tmux new-session -ds $selected_name -c $selected
-fi
+# Function to generate session name
+generate_session_name() {
+    local path="$1"
+    local name
+    
+    # If it's a Git repo, prefer repo name over directory name
+    if [[ -d "$path/.git" ]]; then
+        local repo_name
+        repo_name=$(basename "$(git -C "$path" config --get remote.origin.url 2>/dev/null || echo "$path")")
+        repo_name="${repo_name%.git}"
+        name="$repo_name"
+    else
+        name=$(basename "$path")
+    fi
+    
+    # Clean up name: replace problematic characters
+    name="${name//[.]/_}"
+    name="${name//[-]/_}"
+    name="${name//[ ]/_}"
+    
+    echo "$name"
+}
 
-tmux switch-client -t $selected_name
+# Function to create or switch to session
+manage_session() {
+    local selected_path="$1"
+    local session_name="$2"
+    
+    # Check if tmux is running
+    if ! pgrep tmux > /dev/null; then
+        # No tmux running, create new session
+        exec tmux new-session -s "$session_name" -c "$selected_path"
+    fi
+    
+    # Check if we're inside tmux
+    if [[ -z "${TMUX:-}" ]]; then
+        # Outside tmux, attach to session or create new one
+        if tmux has-session -t="$session_name" 2>/dev/null; then
+            exec tmux attach-session -t "$session_name"
+        else
+            exec tmux new-session -s "$session_name" -c "$selected_path"
+        fi
+    else
+        # Inside tmux, create session if needed and switch to it
+        if ! tmux has-session -t="$session_name" 2>/dev/null; then
+            tmux new-session -ds "$session_name" -c "$selected_path"
+        fi
+        tmux switch-client -t "$session_name"
+    fi
+}
+
+# Main logic
+main() {
+    local selected_path
+    
+    if [[ $# -eq 1 ]]; then
+        selected_path="$1"
+        if [[ ! -d "$selected_path" ]]; then
+            echo "Error: Directory '$selected_path' does not exist" >&2
+            exit 1
+        fi
+    else
+        # Use fzf to select project with preview
+        selected_path=$(find_projects | sort -u | fzf \
+            --height=50% \
+            --border \
+            --preview 'ls -la {}' \
+            --preview-window=right:50% \
+            --prompt="Select project: " \
+            --header="Ctrl-C to cancel" \
+            --bind="ctrl-o:execute(xdg-open {})"
+        )
+        
+        if [[ -z "$selected_path" ]]; then
+            echo "No project selected" >&2
+            exit 0
+        fi
+    fi
+    
+    local session_name
+    session_name=$(generate_session_name "$selected_path")
+    
+    # Validate session name
+    if [[ -z "$session_name" ]]; then
+        echo "Error: Could not generate session name" >&2
+        exit 1
+    fi
+    
+    manage_session "$selected_path" "$session_name"
+}
+
+# Show usage information
+usage() {
+    cat << EOF
+Usage: $(basename "$0") [directory]
+
+Enhanced tmux session manager that finds and switches to project sessions.
+
+Options:
+  directory     Specific directory to create session for
+
+Environment Variables:
+  SESSIONIZER_SEARCH_PATHS    Paths to search (default: \$HOME/Dev \$HOME/Scripts \$HOME/.dotfiles \$HOME)
+  SESSIONIZER_MAX_DEPTH       Maximum search depth (default: 3)
+  SESSIONIZER_INCLUDE_HIDDEN  Include hidden directories (default: false)
+
+Examples:
+  $(basename "$0")                    # Interactive project selection
+  $(basename "$0") ~/my-project       # Create session for specific project
+  
+Features:
+  - Git repository detection and prioritization
+  - Configurable search paths and depth
+  - Enhanced fzf interface with preview
+  - Proper session name sanitization
+  - Error handling and validation
+
+EOF
+}
+
+# Handle help flag
+case "${1:-}" in
+    -h|--help)
+        usage
+        exit 0
+        ;;
+esac
+
+main "$@"
