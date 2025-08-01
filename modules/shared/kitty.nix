@@ -9,7 +9,7 @@
       enable_audio_bell = "no";
       resize_debounce_time = "0";
       background_opacity = lib.mkForce "0.95";
-      font_family = "MonoLisa Nerd Font SemiBold Regular";
+      font_family = "MonoLisa Nerd Font SemiBold";
       font_size = "16.0";
     };
     extraConfig = ''

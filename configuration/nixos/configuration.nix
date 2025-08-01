@@ -127,8 +127,6 @@ in
 # VIDEO/AUDIO
 		  alsa-utils
 		  pavucontrol
-		  pipewire
-		  pulseaudio
 
 # APPS
 		  docker

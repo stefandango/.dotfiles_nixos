@@ -69,6 +69,8 @@
 
   # NixOS-specific packages
   environment.systemPackages = with pkgs; [
+    claude-code
+    zsh  # Add zsh at system level
     # GUI Applications
     firefox
     neofetch
@@ -76,8 +78,6 @@
     # Audio/Video tools
     alsa-utils
     pavucontrol
-    pipewire
-    pulseaudio
     
     # Development
     docker
@@ -124,6 +124,7 @@
 
   # Programs
   programs = {
+    zsh.enable = true;  # Enable zsh system-wide
     gnupg.agent = {
       enable = true;
       enableSSHSupport = true;
@@ -155,6 +156,7 @@
   # User configuration
   users.users.${vars.user} = {
     isNormalUser = true;
+    shell = pkgs.zsh;
     extraGroups = [ "wheel" "video" "audio" "networkmanager" "lp" "input" "openrazer" "docker" ];
   };
 }

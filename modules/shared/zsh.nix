@@ -44,17 +44,24 @@
 
   programs.zsh = {
     enable = true;
-    dotDir = ".config/zsh";
+    dotDir = "${config.xdg.configHome}/zsh";
     shellAliases = {
       ls = "lsd";
       la = "lsd -al";
       ll = "lsd -l";
+    } // (if pkgs.stdenv.isDarwin then {
       claude = "/Users/stefan/.claude/local/claude";
       nixbuild = "nix build ~/.dotfiles#darwinConfigurations.Stefans-MacBook-Pro.system";
       nixcheck = "darwin-rebuild check --flake ~/.dotfiles#Stefans-MacBook-Pro";
-      nixswitch = "sudo darwin-rebuild switch --flake ~/.dotfiles#Stefans-MacBook-Pro";
+      nixswitch = "darwin-rebuild switch --flake ~/.dotfiles#Stefans-MacBook-Pro";
       nixup = "pushd ~/.dotfiles; nix flake update; nixswitch; popd";
-    };
+    } else {
+      # claude alias removed - using system claude binary
+      nixbuild = "nix build ~/.dotfiles#nixosConfigurations.stefan.config.system.build.toplevel";
+      nixcheck = "sudo nixos-rebuild dry-build --flake ~/.dotfiles#stefan";
+      nixswitch = "sudo nixos-rebuild switch --flake ~/.dotfiles#stefan";
+      nixup = "pushd ~/.dotfiles; nix flake update; nixswitch; popd";
+    });
     autosuggestion.enable = true;
     enableCompletion = true;
     syntaxHighlighting.enable = true;
@@ -95,7 +102,8 @@
     prefix = "C-a";
     baseIndex = 1;
     keyMode = "vi";
-    mouse = false;
+    mouse = true;
+    shell = "${pkgs.zsh}/bin/zsh";
     terminal = "screen-256color";
     extraConfig = ''
       # Increase tmux messages display duration from 750ms to 4s

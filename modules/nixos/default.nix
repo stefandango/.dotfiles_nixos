@@ -11,7 +11,6 @@
       ../swaync.nix
       ../hyprland.nix
       ../rofi.nix
-      ../../theme/theming.nix
       #../git.nix
       #../kitty.nix
       #../zsh.nix

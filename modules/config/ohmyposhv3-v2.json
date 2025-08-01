@@ -19,12 +19,6 @@
                     }
                 },
                 {
-                    "type": "text",
-                    "style": "plain",
-                    "foreground": "#565f89",
-                    "template": " │"
-                },
-                {
                     "type": "battery",
                     "style": "plain",
                     "foreground": "#f7768e",
@@ -33,18 +27,12 @@
                         "{{if eq \"Discharging\" .State.String}}#ff5722{{end}}",
                         "{{if eq \"Full\" .State.String}}#9ece6a{{end}}"
                     ],
-                    "template": " {{ if not .Error }}{{ .Icon }}{{ .Percentage }}{{end}}%",
+                    "template": "{{ if and (not .Error) (lt .Percentage 100) }} │ {{ .Icon }}{{ .Percentage }}% │{{end}}",
                     "properties": {
                         "discharging_icon": "",
                         "charging_icon": "",
                         "charged_icon": ""
                     }
-                },
-                {
-                    "type": "text",
-                    "style": "plain",
-                    "foreground": "#565f89",
-                    "template": " │"
                 },
                 {
                     "type": "os",
@@ -119,7 +107,7 @@
                     "type": "nix-shell",
                     "style": "plain",
                     "foreground": "#7ab2d3",
-                    "template": " │ [ nix:{{ .Type }} ]"
+                    "template": "{{ if and .Type (ne .Type \"unknown\") }} │ [ nix:{{ .Type }} ]{{end}}"
                 }
             ]
         },
