@@ -68,8 +68,11 @@
 
         };
         clipboard = {
-            register = "unnamedplus";
-            providers.wl-copy.enable = true;
+            register = "unnamedplus";  # Use system clipboard by default
+            providers = {
+                wl-copy.enable = true;   # Wayland (Linux)
+                xclip.enable = true;     # X11 (Linux)
+            };
         };
 
         globals = {
@@ -170,6 +173,32 @@
             key = "<leader>d";
             action = "\"_d";
             options.desc = "Delete but keep the current clipboard";
+        }
+        
+        # Enhanced clipboard operations
+        {
+            mode = "n";
+            key = "<leader>Y";
+            action = ":%y+<CR>";
+            options.desc = "Copy entire file to system clipboard";
+        }
+        {
+            mode = "n";
+            key = "<leader>P";
+            action = "\"+P";
+            options.desc = "Paste from system clipboard before cursor";
+        }
+        {
+            mode = "v";
+            key = "<leader>y";
+            action = "\"+y";
+            options.desc = "Copy selection to system clipboard";
+        }
+        {
+            mode = "n";
+            key = "<leader>cp";
+            action = ":let @+ = expand('%:p')<CR>:echo 'Copied file path to clipboard'<CR>";
+            options.desc = "Copy current file path to clipboard";
         }
         #{
         #    mode = "n";
