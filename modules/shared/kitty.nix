@@ -10,7 +10,7 @@
       resize_debounce_time = "0";
       background_opacity = lib.mkForce "0.95";
       font_family = "MonoLisa Nerd Font SemiBold";
-      font_size = "16.0";
+      font_size = if pkgs.stdenv.isDarwin then "16.0" else "14.0";
     };
     extraConfig = ''
       font_features MonoLisa-Medium +zero +ss04 +ss07 +ss08 +ss09
