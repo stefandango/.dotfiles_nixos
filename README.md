@@ -1,17 +1,21 @@
 # .dotfiles
 
-Cross-platform Nix configuration for NixOS and macOS using Nix flakes.
+Cross-platform Nix configuration for NixOS and macOS using Nix flakes with enhanced productivity features.
 
 ## Features
 
-- Unified configuration for both NixOS (Linux) and nix-darwin (macOS)
-- Home-manager integration for user environment management
-- Nixvim configuration for Neovim with LSP support
-- Modular architecture with shared cross-platform components
-- Modern audio stack with PipeWire (NixOS)
-- Gaming support with Steam and compatibility tools
-- Development environment with Docker, .NET, Node.js, Python
-- Tokyo Night themed terminal environment
+- **Unified Configuration**: Both NixOS (Linux) and nix-darwin (macOS) support
+- **Home-manager Integration**: Complete user environment management
+- **Nixvim Configuration**: Neovim with LSP support and enhanced clipboard integration
+- **Modular Architecture**: Shared cross-platform components with system-specific modules
+- **Enhanced Terminal Experience**: Comprehensive shortcuts and utilities for maximum productivity
+- **Smart Tmux Integration**: Mouse scrolling, battery indicator, and project-focused sessionizer
+- **Seamless Clipboard Experience**: Universal system clipboard across terminal, tmux, and neovim
+- **Development Workflow Optimizations**: Port management, quick file serving, and network diagnostics
+- **Modern Audio Stack**: PipeWire with ALSA/JACK/PulseAudio compatibility (NixOS)
+- **Gaming Support**: Steam with gamescope session support (NixOS)
+- **Development Environment**: Docker, .NET, Node.js, Python with intelligent tooling
+- **Tokyo Night Theme**: Consistent theming across all applications
 
 ## Installation
 
@@ -47,42 +51,119 @@ sudo nixos-rebuild switch --flake .
 
 ## Usage
 
-### Common Commands
+### System Management Commands
 
-**macOS (Darwin):**
 ```bash
-# Test configuration without applying (no root required)
-nix build ~/.dotfiles#darwinConfigurations.Stefans-MacBook-Pro.system
+# Core Nix commands (available everywhere)
+nixswitch         # Apply configuration changes
+nixup             # Update flake inputs and rebuild
+nixtest           # Test configuration without building
+nixclean          # Clean up old generations and optimize store
+nixgen            # List system generations
+nixvalidate       # Pre-flight checks before switching
 
-# Check configuration validity (no root required)
-darwin-rebuild check --flake ~/.dotfiles#Stefans-MacBook-Pro
-
-# Apply configuration (requires root)
-sudo darwin-rebuild switch --flake ~/.dotfiles#Stefans-MacBook-Pro
-
-# Using aliases (available in shell):
-nixbuild   # Test build configuration
-nixcheck   # Check configuration validity
-nixswitch  # Apply configuration (requires sudo)
-nixup      # Update flake and rebuild
+# Enhanced Nix helpers
+nixsearch firefox # Search packages with detailed info
+nixinfo           # Show comprehensive Nix system status
 ```
 
-**NixOS:**
+### Development Environment Scripts
+
 ```bash
-# Test configuration without applying
-nix build ~/.dotfiles#nixosConfigurations.stefan.config.system.build.toplevel
+# Port management
+checkport 3000    # Check what's running on port 3000
+killport 3000     # Kill processes using port 3000
 
-# Check configuration validity
-sudo nixos-rebuild dry-build --flake ~/.dotfiles#stefan
+# Quick servers and utilities  
+serve [port]      # Start HTTP server (default: 8000)
+json [file]       # Pretty print JSON from stdin or file
 
-# Apply configuration
-sudo nixos-rebuild switch --flake ~/.dotfiles#stefan
+# Project navigation
+dev               # Jump to ~/Dev directory
+dots              # Jump to ~/.dotfiles directory
+```
 
-# Using aliases (available in shell):
-nixbuild   # Test build configuration
-nixcheck   # Check configuration validity
-nixswitch  # Apply configuration (requires sudo)
-nixup      # Update flake and rebuild
+### File Management Enhancements
+
+```bash
+# Quick navigation
+..                # cd ..
+...               # cd ../..
+....              # cd ../../..
+cdtemp            # Go to new temporary directory
+
+# File operations
+backup file.txt   # Create timestamped backup copy
+```
+
+### Enhanced Clipboard Integration
+
+```bash
+# Core clipboard utilities
+copy [file]       # Copy file contents or stdin to clipboard
+paste [file]      # Paste clipboard to file or stdout  
+copypath [path]   # Copy directory path to clipboard
+
+# Advanced clipboard management
+cb / clipshow     # Show clipboard contents with detailed info
+cbw / clipwatch   # Watch clipboard changes in real-time
+cbc / clipclear   # Clear clipboard contents
+cbcp / copypath   # Copy current directory path
+
+# Quick clipboard operations
+clip              # Pipe command: echo "text" | clip
+cpwd              # Copy current directory path with confirmation
+ccat file.txt     # Copy file contents to clipboard
+
+# Keyboard shortcuts (terminal)
+Alt+c             # Show clipboard contents
+Alt+v             # Paste from clipboard  
+Alt+x             # Clear clipboard
+```
+
+### Network Utilities
+
+```bash
+# Network information
+myip              # Get public IP address
+localip           # Get local IP address
+netinfo           # Comprehensive network information
+speedtest         # Run internet speed test
+```
+
+### Tmux Session Management
+
+```bash
+# Enhanced tmux workflow
+Ctrl+f            # Launch tmux sessionizer (fzf project selector)
+
+# Dev projects automatically get multi-window setup:
+# 🤖 AI      - Opens claude for AI assistance
+# 📝 Editor  - Opens nvim in project directory  
+# 🔨 Build   - For running builds/tests
+# 💻 Terminal - General purpose terminal
+
+# Tmux clipboard operations
+Ctrl+a [          # Enter copy mode
+v                 # Start visual selection (in copy mode)
+y                 # Copy selection to system clipboard (in copy mode)
+r                 # Rectangle selection toggle (in copy mode)
+Ctrl+a p          # Paste from clipboard
+Ctrl+a ]          # Alternative paste binding
+```
+
+### Neovim Clipboard Integration
+
+```bash
+# System clipboard is default - y and p work with system clipboard
+
+# Enhanced clipboard keymaps (in neovim)
+<leader>Y         # Copy entire file to system clipboard
+<leader>P         # Paste from system clipboard before cursor
+<leader>y         # Copy selection to system clipboard (visual mode)
+<leader>cp        # Copy current file path to clipboard
+<leader>p         # Paste but keep current clipboard (visual mode)
+<leader>d         # Delete without affecting clipboard
 ```
 
 ### Package Management
@@ -115,40 +196,79 @@ This configuration uses a hybrid approach:
 
 ### Key Components
 
-- **Zsh Configuration**: Custom shell with oh-my-posh prompt, aliases, and plugins
-- **Tmux Setup**: Terminal multiplexer with Tokyo Night theme and custom keybindings
-- **Development Tools**: Git, Neovim (via nixvim), ripgrep, lazygit, gh (GitHub CLI)
+- **Enhanced Zsh Configuration**: Custom shell with oh-my-posh prompt, comprehensive aliases, and productivity plugins
+- **Smart Tmux Setup**: Terminal multiplexer with mouse scrolling, battery indicator, and project-focused sessionizer
+- **Cross-platform Scripts**: All utilities work on both macOS and Linux with intelligent error handling
+- **Consistent UX**: Unified command interface across all tools with PATH integration
+- **Development Tools**: Git, Neovim (via nixvim), ripgrep, lazygit, gh (GitHub CLI) with enhanced workflows
 - **Modern CLI Tools**: bat, lsd, fzf, fd, tree-sitter for enhanced terminal experience
 - **Audio System**: PipeWire with ALSA/JACK/PulseAudio compatibility (NixOS)
 - **Gaming**: Steam with gamescope session support (NixOS)
-- **Docker**: Container development environment
+- **Docker**: Container development environment with port management utilities
 
-## Shell Features
+## Common Workflows
 
-### Available Aliases
+### Setting up a New Development Project
+```bash
+dev                           # Navigate to Dev directory
+mkdir my-new-project && cd my-new-project
+git init
+tmux-sessionizer .           # Create development session
+# Automatically opens: AI, Editor, Build, Terminal windows
+```
 
-- `ls` → `lsd` (modern ls replacement)
-- `la` → `lsd -al` (list all files)
-- `ll` → `lsd -l` (long format)
-- `claude` → System claude binary (NixOS) or `/Users/stefan/.claude/local/claude` (macOS)
-- `nixbuild` → Test build configuration
-- `nixcheck` → Check configuration validity
-- `nixswitch` → Apply configuration (requires sudo)
-- `nixup` → Update flake and rebuild
+### Port Troubleshooting
+```bash
+checkport 3000               # See what's using port 3000
+killport 3000                # Kill the process
+serve 3000                   # Start new server on port 3000
+```
 
-### Oh-My-Posh Prompt
+### Configuration Management Workflow
+```bash
+dots                         # Go to dotfiles
+# Make your changes...
+nixvalidate                  # Check for issues
+nixtest                      # Test configuration
+nixswitch                    # Apply changes
+```
 
-Features a custom two-line prompt with:
-- Git status and repository information
-- Current directory with smart truncation
-- Language version detection (Node.js, Python, etc.)
-- Clean, minimalist design with icons
+### File Operations
+```bash
+backup important-file.txt    # Create timestamped backup
+copy config.json             # Copy file to clipboard
+dev && paste new-config.json # Navigate and paste clipboard
+copypath                     # Copy current directory path
+```
 
-### Tmux Integration
+### Seamless Clipboard Workflows
+```bash
+# Terminal to Neovim workflow
+ccat config.json             # Copy file contents to clipboard
+# Open neovim, press 'p' to paste
 
-- Prefix: Default (`Ctrl-b`)
-- Custom keybindings for window navigation
-- Tmux sessionizer script bound to `Ctrl-f`
+# Neovim to Terminal workflow  
+# In neovim: select text, <leader>y to copy
+# In terminal: Alt+v to paste or use 'paste > output.txt'
+
+# Tmux copy-paste workflow
+# Ctrl+a [ to enter copy mode, 'v' to select, 'y' to copy
+# Automatically available in terminal and neovim
+
+# Monitor clipboard activity
+clipwatch                    # See all clipboard changes in real-time
+
+# Debugging clipboard issues
+cb                           # Show current clipboard contents and stats
+clipclear                    # Clear clipboard if needed
+```
+
+### Network Diagnostics
+```bash
+netinfo                      # Overview of network status
+myip && localip              # Get both IP addresses
+speedtest                    # Check connection speed
+```
 
 ## Customization
 
@@ -186,25 +306,38 @@ Edit `/Users/stefan/.dotfiles/modules/config/ohmyposhv3-v2.json` to customize th
 
 ### Common Issues
 
-1. **Build fails with platform-specific packages**:
-   - Check if packages are available on your platform
-   - Use `lib.mkIf pkgs.stdenv.isLinux` for Linux-only packages
+**Scripts not found after nixswitch:**
+- Scripts are installed to `~/Scripts` and added to PATH
+- Restart your terminal or run `source ~/.config/zsh/.zshrc`
 
-2. **Permission denied during rebuild**:
-   - Use `nixswitch` alias which includes `sudo`
-   - Or run: `sudo darwin-rebuild switch --flake ~/.dotfiles#Stefans-MacBook-Pro`
+**Mouse scrolling not working in tmux:**
+- Mouse support is enabled by default in the configuration
+- Ensure you're using a compatible terminal emulator
 
-3. **Flake inputs out of date**:
-   - Run `nixup` to update and rebuild
-   - Or manually: `nix flake update`
+**Battery indicator not showing:**
+- macOS: Requires `pmset` (should be available by default)
+- Linux: Requires `/sys/class/power_supply/BAT0` (most systems)
+- Only shows when on battery power
 
-4. **Claude command not found**:
-   - Ensure shell is reloaded after configuration changes
-   - Check that aliases are properly loaded with `alias | grep claude`
-   - The system provides `claude` binary directly on NixOS
+**Clipboard operations failing:**
+- macOS: Uses `pbcopy`/`pbpaste` (built-in)
+- Linux: Requires `xclip` (X11) or `wl-copy` (Wayland) - install via system package manager
+- Test clipboard: `echo "test" | clip && cb` should show "test"
+- Check available tools: `which pbcopy xclip wl-copy`
+
+**Clipboard not working between applications:**
+- Neovim: Check `:checkhealth` for clipboard provider status
+- Tmux: Ensure `set-clipboard on` is enabled (should be automatic)
+- Terminal: Try `Alt+c` to verify clipboard shortcuts work
+- Cross-check: Copy in one app, run `cb` to verify it's in system clipboard
+
+**nixswitch fails:**
+- Run `nixvalidate` first to check for common issues
+- Check `nix flake check ~/.dotfiles` for detailed error messages
+- Ensure you have proper permissions (sudo for NixOS)
 
 ### Getting Help
-
+- Run `nixinfo` to see available commands and system status
+- Use `--help` flag with most scripts for usage information
+- Check script source in `~/Scripts/` for debugging
 - Check `CLAUDE.md` for detailed architecture and command reference
-- Review module files in `modules/` for configuration options
-- Use `nixcheck` to validate configuration before applying
