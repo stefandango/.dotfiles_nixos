@@ -84,6 +84,7 @@ in
 		monitor=,preferred,auto,auto
 
 		env = XCURSOR_SIZE,24
+		env = XCURSOR_THEME,Adwaita
 
 		# For all categories, see https://wiki.hyprland.org/Configuring/Variables/
 		input {
@@ -99,7 +100,7 @@ in
 					natural_scroll = no
 				}
 
-			sensitivity = -0.8 # -1.0 - 1.0, 0 means no modification.
+			sensitivity = 0.0 # -1.0 - 1.0, 0 means no modification.
 		}
 
 		general {
@@ -126,12 +127,14 @@ in
 					enabled = true
 					size = 8
 					passes = 1
+					vibrancy = 0.1696
 				}
 
-            #drop_shadow = yes
-            #	shadow_range = 4
-            #	shadow_render_power = 3
-            #	col.shadow = rgba(1a1a1aee)
+		}
+
+		render {
+			# Experimental: can improve FPS on underpowered devices
+			# new_render_scheduling = true
 		}
 
 		animations {
@@ -162,21 +165,18 @@ in
 
 		misc {
 		# See https://wiki.hyprland.org/Configuring/Variables/ for more
-			force_default_wallpaper = -1 # Set to 0 to disable the anime mascot wallpapers
-			#no_vfr=false
+			force_default_wallpaper = 0
+			vfr = true
 			vrr = 1
-			disable_hyprland_logo=true
-			disable_splash_rendering=true
-			mouse_move_enables_dpms=true
-			key_press_enables_dpms=true
-			background_color=0x111111
+			disable_hyprland_logo = true
+			disable_splash_rendering = true
+			mouse_move_enables_dpms = true
+			key_press_enables_dpms = true
+			background_color = 0x111111
+			enable_swallow = true
+			swallow_regex = ^(kitty)$
 		}
 
-		# Example per-device config
-		# See https://wiki.hyprland.org/Configuring/Keywords/#executing for more
-		# device:epic-mouse-v1 {
-	 #       		sensitivity = -0.5
-  #      		}
 
 		# Example windowrule v1
 		# windowrule = float, ^(kitty)$
@@ -191,8 +191,6 @@ in
 		# Example binds, see https://wiki.hyprland.org/Configuring/Binds/ for more
 		bind = $mainMod, Return, exec, kitty
 		bind = $mainMod, Q, killactive,
-		# bind = $mainMod, M, exit,
-		#bind = $mainMod, E, exec, dolphin
 		bind = SUPERSHIFT, SPACE, togglefloating,
 		bind = $mainMod, D, exec, pkill rofi || rofi -show drun -theme ~/.config/rofi/launcher.rasi
 		bind = $mainMod, P, pseudo, # dwindle
@@ -290,14 +288,11 @@ in
 
 		$thunar = class:^(thunar)$
 		windowrulev2 = float,$thunar
-		#windowrulev2 = size 60% 60%,$thunar
-		#windowrulev2 = move 50% 6%,$thunar
-		#windowrulev2 = workspace special silent,$thunar
 		windowrulev2 = opacity 0.90,$thunar
 
 		windowrulev2 = opacity 0.9 0.9,class:^(Slack|WebCord|Spotify|Kitty)$
 
-		exec-once=${pkgs.swww}/bin/swww init
+		exec-once=${pkgs.swww}/bin/swww-daemon
 		exec-once=${pkgs.waybar}/bin/waybar
 		exec-once=${pkgs.swaynotificationcenter}/bin/swaync
 		exec-once=${pkgs.openrazer-daemon}/bin/openrazer-daemon
@@ -307,8 +302,8 @@ in
 		exec-once = wl-clipboard-history -t
 		exec-once = wl-paste --watch cliphist store
 		exec-once = rm "$HOME/.cache/cliphist/db"   #it'll delete history at every restart
-		exec-once = sleep 2 && ~/Scripts/swww_random.sh ~/Pictures/Wallpapers/
-		exec-once = sleep 3 && insync start --qt-qpa-platform=xcb --no-daemon
+		exec-once = sleep 3 && ~/Scripts/swww_random.sh ~/Pictures/Wallpapers/
+		exec-once = sleep 4 && insync start --qt-qpa-platform=xcb --no-daemon
 		${execute}
 		'';
 	in
