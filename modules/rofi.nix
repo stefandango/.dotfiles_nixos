@@ -29,14 +29,41 @@ in
 				};
 
 				".config/rofi/shared/fonts.rasi" = {
-				text = ''
-					/* Text Font */
-* {
-/*    font: "JetBrainsMono SemiBold Nerd Font Complete Mono 12"; */
-font: "MonoLisaSemiBold Nerd Font Semi-Bold 12";
-/* font: "JetBrainsMono Nerd Font Semi-Bold 10"; */
-}
-				'';
+					text = ''
+						* {
+							font: "MonoLisaSemiBold Nerd Font Semi-Bold 12";
+						}
+					'';
+				};
+
+				".config/rofi/shared/variables.rasi" = {
+					text = ''
+						* {
+							border-colour:               var(border);
+							handle-colour:               var(selected);
+							background-colour:           var(background);
+							foreground-colour:           var(foreground);
+							alternate-background:        var(background-alt);
+							normal-background:           var(background);
+							normal-foreground:           var(foreground);
+							urgent-background:           var(urgent);
+							urgent-foreground:           var(background);
+							active-background:           var(active);
+							active-foreground:           var(background);
+							selected-normal-background:  var(selected);
+							selected-normal-foreground:  var(background);
+							selected-urgent-background:  var(active);
+							selected-urgent-foreground:  var(background);
+							selected-active-background:  var(urgent);
+							selected-active-foreground:  var(background);
+							alternate-normal-background: var(background);
+							alternate-normal-foreground: var(foreground);
+							alternate-urgent-background: var(urgent);
+							alternate-urgent-foreground: var(background);
+							alternate-active-background: var(active);
+							alternate-active-foreground: var(background);
+						}
+					'';
 				};
 
 				".config/rofi/launcher.rasi" = {

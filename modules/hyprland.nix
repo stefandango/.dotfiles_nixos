@@ -292,7 +292,7 @@ in
 
 		windowrulev2 = opacity 0.9 0.9,class:^(Slack|WebCord|Spotify|Kitty)$
 
-		exec-once=${pkgs.swww}/bin/swww init
+		exec-once=${pkgs.swww}/bin/swww-daemon
 		exec-once=${pkgs.waybar}/bin/waybar
 		exec-once=${pkgs.swaynotificationcenter}/bin/swaync
 		exec-once=${pkgs.openrazer-daemon}/bin/openrazer-daemon
@@ -302,8 +302,8 @@ in
 		exec-once = wl-clipboard-history -t
 		exec-once = wl-paste --watch cliphist store
 		exec-once = rm "$HOME/.cache/cliphist/db"   #it'll delete history at every restart
-		exec-once = sleep 2 && ~/Scripts/swww_random.sh ~/Pictures/Wallpapers/
-		exec-once = sleep 3 && insync start --qt-qpa-platform=xcb --no-daemon
+		exec-once = sleep 3 && ~/Scripts/swww_random.sh ~/Pictures/Wallpapers/
+		exec-once = sleep 4 && insync start --qt-qpa-platform=xcb --no-daemon
 		${execute}
 		'';
 	in

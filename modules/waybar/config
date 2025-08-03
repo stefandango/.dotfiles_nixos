@@ -1,169 +1,166 @@
 {
 	"layer": "top",
-		"position": "top",
-		"mod": "dock",
-		"exclusive": true,
-		"passthrough": false,
-		"gtk-layer-shell": true,
-		"height": 40,
-		"modules-left": [
-			"clock",
-			"custom/weather",
-		],
-		"modules-center": [
-			/*"hyprland/window" ],*/
-			"hyprland/workspaces" ],
-		"modules-right": [
-			"keyboard-state",
-			"custom/docker",
-			"custom/clipboard",
-			"custom/razerviperbattery",
-			"custom/disks",
-			"memory",
-			"cpu",
-			"temperature",
-			"pulseaudio",
-			"tray",
-			"custom/notification",
-			"network",
-			"custom/logout"
-		],
-		"clock": {
-			"format": "🕑 {:%R 📅 %d/%m}",
-			"tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
-            "on-click": "xdg-open https://calendar.google.com/calendar/u/0/r/week"
+	"position": "top",
+	"mod": "dock",
+	"exclusive": true,
+	"passthrough": false,
+	"gtk-layer-shell": true,
+	"height": 36,
+	"modules-left": [
+		"clock",
+		"custom/weather"
+	],
+	"modules-center": [
+		"hyprland/workspaces"
+	],
+	"modules-right": [
+		"custom/docker",
+		"custom/clipboard",
+		"custom/razerviperbattery",
+		"custom/disks",
+		"memory",
+		"cpu",
+		"temperature",
+		"pulseaudio",
+		"network",
+		"tray",
+		"custom/notification",
+		"custom/logout"
+	],
+	"clock": {
+		"format": "󰅐 {:%H:%M}",
+		"format-alt": "󰨲 {:%d/%m}",
+		"tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+		"on-click": "xdg-open https://calendar.google.com/calendar/u/0/r/week"
+	},
+	"hyprland/workspaces": {
+		"disable-scroll": true,
+		"all-outputs": true,
+		"on-click": "activate",
+		"format": "{name}",
+		"active-only": false,
+		"show-special": false,
+		"sort-by-number": true
+	},
+	"tray": {
+		"icon-size": 14,
+		"spacing": 8
+	},
+	"custom/weather": {
+		"tooltip": true,
+		"format": " {}",
+		"interval": 30,
+		"exec": "~/Scripts/waybar-wttr.py",
+		"return-type": "json"
+	},
+	"custom/docker": {
+		"format": "  {}",
+		"return-type": "json",
+		"exec": "~/Scripts/waybar-docker.sh",
+		"interval": 10,
+		"on-click": "pypr toggle lazydocker"
+	},
+	"custom/disks": {
+		"exec": "~/Scripts/waybar-diskinfo.sh",
+		"return-type": "json",
+		"format": "󰋊 {}",
+		"on-click": "pypr toggle systeminfo",
+		"interval": 30,
+		"tooltip": true
+	},
+	"custom/logout": {
+		"interval": "once",
+		"on-click": "pkill rofi || ~/.config/rofi/powermenu.sh",
+		"format": "⏻",
+		"tooltip": true,
+		"tooltip-format": "Power Menu"
+	},
+	"custom/razerviperbattery": {
+		"format": "󰍽{}",
+		"interval": 10,
+		"exec": "~/Scripts/viper_battery.py",
+		"return-type": "json",
+		"tooltip": true
+	},
+	"custom/clipboard": {
+		"format": "  {}",
+		"interval": 5,
+		"return-type": "json",
+		"on-click": "pkill rofi || cliphist list | rofi -dmenu -theme $HOME/.config/rofi/clipboard.rasi | cliphist decode | wl-copy",
+		"on-click-right": "cliphist list | rofi -dmenu -theme $HOME/.config/rofi/clipboard.rasi | cliphist delete",
+		"on-click-middle": "cliphist wipe && pkill -RTMIN+9 waybar && notify-send 'Cleared clipboard history' -i clipboard",
+		"exec": "~/Scripts/waybar-clipboard.sh",
+		"signal": 9
+	},
+	"custom/notification": {
+		"tooltip": false,
+		"format": "{icon}",
+		"format-icons": {
+			"notification": "<span foreground='red'><small><sup>●</sup></small></span>",
+			"none": "󰂚",
+			"dnd-notification": "<span foreground='red'><small><sup>●</sup></small></span>",
+			"dnd-none": "󰂛"
 		},
-		"hyprland/window": {
-			"format": "{}"
+		"return-type": "json",
+		"exec-if": "which swaync-client",
+		"exec": "swaync-client -swb",
+		"on-click": "sleep 0.1 && swaync-client -t -sw",
+		"on-click-right": "sleep 0.1 && swaync-client -d -sw",
+		"escape": true
+	},
+	"pulseaudio": {
+		"format": "{icon} {volume}% {format_source}",
+		"format-bluetooth": "{icon} {volume}%",
+		"format-source": "󰍬 {volume}%",
+		"format-source-muted": "󰍭",
+		"format-muted": "󰖁 {format_source}",
+		"format-icons": {
+			"headphones": "󰋋",
+			"handsfree": "󰋎",
+			"headset": "󰋎",
+			"phone": "󰏲",
+			"portable": "󰦧",
+			"car": "󰄋",
+			"default": ["󰕿", "󰖀", "󰕾"]
 		},
-		"hyprland/workspaces": {
-			"disable-scroll": true,
-			"all-outputs": true,
-			"on-click": "activate",
-			"format": "{name}",
+		"scroll-step": 5,
+		"on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+		"on-click-middle": "pactl set-source-mute @DEFAULT_SOURCE@ toggle",
+		"on-click-right": "pypr toggle pavucontrol",
+		"tooltip": false
+	},
+	"temperature": {
+		"thermal-zone": 2,
+		"hwmon-path": "/sys/class/hwmon/hwmon2/temp1_input",
+		"critical-threshold": 80,
+		"on-click": "pypr toggle systeminfo",
+		"format-critical": "󰸁 {temperatureC}°C",
+		"format": "󰔏 {temperatureC}°C",
+		"tooltip": false
+	},
+	"cpu": {
+		"on-click": "pypr toggle systeminfo",
+		"tooltip": false,
+		"format": "󰻠 {}%"
+	},
+	"network": {
+		"format": "{icon}",
+		"format-wifi": "{icon}  {essid}",
+		"format-ethernet": "{icon}  Connected",
+		"format-disconnected": "󰤭  Disconnected",
+		"format-icons": {
+			"wifi": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+			"ethernet": ["󰈀"],
+			"disconnected": ["󰤭"]
 		},
-		"tray": {
-			"icon-size": 13,
-			"spacing": 10
-		},
-		"custom/weather" : {
-			"tooltip" : true,
-			"format" : "{}",
-			"interval" : 30,
-			"exec" : "~/Scripts/waybar-wttr.py",
-			"return-type" : "json"
-		},
-		"custom/docker": {
-			"format": "<span font='16' rise='-4000'></span>  {}",
-			"return-type": "json",
-			"exec": "~/Scripts/waybar-docker.sh",
-			"interval": 10,
-			"on-click": "pypr toggle lazydocker"
-		},
-		"custom/disks": {
-			"exec": "~/Scripts/waybar-diskinfo.sh",
-			"return-type": "json",
-			"format": "  {}",
-			"on-click": "pypr toggle systeminfo",
-			"interval": 30,
-			"tooltip": true
-		},
-		"custom/logout": {
-			"interval": "once",
-			"on-click": "pkill rofi || ~/.config/rofi/powermenu.sh",
-			"format": "⏻",
-		},
-		"custom/razerviperbattery": {
-			"interval": 10,
-			"exec": "~/Scripts/viper_battery.py",
-			"return-type": "json",
-			"tooltip": false
-		},
-		"custom/clipboard": {
-			"format": "",  "format": "<span font='12'></span>  {}",
-			"interval": 5,
-			"return-type": "json",
-			"on-click": "pkill rofi || cliphist list | rofi -dmenu -theme $HOME/.config/rofi/clipboard.rasi | cliphist decode | wl-copy",
-			"on-click-right": "cliphist list | rofi -dmenu -theme $HOME/.config/rofi/clipboard.rasi | cliphist delete",
-			"on-click-middle": "cliphist wipe && pkill -RTMIN+9 waybar && notify-send 'Cleared clipboard history' -i clipboard",
-			"exec": "~/Scripts/waybar-clipboard.sh",
-			"signal": 9
-		},
-		"custom/notification": {
-			"tooltip": false,
-			"format": "{icon}",
-			"format-icons": {
-				"notification": "<span foreground='red'><small><sup></sup></small></span>",
-				"none": " ",
-				"dnd-notification": "<span foreground='red'><small><sup></sup></small></span>",
-				"dnd-none": " "
-			},
-			"return-type": "json",
-			"exec-if": "which swaync-client",
-			"exec": "swaync-client -swb",
-			"on-click": "sleep 0.1 && swaync-client -t -sw",
-			"on-click-right": "sleep 0.1 && swaync-client -d -sw",
-			"escape": true
-		},
-		"pulseaudio": {
-			"format": "<span font='12' rise='-1000'>{icon}</span> {volume}% {format_source}",
-			"format-bluetooth": "{icon} ",
-			"format-source": " {volume}%",
-			"format-source-muted": "",
-			"format-muted": "<span font='16' rise='-3000'></span> {format_source}",
-			"format-icons": {
-				"headphones": "󰕾",
-				"handsfree": "󰕾",
-				"headset": "󰕾",
-				"phone": "󰕾",
-				"portable": "󰕾",
-				"car": "󰕾",
-				"default": ["󰕾", "󰕾"]
-			},
-			"scroll-step": 5,
-			"on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
-			"on-click-middle": "pactl set-source-mute @DEFAULT_SOURCE@ toggle",
-			"on-click-right": "pypr toggle pavucontrol",
-			"tooltip": false
-		},
-		"temperature": {
-			"thermal-zone": 2, "hwmon-path": "/sys/class/hwmon/hwmon2/temp1_input",
-			"critical-threshold": 80,
-			"on-click": "pypr toggle systeminfo",
-			"format-critical": "{temperatureC}°C ",
-			"format": "" },
-		"cpu": {
-			"on-click": "pypr toggle systeminfo",
-			"tooltip": false,
-			"format": "  {}%"
-		},
-		"network": {
-			"format": "{icon}  {ifname}",
-			"format-wifi": "{icon}  {essid}",
-			"format-ethernet": "{icon}",
-			"format-disconnected": "Offline",
-			"format-icons": {
-				"wifi": [""],
-				"ethernet": [""],
-				"disconnected": [""]
-			},
-			"tooltip": true,
-			"tooltip-format": "Network:{ifname}\nIP:{ipaddr}\nRate: {bandwidthUpBits} / {bandwidthDownBits}",
-		},
-		"memory": {
-			"interval": 30,
-			"format": "󰍛 {avail:0.1f}GB",
-			"tooltip": true,
-			"tooltip-format": "{used:0.1f}GB / {total:0.1f}GB",
-			"on-click": "pypr toggle systeminfo"
-		},
-		"keyboard-state": {
-			"numlock": false,
-			"capslock": true,
-			"format": "{icon} {name}",
-			"format-icons": {
-				"locked": "",
-				"unlocked": ""
-			}
-		}
+		"tooltip": true,
+		"tooltip-format": "Network: {ifname}\nIP: {ipaddr}\nRate: {bandwidthUpBits} / {bandwidthDownBits}"
+	},
+	"memory": {
+		"interval": 30,
+		"format": "󰍛 {avail:0.1f}GB",
+		"tooltip": true,
+		"tooltip-format": "{used:0.1f}GB / {total:0.1f}GB",
+		"on-click": "pypr toggle systeminfo"
+	}
 }
