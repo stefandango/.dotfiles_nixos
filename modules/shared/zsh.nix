@@ -819,6 +819,9 @@
       bind C-n next-window
       bind-key -r f run-shell "tmux neww ~/Scripts/tmux-sessionizer"
       
+      # Kill current session and switch to another
+      bind-key X run-shell 'tmux switch-client -n \; kill-session -t "#S"'
+      
       # Light & Transparent Tokyo Night Theme
       set -g status-position bottom
       set -g status-justify centre

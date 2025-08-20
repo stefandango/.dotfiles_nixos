@@ -81,15 +81,40 @@ in
 
  nixpkgs.config.allowUnfree = true;
 
- fonts.packages = with pkgs; [
-	 source-code-pro
-	 corefonts
-	 font-awesome
-	 noto-fonts
-	 noto-fonts-color-emoji
-	 nerd-fonts.fira-code
-	 nerd-fonts.jetbrains-mono
- ];
+ fonts = {
+	packages = with pkgs; [
+		source-code-pro
+		corefonts
+		font-awesome
+		noto-fonts
+		noto-fonts-color-emoji
+		noto-fonts-cjk-sans
+		nerd-fonts.fira-code
+		nerd-fonts.jetbrains-mono
+		inter
+		roboto
+		liberation_ttf
+	];
+
+	fontconfig = {
+		enable = true;
+		antialias = true;
+		hinting = {
+			enable = true;
+			style = "slight";
+		};
+		subpixel = {
+			rgba = "rgb";
+			lcdfilter = "default";
+		};
+		defaultFonts = {
+			serif = [ "Noto Serif" "Liberation Serif" ];
+			sansSerif = [ "Inter" "Noto Sans" "Liberation Sans" ];
+			monospace = [ "JetBrainsMono Nerd Font" "Source Code Pro" "Liberation Mono" ];
+			emoji = [ "Noto Color Emoji" ];
+		};
+	};
+ };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget

@@ -28,16 +28,19 @@ in
 						border: none;
 						border-radius: 0;
 						font-family: "MonoLisa Nerd Font", "JetBrainsMono Nerd Font", monospace;
-						font-weight: 600;
-						font-size: 12px;
+						font-weight: 500;
+						font-size: 13px;
 						min-height: 0;
 					}
 
 					window#waybar {
-						background: transparent;
+						background: rgba(${rgb.bg}, 0.85);
 						color: #${hex.fg};
 						transition-property: background-color;
-						transition-duration: 0.5s;
+						transition-duration: 0.3s;
+						border-radius: 0;
+						margin: 0;
+						padding: 0;
 					}
 
 					tooltip {
@@ -49,41 +52,41 @@ in
 					}
 
 					#workspaces {
-						padding: 4px 8px;
-						margin: 2px 4px;
-						background: rgba(${rgb.bg}, 0.8);
-						border: 1px solid rgba(${rgb.active}, 0.5);
-						border-radius: 6px;
+						padding: 2px 6px;
+						margin: 2px 6px;
+						background: transparent;
+						border: none;
+						border-radius: 8px;
 					}
 
 					#workspaces button {
-						padding: 6px 12px;
+						padding: 4px 8px;
 						color: #${hex.text};
 						background: transparent;
 						border: none;
 						border-radius: 6px;
-						margin: 0 2px;
-						transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+						margin: 0 1px;
+						transition: all 0.2s ease;
 						font-weight: 500;
-						min-width: 32px;
+						min-width: 28px;
 					}
 
 					#workspaces button.active {
 						color: #${hex.fg};
-						background: rgba(${rgb.active}, 0.4);
-						border: 1px solid #${hex.active};
-						box-shadow: 0 2px 4px rgba(${rgb.active}, 0.3);
+						background: rgba(${rgb.active}, 0.6);
+						border: none;
+						box-shadow: 0 2px 8px rgba(${rgb.active}, 0.2);
 					}
 
 					#workspaces button:hover {
-						background: rgba(${rgb.fg}, 0.15);
+						background: rgba(${rgb.fg}, 0.2);
 						color: #${hex.fg};
 					}
 
 					#workspaces button.urgent {
 						color: #${hex.red};
-						background: rgba(${rgb.red}, 0.2);
-						border: 1px solid #${hex.red};
+						background: rgba(${rgb.red}, 0.3);
+						border: none;
 					}
 
 					#clock,
@@ -101,12 +104,12 @@ in
 					#custom-notification,
 					#custom-logout {
 						padding: 4px 8px;
-						margin: 2px 4px;
+						margin: 2px 3px;
 						color: #${hex.fg};
-						background: rgba(${rgb.bg}, 0.8);
-						border: 1px solid rgba(${rgb.active}, 0.5);
+						background: transparent;
+						border: none;
 						border-radius: 6px;
-						transition: all 0.3s ease-in-out;
+						transition: all 0.2s ease;
 					}
 
 					#clock:hover,
@@ -123,11 +126,10 @@ in
 					#custom-notification:hover,
 					#custom-logout:hover {
 						background: rgba(${rgb.active}, 0.2);
-						border-color: #${hex.active};
 					}
 
 					#clock {
-						color: #${hex.cyan};
+						color: #${hex.fg};
 						font-weight: bold;
 						min-width: 80px;
 					}
@@ -137,33 +139,33 @@ in
 					}
 
 					#custom-docker {
-						color: #${hex.blue};
+						color: #${hex.green};
 					}
 
 					#custom-clipboard {
 						color: #${hex.purple};
 					}
 
-					#memory {
-						color: #${hex.green};
+					#custom-memory {
+						color: #${hex.orange};
 					}
 
-					#cpu {
+					#custom-cpu {
 						color: #${hex.yellow};
 					}
 
-					#temperature {
-						color: #${hex.orange};
+					#custom-temperature {
+						color: #${hex.red};
 					}
 
 					#temperature.critical {
 						color: #${hex.red};
 						background: rgba(${rgb.red}, 0.2);
-						border-color: #${hex.red};
 					}
 
+
 					#pulseaudio {
-						color: #${hex.cyan};
+						color: #${hex.purple};
 					}
 
 					#pulseaudio.muted {
@@ -189,11 +191,19 @@ in
 					}
 
 					#custom-razerviperbattery {
-						color: #${hex.cyan};
+						color: #${hex.yellow};
 					}
 
 					#custom-notification {
-						color: #${hex.blue};
+						color: #${hex.fg};
+					}
+
+					#custom-devserver {
+						color: #${hex.cyan};
+					}
+
+					#custom-tmux {
+						color: #${hex.text};
 					}
 
 					#tray {

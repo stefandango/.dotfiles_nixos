@@ -5,23 +5,23 @@ CNFR="$HOME/.config/rofi/confirm.rasi"
 
 # Theme Elements
 prompt="`hostname` (`echo Stefandango/$USER`)"
-mesg="Uptime : `uptime | sed -E 's/^[^,]*up *//; s/, *[[:digit:]]* users.*//; s/min/minutes/; s/([[:digit:]]+):0?([[:digit:]]+)/\1 hours, \2 minutes/'`"
+mesg="Uptime : `awk '{days=int($1/86400); hours=int(($1%86400)/3600); mins=int(($1%3600)/60); if(days>0) printf "%dd %dh %dm", days, hours, mins; else if(hours>0) printf "%dh %dm", hours, mins; else printf "%dm", mins}' /proc/uptime`"
 
 
 # Options
 layout=`cat ''${RASI} | grep 'USE_ICON' | cut -d'=' -f2`
 if [[ "$layout" == 'NO' ]]; then
-	option_1=" Lock"
-	option_2=" Logout"
+	option_1="󰌾 Lock"
+	option_2="󰗼 Logout"
 	#option_3=" Suspend"
 	option_3="󰑐 Reboot"
-	option_4="⏻ Shutdown"
+	option_4="󰐥 Shutdown"
 else
-	option_1=""
-	option_2=""
+	option_1="󰌾"
+	option_2="󰗼"
 	#option_3=""
 	option_3="󰑐"
-	option_4="⏻"
+	option_4="󰐥"
 fi
 cnflayout=`cat ''${CNFR} | grep 'USE_ICON' | cut -d'=' -f2`
 if [[ "$cnflayout" == 'NO' ]]; then

@@ -7,23 +7,25 @@
 	"gtk-layer-shell": true,
 	"height": 36,
 	"modules-left": [
-		"clock",
-		"custom/weather"
+		"hyprland/workspaces",
+		"custom/docker",
+		"custom/devserver",
+		"custom/clipboard"
 	],
 	"modules-center": [
-		"hyprland/workspaces"
+		"custom/weather"
 	],
 	"modules-right": [
-		"custom/docker",
-		"custom/clipboard",
+		"custom/tmux",
 		"custom/razerviperbattery",
 		"custom/disks",
-		"memory",
-		"cpu",
-		"temperature",
+		"custom/memory",
+		"custom/cpu",
+		"custom/temperature",
 		"pulseaudio",
 		"network",
 		"tray",
+		"clock",
 		"custom/notification",
 		"custom/logout"
 	],
@@ -60,11 +62,26 @@
 		"interval": 10,
 		"on-click": "pypr toggle lazydocker"
 	},
+	"custom/devserver": {
+		"format": "󰿟 {}",
+		"return-type": "json",
+		"exec": "~/Scripts/waybar-devserver.sh",
+		"interval": 5,
+		"on-click": "~/Scripts/dev-server-manager.sh"
+	},
+	"custom/tmux": {
+		"format": "󰌌 {}",
+		"exec": "~/Scripts/waybar-tmux.sh",
+		"return-type": "json",
+		"interval": 5,
+		"tooltip": true
+	},
 	"custom/disks": {
 		"exec": "~/Scripts/waybar-diskinfo.sh",
 		"return-type": "json",
 		"format": "󰋊 {}",
-		"on-click": "pypr toggle systeminfo",
+		"on-click": "thunar",
+		"on-click-right": "pypr toggle systeminfo",
 		"interval": 30,
 		"tooltip": true
 	},
@@ -83,7 +100,7 @@
 		"tooltip": true
 	},
 	"custom/clipboard": {
-		"format": "  {}",
+		"format": "󰅌 {}",
 		"interval": 5,
 		"return-type": "json",
 		"on-click": "pkill rofi || cliphist list | rofi -dmenu -theme $HOME/.config/rofi/clipboard.rasi | cliphist decode | wl-copy",
@@ -129,19 +146,19 @@
 		"on-click-right": "pypr toggle pavucontrol",
 		"tooltip": false
 	},
-	"temperature": {
-		"thermal-zone": 2,
-		"hwmon-path": "/sys/class/hwmon/hwmon2/temp1_input",
-		"critical-threshold": 80,
+	"custom/temperature": {
+		"exec": "~/Scripts/waybar-temperature.sh",
+		"return-type": "json",
+		"format": "{}",
 		"on-click": "pypr toggle systeminfo",
-		"format-critical": "󰸁 {temperatureC}°C",
-		"format": "󰔏 {temperatureC}°C",
-		"tooltip": false
+		"interval": 10
 	},
-	"cpu": {
+	"custom/cpu": {
+		"exec": "~/Scripts/waybar-cpu.sh",
+		"return-type": "json", 
+		"format": "{}",
 		"on-click": "pypr toggle systeminfo",
-		"tooltip": false,
-		"format": "󰻠 {}%"
+		"interval": 10
 	},
 	"network": {
 		"format": "{icon}",
@@ -153,14 +170,16 @@
 			"ethernet": ["󰈀"],
 			"disconnected": ["󰤭"]
 		},
+		"on-click": "nm-connection-editor",
+		"on-click-right": "nmtui",
 		"tooltip": true,
 		"tooltip-format": "Network: {ifname}\nIP: {ipaddr}\nRate: {bandwidthUpBits} / {bandwidthDownBits}"
 	},
-	"memory": {
-		"interval": 30,
-		"format": "󰍛 {avail:0.1f}GB",
-		"tooltip": true,
-		"tooltip-format": "{used:0.1f}GB / {total:0.1f}GB",
-		"on-click": "pypr toggle systeminfo"
+	"custom/memory": {
+		"exec": "~/Scripts/waybar-memory.sh",
+		"return-type": "json",
+		"format": "{}",
+		"on-click": "pypr toggle systeminfo", 
+		"interval": 30
 	}
 }
