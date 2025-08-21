@@ -37,6 +37,7 @@ in
 			insync			# Gdrive integration
 			xfce.thunar		# File explorer GUI
 			xfce.thunar-volman	# Auto manage removable drives etc..
+			imv			# Simple image viewer
 
 			# Should be moved to own files
 			swaynotificationcenter #loaded in seperate nix file
@@ -202,9 +203,11 @@ in
 		bind = SUPERSHIFT, E,exec, pkill rofi || .config/rofi/powermenu.sh
         	bind=,print,exec,${pkgs.grimblast}/bin/grimblast --notify --freeze --wait 1 copysave area ~/Pictures/$(date +%Y-%m-%dT%H%M%S).png
 		bind=SUPER,Y,exec,pkill rofi || cliphist list | rofi -dmenu -theme $HOME/.config/rofi/clipboard.rasi | cliphist decode | wl-copy
+		bind=SUPER,T,exec,pkill rofi || ~/Scripts/waybar-tmux-manager.sh
 		bind=SUPER,code:49,exec,pypr toggle term
 		bind=SUPER,Z,exec, pypr zoom
 		bind=SUPER,E,exec,pypr toggle files
+		bind=SUPER,I,exec,~/Scripts/imv_launcher.sh
 
         	bind=,XF86AudioLowerVolume,exec,pactl set-sink-volume @DEFAULT_SINK@ -10%
         	bind=,XF86AudioRaiseVolume,exec,pactl set-sink-volume @DEFAULT_SINK@ +5%
@@ -289,6 +292,11 @@ in
 		$thunar = class:^(thunar)$
 		windowrulev2 = float,$thunar
 		windowrulev2 = opacity 0.90,$thunar
+
+		$imv = class:^(imv)$
+		windowrulev2 = float,$imv
+		windowrulev2 = size 70% 70%,$imv
+		windowrulev2 = center,$imv
 
 		windowrulev2 = opacity 0.9 0.9,class:^(Slack|WebCord|Spotify|Kitty)$
 

@@ -43,6 +43,11 @@ in
 				recursive = true;
 				executable = true;
 			};
+			"Scripts/imv_launcher.sh" = {
+				source = ./scripts/imv_launcher.sh;
+				recursive = true;
+				executable = true;
+			};
 			#"Scripts/tmux-sessionizer" = {
 			#	source = ./scripts/tmux-sessionizer;
 			#	recursive = true;

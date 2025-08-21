@@ -16,13 +16,30 @@ in
 				".config/rofi/shared/colors.rasi" = with colors.scheme.default; {
 					text = ''
 						* {
-    background:     rgb(${rgb.bg}, 95%);
-    background-alt: rgb(43, 43, 57, 95%);
+    /* Modern glass theme with enhanced transparency */
+    background:     rgb(${rgb.bg}, 85%);
+    background-alt: rgba(43, 43, 57, 0.7);
+    background-hover: rgba(${rgb.active}, 0.1);
+    background-glass: rgba(${rgb.bg}, 0.95);
+    
     foreground:     rgb(${rgb.fg});
-    selected:       rgb(${rgb.active}, 95%);
-    border:         rgb(${rgb.active});
-    active:         rgb(${rgb.active}, 95%);
-    urgent:         rgb(${rgb.highlight});
+    foreground-dim: rgba(${rgb.fg}, 0.7);
+    
+    selected:       rgba(${rgb.active}, 0.9);
+    selected-hover: rgba(${rgb.active}, 0.95);
+    
+    border:         rgba(${rgb.active}, 0.8);
+    border-hover:   rgba(${rgb.active}, 1.0);
+    
+    active:         rgba(${rgb.active}, 0.85);
+    urgent:         rgba(${rgb.highlight}, 0.9);
+    
+    /* Modern accent colors */
+    accent:         rgb(${rgb.active});
+    accent-dim:     rgba(${rgb.active}, 0.5);
+    
+    /* Shadow effects */
+    shadow:         rgba(0, 0, 0, 0.3);
 }
 
 					'';
@@ -32,6 +49,10 @@ in
 					text = ''
 						* {
 							font: "MonoLisaSemiBold Nerd Font Semi-Bold 12";
+							font-large: "MonoLisaSemiBold Nerd Font Bold 14";
+							font-small: "MonoLisaSemiBold Nerd Font Medium 10";
+							font-icons: "MonoLisaSemiBold Nerd Font Semi-Bold 16";
+							font-icons-large: "MonoLisaSemiBold Nerd Font Semi-Bold 20";
 						}
 					'';
 				};
@@ -39,29 +60,29 @@ in
 				".config/rofi/shared/variables.rasi" = {
 					text = ''
 						* {
-							border-colour:               var(border);
-							handle-colour:               var(selected);
-							background-colour:           var(background);
-							foreground-colour:           var(foreground);
-							alternate-background:        var(background-alt);
-							normal-background:           var(background);
-							normal-foreground:           var(foreground);
-							urgent-background:           var(urgent);
-							urgent-foreground:           var(background);
-							active-background:           var(active);
-							active-foreground:           var(background);
-							selected-normal-background:  var(selected);
-							selected-normal-foreground:  var(background);
-							selected-urgent-background:  var(active);
-							selected-urgent-foreground:  var(background);
-							selected-active-background:  var(urgent);
-							selected-active-foreground:  var(background);
-							alternate-normal-background: var(background);
-							alternate-normal-foreground: var(foreground);
-							alternate-urgent-background: var(urgent);
-							alternate-urgent-foreground: var(background);
-							alternate-active-background: var(active);
-							alternate-active-foreground: var(background);
+							border-colour:               @border;
+							handle-colour:               @selected;
+							background-colour:           @background;
+							foreground-colour:           @foreground;
+							alternate-background:        @background-alt;
+							normal-background:           @background;
+							normal-foreground:           @foreground;
+							urgent-background:           @urgent;
+							urgent-foreground:           @background;
+							active-background:           @active;
+							active-foreground:           @background;
+							selected-normal-background:  @selected;
+							selected-normal-foreground:  @background;
+							selected-urgent-background:  @active;
+							selected-urgent-foreground:  @background;
+							selected-active-background:  @urgent;
+							selected-active-foreground:  @background;
+							alternate-normal-background: @background;
+							alternate-normal-foreground: @foreground;
+							alternate-urgent-background: @urgent;
+							alternate-urgent-foreground: @background;
+							alternate-active-background: @active;
+							alternate-active-foreground: @background;
 						}
 					'';
 				};

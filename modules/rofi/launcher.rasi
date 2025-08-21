@@ -3,10 +3,10 @@ configuration {
     terminal:                   "kitty";
 	modi:                       "drun,filebrowser,run";
     show-icons:                 true;
-    display-drun:               "󰣆 Apps";
-    display-run:                " Run";
-    display-filebrowser:        " Files";
-    display-window:             " Windows";
+    display-drun:               "󰣆    Apps";
+    display-run:                "    Run";
+    display-filebrowser:        "    Files";
+    display-window:             "    Windows";
 	drun-display-format:        "{name}";
 	window-format:              "{w} · {c} · {t}";
     run-shell-command:          "{terminal} --hold {cmd}";
@@ -23,33 +23,30 @@ configuration {
 
 /*****----- Main Window -----*****/
 window {
-    /* properties for window widget */
+    /* Modern glass window with enhanced visuals */
     transparency:                "real";
     location:                    center;
     anchor:                      center;
     fullscreen:                  false;
-    width:                       30%;
+    width:                       35%;
     x-offset:                    0px;
     y-offset:                    0px;
 
-    /* properties for all widgets */
+    /* Enhanced styling */
     enabled:                     true;
     margin:                      0px;
     padding:                     0px;
-    border:                      2px solid;
-    border-radius:               5px;
+    border:                      1px solid;
+    border-radius:               15px;
     border-color:                @border-colour;
     cursor:                      "default";
-    /* Backgroud Colors */
-    background-color:            @background-colour;
-    /* Backgroud Image */
-    //background-image:          url("/path/to/image.png", none);
-    /* Simple Linear Gradient */
-    //background-image:          linear-gradient(red, orange, pink, purple);
-    /* Directional Linear Gradient */
-    //background-image:          linear-gradient(to bottom, pink, yellow, magenta);
-    /* Angle Linear Gradient */
-    //background-image:          linear-gradient(45, cyan, purple, indigo);
+    
+    /* Modern glass background with subtle gradient */
+    background-color:            @background-glass;
+    background-image:            linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+    
+    /* Subtle shadow for depth - rofi doesn't support box-shadow */
+    /* box-shadow:                  0px 10px 30px @shadow; */
 }
 
 /*****----- Main Box -----*****/
@@ -68,14 +65,13 @@ mainbox {
 /*****----- Inputbar -----*****/
 inputbar {
     enabled:                     true;
-    spacing:                     10px;
+    spacing:                     15px;
     margin:                      0px;
-    padding:                     10px;
+    padding:                     15px 20px;
     border:                      0px solid;
-    border-radius:               6px;
+    border-radius:               12px;
     border-color:                @border-colour;
-    /* background-color:            @background-alt; */
-    background-color:            transparent;
+    background-color:            @background-hover;
     text-color:                  @foreground-colour;
     children:                    [ "textbox-prompt-colon", "entry" ];
 }
@@ -88,17 +84,19 @@ prompt {
 textbox-prompt-colon {
     enabled:                     true;
     expand:                      false;
-    str:                         "❯ ";
+    str:                         "󰍉 ";
     background-color:            inherit;
-    text-color:                  inherit;
+    text-color:                  @accent;
+    font:                        @font-icons;
 }
 entry {
     enabled:                     true;
     background-color:            inherit;
     text-color:                  inherit;
     cursor:                      text;
-    placeholder:                 "Search...";
-    placeholder-color:           inherit;
+    placeholder:                 "Search applications...";
+    placeholder-color:           @foreground-dim;
+    font:                        @font-large;
 }
 num-filtered-rows {
     enabled:                     true;
@@ -129,7 +127,7 @@ case-indicator {
 listview {
     enabled:                     true;
     columns:                     1;
-    lines:                       10;
+    lines:                       12;
     cycle:                       true;
     dynamic:                     true;
     scrollbar:                   false;
@@ -138,11 +136,11 @@ listview {
     fixed-height:                true;
     fixed-columns:               true;
     
-    spacing:                     5px;
-    margin:                      0px;
-    padding:                     0px;
+    spacing:                     8px;
+    margin:                      10px 0px;
+    padding:                     10px;
     border:                      0px solid;
-    border-radius:               0px;
+    border-radius:               10px;
     border-color:                @border-colour;
     background-color:            transparent;
     text-color:                  @foreground-colour;
@@ -158,59 +156,65 @@ scrollbar {
 /*****----- Elements -----*****/
 element {
     enabled:                     true;
-    spacing:                     10px;
+    spacing:                     12px;
     margin:                      0px;
-    padding:                     2px;
+    padding:                     12px 15px;
     border:                      0px solid;
-    border-radius:               0px;
+    border-radius:               10px;
     border-color:                @border-colour;
     background-color:            transparent;
     text-color:                  @foreground-colour;
     cursor:                      pointer;
+    
+    /* Smooth transitions - not supported in rofi */
+    /* transition:                  background-color 200ms ease, border-color 200ms ease; */
 }
 element normal.normal {
-    /* background-color:            var(normal-background); */
+    /* background-color:            @normal-background; */
     background-color:            transparent;
-    text-color:                  var(normal-foreground);
+    text-color:                  @normal-foreground;
 }
 element normal.urgent {
-    background-color:            var(urgent-background);
+    background-color:            @urgent-background;
     background-color:            transparent;
-    text-color:                  var(urgent-foreground);
+    text-color:                  @urgent-foreground;
 }
 element normal.active {
-    background-color:            var(active-background);
-    text-color:                  var(active-foreground);
+    background-color:            @active-background;
+    text-color:                  @active-foreground;
 }
 element selected.normal {
-    background-color:            var(selected);
-    text-color:                  var(background);
+    background-color:            @selected;
+    border:                      1px;
+    border-color:                @border;
+    text-color:                  @foreground;
+    /* box-shadow:                  0px 2px 10px rgba(0,0,0,0.2); */
 }
 element selected.urgent {
-    background-color:            var(selected-urgent-background);
-    text-color:                  var(selected-urgent-foreground);
+    background-color:            @selected-urgent-background;
+    text-color:                  @selected-urgent-foreground;
 }
 element selected.active {
-    background-color:            var(selected-active-background);
-    text-color:                  var(selected-active-foreground);
+    background-color:            @selected-active-background;
+    text-color:                  @selected-active-foreground;
 }
 element alternate.normal {
-    /* background-color:            var(alternate-normal-background); */
+    /* background-color:            @alternate-normal-background; */
     background-color:            transparent;
-    text-color:                  var(alternate-normal-foreground);
+    text-color:                  @alternate-normal-foreground;
 }
 element alternate.urgent {
-    background-color:            var(alternate-urgent-background);
-    text-color:                  var(alternate-urgent-foreground);
+    background-color:            @alternate-urgent-background;
+    text-color:                  @alternate-urgent-foreground;
 }
 element alternate.active {
-    background-color:            var(alternate-active-background);
-    text-color:                  var(alternate-active-foreground);
+    background-color:            @alternate-active-background;
+    text-color:                  @alternate-active-foreground;
 }
 element-icon {
     background-color:            transparent;
     text-color:                  inherit;
-    size:                        40px;
+    size:                        32px;
     cursor:                      inherit;
 }
 element-text {
@@ -220,6 +224,7 @@ element-text {
     cursor:                      inherit;
     vertical-align:              0.5;
     horizontal-align:            0.0;
+    font:                        @font;
 }
 
 /*****----- Mode Switcher -----*****/
@@ -246,8 +251,8 @@ button {
     cursor:                      pointer;
 }
 button selected {
-    background-color:            var(active);
-    text-color:                  var(background);
+    background-color:            @active;
+    text-color:                  @background;
 }
 
 /*****----- Message -----*****/
