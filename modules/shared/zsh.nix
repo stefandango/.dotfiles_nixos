@@ -787,6 +787,10 @@
     shell = "${pkgs.zsh}/bin/zsh";
     terminal = "screen-256color";
     extraConfig = ''
+      # Enable 24-bit color and proper terminal support
+      set-option -ga terminal-overrides ",*256col*:Tc"
+      set-option -g default-terminal "screen-256color"
+      
       # Increase tmux messages display duration from 750ms to 4s
       set -g display-time 4000
       set -s escape-time 0
@@ -799,16 +803,26 @@
       
       # Enhanced clipboard integration
       set -g set-clipboard on
-      set -s copy-command 'pbcopy'  # macOS
       
       # Copy mode bindings for better clipboard integration
       bind-key -T copy-mode-vi v send-keys -X begin-selection
-      bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel 'pbcopy'
       bind-key -T copy-mode-vi r send-keys -X rectangle-toggle
       
-      # Linux clipboard support (will use if pbcopy not available)
-      if-shell 'command -v xclip' 'set -s copy-command "xclip -selection clipboard"'
-      if-shell 'command -v wl-copy' 'set -s copy-command "wl-copy"'
+      # Platform-specific clipboard setup
+      if-shell 'test "$(uname)" = "Darwin"' {
+        set -s copy-command 'pbcopy'
+        bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel 'pbcopy'
+      } {
+        if-shell 'command -v wl-copy >/dev/null 2>&1' {
+          set -s copy-command 'wl-copy'
+          bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel 'wl-copy'
+        } {
+          if-shell 'command -v xclip >/dev/null 2>&1' {
+            set -s copy-command 'xclip -selection clipboard'
+            bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel 'xclip -selection clipboard'
+          }
+        }
+      }
       
       # Quick paste binding
       bind-key ] paste-buffer
@@ -819,8 +833,8 @@
       bind C-n next-window
       bind-key -r f run-shell "tmux neww ~/Scripts/tmux-sessionizer"
       
-      # Kill current session and switch to another
-      bind-key X run-shell 'tmux switch-client -n \; kill-session -t "#S"'
+      # Smart quit using tmux-quit script
+      bind-key X run-shell '~/Scripts/tmux-quit'
       
       # Light & Transparent Tokyo Night Theme
       set -g status-position bottom

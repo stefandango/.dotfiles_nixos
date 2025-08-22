@@ -53,6 +53,11 @@ in
 			#	recursive = true;
 			#	executable = true;
 			#};
+			"Scripts/tmux-quit" = {
+				source = ./scripts/tmux-quit;
+				recursive = true;
+				executable = true;
+			};
 
 			};	
 		};
