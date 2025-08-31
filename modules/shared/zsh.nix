@@ -12,6 +12,7 @@
     fd
     tree-sitter
     gh
+    codex
   ];
 
   home.file = {
