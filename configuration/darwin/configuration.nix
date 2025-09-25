@@ -41,27 +41,28 @@ in
     ];
 
     system.primaryUser = "stefan";
-    system.defaults = {
-        finder = {
-            _FXShowPosixPathInTitle = true;
-            AppleShowAllExtensions = true;
-        };
-        trackpad = {
-            Clicking = true;
-            TrackpadThreeFingerDrag = true;
-        };
-        NSGlobalDomain.AppleShowAllExtensions = true;
-        dock = {
-            autohide = true;
-            show-recents = false;
-            launchanim = true;
-            mouse-over-hilite-stack = true;
-            orientation = "bottom";
-            tilesize = 50;
-            magnification = true;
-            largesize = 80;
-        };
-    };
+    # Commented out for macOS upgrade - test new defaults first
+     system.defaults = {
+         finder = {
+             _fxshowposixpathintitle = true;
+             appleshowallextensions = true;
+         };
+         trackpad = {
+             clicking = true;
+             trackpadthreefingerdrag = true;
+         };
+         nsglobaldomain.appleshowallextensions = true;
+         dock = {
+             autohide = true;
+             show-recents = false;
+             launchanim = true;
+             mouse-over-hilite-stack = true;
+             orientation = "bottom";
+             tilesize = 50;
+             magnification = true;
+             largesize = 80;
+         };
+     };
     homebrew = {
         enable = true;
         caskArgs.no_quarantine = true;
@@ -84,7 +85,8 @@ in
         # Kitty is double installed above to fix permission error on macOS
         brews = [ "python" "uv" ];
     };
-    security.pam.services.sudo_local.touchIdAuth = true;
+    # Commented out for macOS upgrade - test new defaults first
+    # security.pam.services.sudo_local.touchIdAuth = true;
     system.stateVersion = 4;
     nixpkgs.hostPlatform = "aarch64-darwin";
     ids.gids.nixbld = 350;
