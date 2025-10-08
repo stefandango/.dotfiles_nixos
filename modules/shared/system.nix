@@ -37,13 +37,14 @@
     wget
     unzip
     zip
-    
+
     # Development tools
     direnv
     nix-direnv
-    
+
     # Modern CLI tools
     btop
     ripgrep
+    nix-output-monitor
   ];
 }

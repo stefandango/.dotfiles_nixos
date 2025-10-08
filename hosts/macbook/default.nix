@@ -67,11 +67,11 @@
       "kitty"
       "pearcleaner"
       "devutils"
-      "handbrake"
+      "handbrake-app"
       "alt-tab"
       "dbeaver-community"
       "jordanbaird-ice"
-      "font-monaspace-nerd-font"
+      "font-monaspice-nerd-font"
       "font-noto-sans-symbols-2"
     ];
     brews = [ "uv" ];

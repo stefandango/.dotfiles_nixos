@@ -26,9 +26,11 @@
     "Scripts/nixswitch" = {
       text = if pkgs.stdenv.isDarwin then ''
         #!/usr/bin/env bash
+        nom build ~/.dotfiles#darwinConfigurations.Stefans-MacBook-Pro.system "$@" && \
         darwin-rebuild switch --flake ~/.dotfiles#Stefans-MacBook-Pro "$@"
       '' else ''
         #!/usr/bin/env bash
+        nom build ~/.dotfiles#nixosConfigurations.stefan.config.system.build.toplevel "$@" && \
         sudo nixos-rebuild switch --flake ~/.dotfiles#stefan "$@"
       '';
       executable = true;
