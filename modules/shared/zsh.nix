@@ -26,12 +26,98 @@
     "Scripts/nixswitch" = {
       text = if pkgs.stdenv.isDarwin then ''
         #!/usr/bin/env bash
-        nom build ~/.dotfiles#darwinConfigurations.Stefans-MacBook-Pro.system "$@" && \
-        darwin-rebuild switch --flake ~/.dotfiles#Stefans-MacBook-Pro "$@"
+        # Enhanced nixswitch for macOS with visual feedback
+
+        set -e
+
+        echo "🔨 Building configuration..."
+        echo ""
+
+        build_start=$(date +%s)
+
+        if nom build ~/.dotfiles#darwinConfigurations.Stefans-MacBook-Pro.system "$@"; then
+            build_end=$(date +%s)
+            build_time=$((build_end - build_start))
+
+            echo ""
+            echo "✅ Build completed in ''${build_time}s"
+            echo ""
+            echo "🔄 Activating configuration..."
+            echo ""
+
+            switch_start=$(date +%s)
+
+            if darwin-rebuild switch --flake ~/.dotfiles#Stefans-MacBook-Pro "$@"; then
+                switch_end=$(date +%s)
+                switch_time=$((switch_end - switch_start))
+
+                echo ""
+                echo "✨ Successfully switched! (''${switch_time}s)"
+
+                # Show new generation
+                new_gen=$(darwin-rebuild --list-generations 2>/dev/null | tail -1 | awk '{print $1}')
+                echo "   Generation: #$new_gen"
+
+                total_time=$((build_time + switch_time))
+                echo "   Total time: ''${total_time}s"
+                echo ""
+            else
+                echo ""
+                echo "❌ Failed to activate configuration"
+                exit 1
+            fi
+        else
+            echo ""
+            echo "❌ Build failed"
+            exit 1
+        fi
       '' else ''
         #!/usr/bin/env bash
-        nom build ~/.dotfiles#nixosConfigurations.stefan.config.system.build.toplevel "$@" && \
-        sudo nixos-rebuild switch --flake ~/.dotfiles#stefan "$@"
+        # Enhanced nixswitch for NixOS with visual feedback
+
+        set -e
+
+        echo "🔨 Building configuration..."
+        echo ""
+
+        build_start=$(date +%s)
+
+        if nom build ~/.dotfiles#nixosConfigurations.stefan.config.system.build.toplevel "$@"; then
+            build_end=$(date +%s)
+            build_time=$((build_end - build_start))
+
+            echo ""
+            echo "✅ Build completed in ''${build_time}s"
+            echo ""
+            echo "🔄 Activating configuration..."
+            echo ""
+
+            switch_start=$(date +%s)
+
+            if sudo nixos-rebuild switch --flake ~/.dotfiles#stefan "$@"; then
+                switch_end=$(date +%s)
+                switch_time=$((switch_end - switch_start))
+
+                echo ""
+                echo "✨ Successfully switched! (''${switch_time}s)"
+
+                # Show new generation
+                new_gen=$(nixos-rebuild list-generations 2>/dev/null | tail -1 | awk '{print $1}')
+                echo "   Generation: #$new_gen"
+
+                total_time=$((build_time + switch_time))
+                echo "   Total time: ''${total_time}s"
+                echo ""
+            else
+                echo ""
+                echo "❌ Failed to activate configuration"
+                exit 1
+            fi
+        else
+            echo ""
+            echo "❌ Build failed"
+            exit 1
+        fi
       '';
       executable = true;
     };
@@ -39,10 +125,79 @@
     "Scripts/nixup" = {
       text = ''
         #!/usr/bin/env bash
-        pushd ~/.dotfiles
-        nix flake update
+        # Enhanced Nix update with progress tracking
+
+        set -e
+
+        echo "❄️  Nix Update & Rebuild"
+        echo "======================="
+        echo ""
+
+        # Navigate to dotfiles
+        pushd ~/.dotfiles > /dev/null
+
+        # Show current state
+        echo "📍 Current state:"
+        if [[ -f flake.lock ]]; then
+            last_update=$(date -r flake.lock "+%Y-%m-%d %H:%M" 2>/dev/null || echo "unknown")
+            echo "   Last update: $last_update"
+        fi
+        echo ""
+
+        # Update flake inputs
+        echo "🔄 [1/3] Updating flake inputs..."
+        echo "─────────────────────────────────"
+
+        if nix flake update 2>&1 | while IFS= read -r line; do
+            if [[ "$line" =~ Updated.*input ]]; then
+                input=$(echo "$line" | sed -E "s/.*'([^']+)'.*/\1/")
+                echo "   ✓ Updated: $input"
+            elif [[ "$line" =~ warning ]]; then
+                echo "   ⚠ $line"
+            fi
+        done; then
+            echo ""
+            echo "✅ Flake inputs updated"
+        else
+            echo "❌ Failed to update flake inputs"
+            popd > /dev/null
+            exit 1
+        fi
+        echo ""
+
+        # Show what changed
+        echo "📝 Changes in flake.lock:"
+        git diff --no-index --color=always --word-diff=color /dev/null flake.lock 2>/dev/null | head -20 || echo "   (no changes)"
+        echo ""
+
+        # Build and switch
+        echo "🔨 [2/3] Building new configuration..."
+        echo "─────────────────────────────────────"
         ~/Scripts/nixswitch
-        popd
+
+        if [[ $? -eq 0 ]]; then
+            echo ""
+            echo "🎉 [3/3] Update complete!"
+            echo "─────────────────────────"
+
+            # Show new state
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                new_gen=$(darwin-rebuild --list-generations 2>/dev/null | tail -1)
+            else
+                new_gen=$(nixos-rebuild list-generations 2>/dev/null | tail -1)
+            fi
+
+            echo "   New generation: $new_gen"
+            echo ""
+            echo "✨ Your system is now up to date!"
+        else
+            echo ""
+            echo "❌ Build failed. Check errors above."
+            popd > /dev/null
+            exit 1
+        fi
+
+        popd > /dev/null
       '';
       executable = true;
     };
@@ -554,26 +709,167 @@
     };
 
     # Smart Nix Helper Scripts
+    "Scripts/nixclean" = {
+      text = ''
+        #!/usr/bin/env bash
+        # Enhanced Nix cleanup with statistics
+
+        echo "🧹 Nix Store Cleanup"
+        echo "==================="
+        echo ""
+
+        # Get before stats
+        echo "📊 Current state:"
+
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            gen_count=$(darwin-rebuild --list-generations 2>/dev/null | wc -l || echo "0")
+        else
+            gen_count=$(sudo nixos-rebuild list-generations 2>/dev/null | wc -l || echo "0")
+        fi
+
+        store_size_before=$(du -sh /nix/store 2>/dev/null | awk '{print $1}' || echo "unknown")
+
+        echo "   Generations: $gen_count"
+        echo "   Store size: $store_size_before"
+        echo ""
+
+        # Ask for confirmation
+        read -p "🗑️  Delete old generations and optimize store? [y/N] " -n 1 -r
+        echo ""
+
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo "Cancelled."
+            exit 0
+        fi
+
+        echo ""
+        echo "🔄 Cleaning up..."
+        echo ""
+
+        # Delete old generations
+        echo "   → Deleting old generations..."
+        if nix-collect-garbage -d 2>&1 | grep -E "freed|removing" | head -5; then
+            echo "   ✅ Old generations removed"
+        fi
+
+        echo ""
+
+        # Optimize store
+        echo "   → Optimizing Nix store..."
+        if nix-store --optimize 2>&1 | grep -E "freed|bytes" | tail -3; then
+            echo "   ✅ Store optimized"
+        fi
+
+        echo ""
+        echo "─────────────────────────"
+        echo ""
+
+        # Get after stats
+        echo "📊 After cleanup:"
+
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            gen_count_after=$(darwin-rebuild --list-generations 2>/dev/null | wc -l || echo "0")
+        else
+            gen_count_after=$(sudo nixos-rebuild list-generations 2>/dev/null | wc -l || echo "0")
+        fi
+
+        store_size_after=$(du -sh /nix/store 2>/dev/null | awk '{print $1}' || echo "unknown")
+
+        echo "   Generations: $gen_count_after"
+        echo "   Store size: $store_size_after"
+        echo ""
+        echo "✨ Cleanup complete!"
+      '';
+      executable = true;
+    };
+
+    "Scripts/nixgen" = {
+      text = if pkgs.stdenv.isDarwin then ''
+        #!/usr/bin/env bash
+        # Enhanced generation listing for Darwin
+
+        echo "📜 System Generations (Darwin)"
+        echo "=============================="
+        echo ""
+
+        generations=$(darwin-rebuild --list-generations 2>/dev/null)
+
+        if [[ -z "$generations" ]]; then
+            echo "No generations found"
+            exit 0
+        fi
+
+        # Get current generation
+        current=$(echo "$generations" | tail -1 | awk '{print $1}')
+
+        echo "$generations" | while read -r line; do
+            gen=$(echo "$line" | awk '{print $1}')
+            date=$(echo "$line" | awk '{print $2, $3}')
+
+            if [[ "$gen" == "$current" ]]; then
+                echo "→ #$gen  $date  ⭐ current"
+            else
+                echo "  #$gen  $date"
+            fi
+        done
+
+        echo ""
+        echo "Total: $(echo "$generations" | wc -l) generations"
+      '' else ''
+        #!/usr/bin/env bash
+        # Enhanced generation listing for NixOS
+
+        echo "📜 System Generations (NixOS)"
+        echo "============================"
+        echo ""
+
+        generations=$(sudo nixos-rebuild list-generations 2>/dev/null)
+
+        if [[ -z "$generations" ]]; then
+            echo "No generations found"
+            exit 0
+        fi
+
+        # Get current generation
+        current=$(echo "$generations" | tail -1 | awk '{print $1}')
+
+        echo "$generations" | while read -r line; do
+            gen=$(echo "$line" | awk '{print $1}')
+            date=$(echo "$line" | awk '{print $2, $3}')
+
+            if [[ "$gen" == "$current" ]]; then
+                echo "→ #$gen  $date  ⭐ current"
+            else
+                echo "  #$gen  $date"
+            fi
+        done
+
+        echo ""
+        echo "Total: $(echo "$generations" | wc -l) generations"
+      '';
+      executable = true;
+    };
+
     "Scripts/nixsearch" = {
       text = ''
         #!/usr/bin/env bash
         # Enhanced nix search with package preview
-        
+
         if [[ $# -eq 0 ]]; then
             echo "Usage: nixsearch <package_name>"
             echo "Example: nixsearch firefox"
             exit 1
         fi
-        
+
         package="$1"
         echo "🔍 Searching for: $package"
         echo ""
-        
+
         # Search and format output
         nix search nixpkgs "$package" --json 2>/dev/null | \
         jq -r 'to_entries[] | "📦 \(.key)\n   \(.value.description // "No description")\n   Version: \(.value.version // "unknown")\n"' | \
         head -20
-        
+
         if [[ $? -ne 0 ]]; then
             echo "Search failed. Trying basic search..."
             nix search nixpkgs "$package" | head -10
@@ -713,8 +1009,6 @@
       
       # Smart Nix helpers
       nixtest = "nix flake check ~/.dotfiles";
-      nixclean = "nix-collect-garbage -d && nix-store --optimize";
-      nixgen = if pkgs.stdenv.isDarwin then "darwin-rebuild --list-generations" else "nixos-rebuild list-generations";
       
       # Enhanced clipboard shortcuts
       cb = "clipshow";          # Show clipboard contents
