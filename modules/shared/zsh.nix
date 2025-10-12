@@ -13,7 +13,7 @@
     tree-sitter
     gh
     codex
-    opencode
+    #opencode
   ];
 
   home.file = {
