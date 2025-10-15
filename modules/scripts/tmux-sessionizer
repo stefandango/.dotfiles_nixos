@@ -16,6 +16,12 @@ find_projects() {
     # Find Git repositories and immediate subdirectories only
     for path in "${paths[@]}"; do
         [[ -d "$path" ]] || continue
+
+        # Include direct children so freshly created Dev folders appear even before `git init`
+        find "$path" -mindepth 1 -maxdepth 1 -type d \
+            -not -name ".git" \
+            -not -path "*/.git" \
+            -print 2>/dev/null
         
         # First, find direct subdirectories that are Git repos
         find "$path" -mindepth 1 -maxdepth "$SESSIONIZER_MAX_DEPTH" -name ".git" -type d 2>/dev/null | \

@@ -57,6 +57,8 @@
   # Homebrew integration
   homebrew = {
     enable = true;
+    onActivation.cleanup = "uninstall";
+    caskArgs.appdir = "/Applications";
     caskArgs.no_quarantine = true;
     global.brewfile = true;
     masApps = { };
@@ -64,15 +66,15 @@
       "raycast"
       "kitty"
       "pearcleaner"
-      "devutils"  
-      "bartender"
-      "handbrake"
+      "devutils"
+      "handbrake-app"
       "alt-tab"
       "dbeaver-community"
-      "font-monaspace-nerd-font"
+      "jordanbaird-ice"
+      "font-monaspice-nerd-font"
       "font-noto-sans-symbols-2"
     ];
-    brews = [ "python" "uv" ];
+    brews = [ "uv" ];
   };
 
   # Touch ID for sudo

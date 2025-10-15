@@ -8,7 +8,7 @@ in
 	home-manager.users.${vars.user} = {
 		home = {
 			packages = with pkgs; [
-				rofi-wayland
+				rofi
 			];
 
 			file = with colors.scheme.default.hex; {
