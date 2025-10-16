@@ -13,12 +13,19 @@
     tree-sitter
     gh
     codex
+    tokei
     #opencode
   ];
 
   home.file = {
     "Scripts/tmux-sessionizer" = {
       source = ../scripts/tmux-sessionizer;
+      recursive = true;
+      executable = true;
+    };
+
+    "Scripts/projstats" = {
+      source = ../scripts/projstats;
       recursive = true;
       executable = true;
     };
@@ -928,18 +935,18 @@
       text = ''
         #!/usr/bin/env bash
         # Pre-flight checks before nixswitch
-        
+
         echo "🔍 Validating Nix configuration..."
         echo ""
-        
+
         # Check if in correct directory
         if [[ ! -f ~/.dotfiles/flake.nix ]]; then
             echo "❌ flake.nix not found in ~/.dotfiles"
             exit 1
         fi
-        
+
         echo "✅ Found flake.nix"
-        
+
         # Check syntax
         echo -n "🔧 Checking flake syntax... "
         if nix flake check ~/.dotfiles --no-build 2>/dev/null; then
@@ -949,10 +956,10 @@
             echo "Run 'nix flake check ~/.dotfiles' for details"
             exit 1
         fi
-        
+
         # Check for common issues
         echo -n "🔍 Checking for common issues... "
-        
+
         # Check for missing files
         if grep -r "source.*=" ~/.dotfiles/modules/ 2>/dev/null | grep -v ".nix:" | head -1 >/dev/null; then
             echo "⚠️  Found potential missing file references"
@@ -960,7 +967,7 @@
         else
             echo "✅ No obvious issues"
         fi
-        
+
         echo ""
         echo "🚀 Configuration looks good! Run 'nixswitch' to apply."
       '';
