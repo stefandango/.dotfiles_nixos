@@ -241,7 +241,7 @@ if [[ -f requirements.txt ]] || [[ -f pyproject.toml ]]; then
 fi
 
 # Check for .NET projects
-if ls *.csproj >/dev/null 2>&1 || ls *.fsproj >/dev/null 2>&1 || ls *.vbproj >/dev/null 2>&1 || [[ -f *.sln ]]; then
+if ls *.csproj >/dev/null 2>&1 || ls *.fsproj >/dev/null 2>&1 || ls *.vbproj >/dev/null 2>&1 || ls *.sln >/dev/null 2>&1 || ls *.slnx >/dev/null 2>&1; then
     echo "🔷 .NET Project"
     printf '─%.0s' {1..50}
     echo ""
@@ -265,10 +265,19 @@ if ls *.csproj >/dev/null 2>&1 || ls *.fsproj >/dev/null 2>&1 || ls *.vbproj >/d
         echo "   VB.NET projects: $vbproj_count"
     fi
 
-    # Check for solution file
-    if ls *.sln >/dev/null 2>&1; then
-        sln_count=$(ls *.sln 2>/dev/null | wc -l | tr -d ' ')
-        echo "   Solution files: $sln_count"
+    # Check for solution files (both .sln and .slnx)
+    sln_count=$(ls *.sln 2>/dev/null | wc -l | tr -d ' ')
+    slnx_count=$(ls *.slnx 2>/dev/null | wc -l | tr -d ' ')
+    total_sln=$((sln_count + slnx_count))
+
+    if [[ $total_sln -gt 0 ]]; then
+        if [[ $sln_count -gt 0 ]] && [[ $slnx_count -gt 0 ]]; then
+            echo "   Solution files: $total_sln (.sln: $sln_count, .slnx: $slnx_count)"
+        elif [[ $sln_count -gt 0 ]]; then
+            echo "   Solution files: $sln_count (.sln)"
+        else
+            echo "   Solution files: $slnx_count (.slnx)"
+        fi
     fi
 
     # Try to get target framework from first csproj
