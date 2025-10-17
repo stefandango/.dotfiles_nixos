@@ -240,16 +240,25 @@ if [[ -f requirements.txt ]] || [[ -f pyproject.toml ]]; then
     echo ""
 fi
 
-# Check for .NET projects
-if ls *.csproj >/dev/null 2>&1 || ls *.fsproj >/dev/null 2>&1 || ls *.vbproj >/dev/null 2>&1 || ls *.sln >/dev/null 2>&1 || ls *.slnx >/dev/null 2>&1; then
+# Check for .NET projects (search recursively up to 3 levels deep)
+if [[ -f global.json ]] || [[ -f Directory.Build.props ]] || \
+   find . -maxdepth 3 -type f \( -name "*.csproj" -o -name "*.fsproj" -o -name "*.vbproj" -o -name "*.sln" -o -name "*.slnx" \) 2>/dev/null | grep -q .; then
     echo "🔷 .NET Project"
     printf '─%.0s' {1..50}
     echo ""
 
-    # Count project files
-    csproj_count=$(ls *.csproj 2>/dev/null | wc -l | tr -d ' ')
-    fsproj_count=$(ls *.fsproj 2>/dev/null | wc -l | tr -d ' ')
-    vbproj_count=$(ls *.vbproj 2>/dev/null | wc -l | tr -d ' ')
+    # Check for .NET SDK version from global.json
+    if [[ -f global.json ]]; then
+        sdk_version=$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' global.json 2>/dev/null | head -1)
+        if [[ -n "$sdk_version" ]]; then
+            echo "   .NET SDK: $sdk_version"
+        fi
+    fi
+
+    # Count project files recursively
+    csproj_count=$(find . -maxdepth 3 -name "*.csproj" 2>/dev/null | wc -l | tr -d ' ')
+    fsproj_count=$(find . -maxdepth 3 -name "*.fsproj" 2>/dev/null | wc -l | tr -d ' ')
+    vbproj_count=$(find . -maxdepth 3 -name "*.vbproj" 2>/dev/null | wc -l | tr -d ' ')
 
     total_projects=$((csproj_count + fsproj_count + vbproj_count))
 
@@ -266,8 +275,8 @@ if ls *.csproj >/dev/null 2>&1 || ls *.fsproj >/dev/null 2>&1 || ls *.vbproj >/d
     fi
 
     # Check for solution files (both .sln and .slnx)
-    sln_count=$(ls *.sln 2>/dev/null | wc -l | tr -d ' ')
-    slnx_count=$(ls *.slnx 2>/dev/null | wc -l | tr -d ' ')
+    sln_count=$(find . -maxdepth 2 -name "*.sln" 2>/dev/null | wc -l | tr -d ' ')
+    slnx_count=$(find . -maxdepth 2 -name "*.slnx" 2>/dev/null | wc -l | tr -d ' ')
     total_sln=$((sln_count + slnx_count))
 
     if [[ $total_sln -gt 0 ]]; then
@@ -280,14 +289,60 @@ if ls *.csproj >/dev/null 2>&1 || ls *.fsproj >/dev/null 2>&1 || ls *.vbproj >/d
         fi
     fi
 
-    # Try to get target framework from first csproj
+    # Try to get target framework and dependencies from first csproj
     if [[ $csproj_count -gt 0 ]]; then
-        first_csproj=$(ls *.csproj 2>/dev/null | head -1)
+        first_csproj=$(find . -maxdepth 3 -name "*.csproj" 2>/dev/null | head -1)
         if [[ -f "$first_csproj" ]]; then
-            target_framework=$(grep -oP '(?<=<TargetFramework>)[^<]+' "$first_csproj" 2>/dev/null | head -1)
+            # Extract target framework (works on both macOS and Linux)
+            target_framework=$(sed -n 's/.*<TargetFramework>\([^<]*\)<\/TargetFramework>.*/\1/p' "$first_csproj" | head -1)
+            if [[ -z "$target_framework" ]]; then
+                # Try TargetFrameworks (plural) for multi-targeting
+                target_framework=$(sed -n 's/.*<TargetFrameworks>\([^<]*\)<\/TargetFrameworks>.*/\1/p' "$first_csproj" | head -1)
+            fi
+
             if [[ -n "$target_framework" ]]; then
                 echo "   Target framework: $target_framework"
             fi
+
+            # Count PackageReference dependencies (check all csproj files)
+            total_pkg_refs=0
+            while IFS= read -r proj; do
+                [[ -z "$proj" ]] && continue
+                count=$(grep -c '<PackageReference' "$proj" 2>/dev/null || echo "0")
+                count=$(echo "$count" | tr -d '[:space:]')
+                [[ -n "$count" && "$count" =~ ^[0-9]+$ ]] && total_pkg_refs=$((total_pkg_refs + count))
+            done < <(find . -maxdepth 3 -name "*.csproj" 2>/dev/null)
+
+            # Also check Directory.Packages.props for central package management
+            if [[ -f Directory.Packages.props ]]; then
+                central_pkgs=$(grep -c '<PackageVersion' Directory.Packages.props 2>/dev/null || echo "0")
+                if [[ $central_pkgs -gt 0 ]]; then
+                    echo "   NuGet packages: $central_pkgs (centrally managed)"
+                fi
+            elif [[ $total_pkg_refs -gt 0 ]]; then
+                echo "   NuGet packages: $total_pkg_refs"
+            fi
+
+            # Count ProjectReference dependencies
+            total_proj_refs=0
+            while IFS= read -r proj; do
+                [[ -z "$proj" ]] && continue
+                count=$(grep -c '<ProjectReference' "$proj" 2>/dev/null || echo "0")
+                count=$(echo "$count" | tr -d '[:space:]')
+                [[ -n "$count" && "$count" =~ ^[0-9]+$ ]] && total_proj_refs=$((total_proj_refs + count))
+            done < <(find . -maxdepth 3 -name "*.csproj" 2>/dev/null)
+
+            if [[ $total_proj_refs -gt 0 ]]; then
+                echo "   Project references: $total_proj_refs"
+            fi
+        fi
+    fi
+
+    # If packages.config exists (older .NET Framework style)
+    if [[ -f packages.config ]]; then
+        packages_count=$(grep -c '<package ' packages.config 2>/dev/null || echo "0")
+        if [[ $packages_count -gt 0 ]]; then
+            echo "   NuGet packages: $packages_count (packages.config)"
         fi
     fi
 
