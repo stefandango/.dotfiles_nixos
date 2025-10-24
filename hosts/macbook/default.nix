@@ -43,6 +43,7 @@
   environment.systemPackages = with pkgs; [
     powershell
     vlc-bin
+    pom  # Terminal-based Pomodoro timer with notifications
   ];
 
   # Font management

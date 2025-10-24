@@ -41,6 +41,7 @@
     # Development tools
     direnv
     nix-direnv
+    go
 
     # Modern CLI tools
     btop
