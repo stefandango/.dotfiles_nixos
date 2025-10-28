@@ -1065,7 +1065,7 @@
       ];
     };
     initContent = ''
-      export PATH="$PATH:/home/stefan/.dotnet/tools:/Users/stefan/.dotnet/tools:$HOME/Scripts"
+      export PATH="$PATH:/home/stefan/.dotnet/tools:/Users/stefan/.dotnet/tools:$HOME/Scripts:$HOME/go/bin"
       
       # Tmux sessionizer
       bindkey -s ^f '~/Scripts/tmux-sessionizer\n'
