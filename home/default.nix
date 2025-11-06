@@ -23,6 +23,7 @@
     ripgrep
     curl
     btop
+    gopls  # Go language server
   ];
 
   # Enable home-manager
