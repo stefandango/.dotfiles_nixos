@@ -1013,7 +1013,11 @@
       # Quick directory shortcuts
       dev = "cd ~/Dev";
       dots = "cd ~/.dotfiles";
-      
+
+      # Zoxide shortcuts (smarter cd)
+      z = "zoxide";
+      zi = "zoxide query -i";  # Interactive selection
+
       # Smart Nix helpers
       nixtest = "nix flake check ~/.dotfiles";
       
@@ -1066,19 +1070,22 @@
     };
     initContent = ''
       export PATH="$PATH:/home/stefan/.dotnet/tools:/Users/stefan/.dotnet/tools:$HOME/Scripts:$HOME/go/bin"
-      
+
+      # Initialize zoxide (smarter cd)
+      eval "$(zoxide init zsh)"
+
       # Tmux sessionizer
       bindkey -s ^f '~/Scripts/tmux-sessionizer\n'
-      
+
       # Enhanced clipboard bindings
       bindkey -s '^[c' 'clipshow\n'        # Alt+c to show clipboard
       bindkey -s '^[v' 'paste\n'           # Alt+v to paste from clipboard
       bindkey -s '^[x' 'clipclear\n'       # Alt+x to clear clipboard
-      
+
       # Quick clipboard functions
       cpwd() { pwd | clip && echo "📋 Copied current directory to clipboard"; }
       ccat() { cat "$1" | clip && echo "📋 Copied $1 to clipboard"; }
-      
+
       eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)"
     '';
   };
