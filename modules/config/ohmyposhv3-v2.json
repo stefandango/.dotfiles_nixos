@@ -52,31 +52,31 @@
                     "type": "dotnet",
                     "style": "plain",
                     "foreground": "#512bd4",
-                    "template": " │ [ .NET:{{ .Full }} ]"
+                    "template": " │ [  :{{ .Full }} ]"
                 },
                 {
                     "type": "node",
                     "style": "plain",
                     "foreground": "#6cc24a",
-                    "template": " │ [ node:{{ .Full }} ]"
+                    "template": " │ [  :{{ .Full }} ]"
                 },
                 {
                     "type": "python",
                     "style": "plain",
                     "foreground": "#ffb347",
-                    "template": " │ [ py:{{ .Full }} ]"
+                    "template": " │ [  :{{ .Full }} ]"
                 },
                 {
                     "type": "rust",
                     "style": "plain",
                     "foreground": "#ce422b",
-                    "template": " │ [ rust:{{ .Full }} ]"
+                    "template": " │ [  :{{ .Full }} ]"
                 },
                 {
                     "type": "go",
                     "style": "plain",
                     "foreground": "#00add8",
-                    "template": " │ [ go:{{ .Full }} ]"
+                    "template": " │ [ 󰟓 {{ .Full }} ]"
                 },
                 {
                     "type": "nix-shell",
