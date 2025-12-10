@@ -52,37 +52,37 @@
                     "type": "dotnet",
                     "style": "plain",
                     "foreground": "#512bd4",
-                    "template": " │ [  :{{ .Full }} ]"
+                    "template": " [  :{{ .Full }} ]"
                 },
                 {
                     "type": "node",
                     "style": "plain",
                     "foreground": "#6cc24a",
-                    "template": " │ [  :{{ .Full }} ]"
+                    "template": " [  :{{ .Full }} ]"
                 },
                 {
                     "type": "python",
                     "style": "plain",
                     "foreground": "#ffb347",
-                    "template": " │ [  :{{ .Full }} ]"
+                    "template": " [  :{{ .Full }} ]"
                 },
                 {
                     "type": "rust",
                     "style": "plain",
                     "foreground": "#ce422b",
-                    "template": " │ [  :{{ .Full }} ]"
+                    "template": " [  :{{ .Full }} ]"
                 },
                 {
                     "type": "go",
                     "style": "plain",
                     "foreground": "#00add8",
-                    "template": " │ [ 󰟓 {{ .Full }} ]"
+                    "template": " [ 󰟓 {{ .Full }} ]"
                 },
                 {
                     "type": "nix-shell",
                     "style": "plain",
                     "foreground": "#7ab2d3",
-                    "template": "{{ if and .Type (ne .Type \"unknown\") }} │ [ nix:{{ .Type }} ]{{end}}"
+                    "template": "{{ if and .Type (ne .Type \"unknown\") }} [ nix:{{ .Type }} ]{{end}}"
                 }
             ]
         },
