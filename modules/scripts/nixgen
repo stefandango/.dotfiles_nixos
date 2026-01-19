@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Enhanced generation listing (cross-platform)
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    echo "📜 System Generations (Darwin)"
+    echo "=============================="
+    echo ""
+
+    generations=$(darwin-rebuild --list-generations 2>/dev/null)
+else
+    echo "📜 System Generations (NixOS)"
+    echo "============================"
+    echo ""
+
+    generations=$(sudo nixos-rebuild list-generations 2>/dev/null)
+fi
+
+if [[ -z "$generations" ]]; then
+    echo "No generations found"
+    exit 0
+fi
+
+# Get current generation
+current=$(echo "$generations" | tail -1 | awk '{print $1}')
+
+echo "$generations" | while read -r line; do
+    gen=$(echo "$line" | awk '{print $1}')
+    date=$(echo "$line" | awk '{print $2, $3}')
+
+    if [[ "$gen" == "$current" ]]; then
+        echo "→ #$gen  $date  ⭐ current"
+    else
+        echo "  #$gen  $date"
+    fi
+done
+
+echo ""
+echo "Total: $(echo "$generations" | wc -l) generations"

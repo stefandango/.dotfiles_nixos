@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Paste clipboard contents to file or stdout
+
+if [[ $# -eq 0 ]]; then
+    # Output to stdout
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        pbpaste
+    elif command -v xclip >/dev/null 2>&1; then
+        xclip -selection clipboard -o
+    elif command -v wl-paste >/dev/null 2>&1; then
+        wl-paste
+    else
+        echo "Error: No clipboard tool found (pbpaste/xclip/wl-paste)"
+        exit 1
+    fi
+else
+    # Write to file
+    file="$1"
+
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        pbpaste > "$file"
+    elif command -v xclip >/dev/null 2>&1; then
+        xclip -selection clipboard -o > "$file"
+    elif command -v wl-paste >/dev/null 2>&1; then
+        wl-paste > "$file"
+    else
+        echo "Error: No clipboard tool found (pbpaste/xclip/wl-paste)"
+        exit 1
+    fi
+
+    echo "Pasted clipboard contents to '$file'"
+fi

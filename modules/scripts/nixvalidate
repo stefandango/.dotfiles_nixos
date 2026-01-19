@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Pre-flight checks before nixswitch
+
+echo "🔍 Validating Nix configuration..."
+echo ""
+
+# Check if in correct directory
+if [[ ! -f ~/.dotfiles/flake.nix ]]; then
+    echo "❌ flake.nix not found in ~/.dotfiles"
+    exit 1
+fi
+
+echo "✅ Found flake.nix"
+
+# Check syntax
+echo -n "🔧 Checking flake syntax... "
+if nix flake check ~/.dotfiles --no-build 2>/dev/null; then
+    echo "✅ Syntax OK"
+else
+    echo "❌ Syntax errors found"
+    echo "Run 'nix flake check ~/.dotfiles' for details"
+    exit 1
+fi
+
+# Check for common issues
+echo -n "🔍 Checking for common issues... "
+
+# Check for missing files
+if grep -r "source.*=" ~/.dotfiles/modules/ 2>/dev/null | grep -v ".nix:" | head -1 >/dev/null; then
+    echo "⚠️  Found potential missing file references"
+    grep -r "source.*=" ~/.dotfiles/modules/ | grep -v ".nix:" | head -3
+else
+    echo "✅ No obvious issues"
+fi
+
+echo ""
+echo "🚀 Configuration looks good! Run 'nixswitch' to apply."

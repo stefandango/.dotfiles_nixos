@@ -20,978 +20,143 @@
   home.file = {
     "Scripts/tmux-sessionizer" = {
       source = ../scripts/tmux-sessionizer;
-      recursive = true;
       executable = true;
     };
 
     "Scripts/projstats" = {
       source = ../scripts/projstats;
-      recursive = true;
       executable = true;
     };
-    
+
     "Scripts/nixswitch" = {
-      text = if pkgs.stdenv.isDarwin then ''
-        #!/usr/bin/env bash
-        # Enhanced nixswitch for macOS with visual feedback
-
-        set -e
-
-        echo "🔨 Building configuration..."
-        echo ""
-
-        build_start=$(date +%s)
-
-        if nom build ~/.dotfiles#darwinConfigurations.Stefans-MacBook-Pro.system "$@"; then
-            build_end=$(date +%s)
-            build_time=$((build_end - build_start))
-
-            echo ""
-            echo "✅ Build completed in ''${build_time}s"
-            echo ""
-            echo "🔄 Activating configuration..."
-            echo ""
-
-            switch_start=$(date +%s)
-
-            if darwin-rebuild switch --flake ~/.dotfiles#Stefans-MacBook-Pro "$@"; then
-                switch_end=$(date +%s)
-                switch_time=$((switch_end - switch_start))
-
-                echo ""
-                echo "✨ Successfully switched! (''${switch_time}s)"
-
-                # Show new generation
-                new_gen=$(darwin-rebuild --list-generations 2>/dev/null | tail -1 | awk '{print $1}')
-                echo "   Generation: #$new_gen"
-
-                total_time=$((build_time + switch_time))
-                echo "   Total time: ''${total_time}s"
-                echo ""
-            else
-                echo ""
-                echo "❌ Failed to activate configuration"
-                exit 1
-            fi
-        else
-            echo ""
-            echo "❌ Build failed"
-            exit 1
-        fi
-      '' else ''
-        #!/usr/bin/env bash
-        # Enhanced nixswitch for NixOS with visual feedback
-
-        set -e
-
-        echo "🔨 Building configuration..."
-        echo ""
-
-        build_start=$(date +%s)
-
-        if nom build ~/.dotfiles#nixosConfigurations.stefan.config.system.build.toplevel "$@"; then
-            build_end=$(date +%s)
-            build_time=$((build_end - build_start))
-
-            echo ""
-            echo "✅ Build completed in ''${build_time}s"
-            echo ""
-            echo "🔄 Activating configuration..."
-            echo ""
-
-            switch_start=$(date +%s)
-
-            if sudo nixos-rebuild switch --flake ~/.dotfiles#stefan "$@"; then
-                switch_end=$(date +%s)
-                switch_time=$((switch_end - switch_start))
-
-                echo ""
-                echo "✨ Successfully switched! (''${switch_time}s)"
-
-                # Show new generation
-                new_gen=$(nixos-rebuild list-generations 2>/dev/null | tail -1 | awk '{print $1}')
-                echo "   Generation: #$new_gen"
-
-                total_time=$((build_time + switch_time))
-                echo "   Total time: ''${total_time}s"
-                echo ""
-            else
-                echo ""
-                echo "❌ Failed to activate configuration"
-                exit 1
-            fi
-        else
-            echo ""
-            echo "❌ Build failed"
-            exit 1
-        fi
-      '';
+      source = ../scripts/nixswitch;
       executable = true;
     };
-    
+
     "Scripts/nixup" = {
-      text = ''
-        #!/usr/bin/env bash
-        # Enhanced Nix update with progress tracking
-
-        set -e
-
-        echo "❄️  Nix Update & Rebuild"
-        echo "======================="
-        echo ""
-
-        # Navigate to dotfiles
-        pushd ~/.dotfiles > /dev/null
-
-        # Show current state
-        echo "📍 Current state:"
-        if [[ -f flake.lock ]]; then
-            last_update=$(date -r flake.lock "+%Y-%m-%d %H:%M" 2>/dev/null || echo "unknown")
-            echo "   Last update: $last_update"
-        fi
-        echo ""
-
-        # Update flake inputs
-        echo "🔄 [1/3] Updating flake inputs..."
-        echo "─────────────────────────────────"
-
-        if nix flake update 2>&1 | while IFS= read -r line; do
-            if [[ "$line" =~ Updated.*input ]]; then
-                input=$(echo "$line" | sed -E "s/.*'([^']+)'.*/\1/")
-                echo "   ✓ Updated: $input"
-            elif [[ "$line" =~ warning ]]; then
-                echo "   ⚠ $line"
-            fi
-        done; then
-            echo ""
-            echo "✅ Flake inputs updated"
-        else
-            echo "❌ Failed to update flake inputs"
-            popd > /dev/null
-            exit 1
-        fi
-        echo ""
-
-        # Show what changed
-        echo "📝 Changes in flake.lock:"
-        git diff --no-index --color=always --word-diff=color /dev/null flake.lock 2>/dev/null | head -20 || echo "   (no changes)"
-        echo ""
-
-        # Build and switch
-        echo "🔨 [2/3] Building new configuration..."
-        echo "─────────────────────────────────────"
-        ~/Scripts/nixswitch
-
-        if [[ $? -eq 0 ]]; then
-            echo ""
-            echo "🎉 [3/3] Update complete!"
-            echo "─────────────────────────"
-
-            # Show new state
-            if [[ "$OSTYPE" == "darwin"* ]]; then
-                new_gen=$(darwin-rebuild --list-generations 2>/dev/null | tail -1)
-            else
-                new_gen=$(nixos-rebuild list-generations 2>/dev/null | tail -1)
-            fi
-
-            echo "   New generation: $new_gen"
-            echo ""
-            echo "✨ Your system is now up to date!"
-        else
-            echo ""
-            echo "❌ Build failed. Check errors above."
-            popd > /dev/null
-            exit 1
-        fi
-
-        popd > /dev/null
-      '';
+      source = ../scripts/nixup;
       executable = true;
     };
-    
+
     "Scripts/tmux-battery" = {
-      text = ''
-        #!/usr/bin/env bash
-        
-        # Cross-platform battery script for tmux
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            # macOS using pmset
-            battery_info=$(pmset -g batt)
-            if echo "$battery_info" | grep -q "Battery Power"; then
-                percentage=$(echo "$battery_info" | grep -o '[0-9]\+%' | head -n 1)
-                percentage_num=$(echo "$percentage" | tr -d '%')
-                
-                if echo "$battery_info" | grep -q "charging"; then
-                    icon="󰂄"
-                    color="#40c4ff"
-                elif [[ $percentage_num -le 20 ]]; then
-                    icon="󰁺"
-                    color="#f7768e"
-                elif [[ $percentage_num -le 50 ]]; then
-                    icon="󰁾"
-                    color="#e0af68"
-                else
-                    icon="󰁹"
-                    color="#9ece6a"
-                fi
-                
-                echo "#[fg=$color]$icon $percentage"
-            fi
-        elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-            # Linux using /sys/class/power_supply
-            if [[ -d "/sys/class/power_supply/BAT0" ]]; then
-                capacity=$(cat /sys/class/power_supply/BAT0/capacity 2>/dev/null || echo "0")
-                status=$(cat /sys/class/power_supply/BAT0/status 2>/dev/null || echo "Unknown")
-                
-                if [[ "$status" == "Charging" ]]; then
-                    icon="󰂄"
-                    color="#40c4ff"
-                elif [[ $capacity -le 20 ]]; then
-                    icon="󰁺"
-                    color="#f7768e"
-                elif [[ $capacity -le 50 ]]; then
-                    icon="󰁾"
-                    color="#e0af68"
-                else
-                    icon="󰁹"
-                    color="#9ece6a"
-                fi
-                
-                echo "#[fg=$color]$icon $capacity%"
-            fi
-        fi
-      '';
+      source = ../scripts/tmux-battery;
       executable = true;
     };
 
-    # Development Environment Scripts
     "Scripts/checkport" = {
-      text = ''
-        #!/usr/bin/env bash
-        # Check what's running on a specific port
-        
-        if [[ $# -eq 0 ]]; then
-            echo "Usage: checkport <port>"
-            echo "Example: checkport 3000"
-            exit 1
-        fi
-        
-        port=$1
-        
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            # macOS
-            result=$(lsof -i :$port -P -n 2>/dev/null)
-            if [[ -n "$result" ]]; then
-                echo "Port $port is in use:"
-                echo "$result"
-            else
-                echo "Port $port is free"
-            fi
-        else
-            # Linux
-            result=$(ss -tulpn | grep ":$port ")
-            if [[ -n "$result" ]]; then
-                echo "Port $port is in use:"
-                echo "$result"
-            else
-                echo "Port $port is free"
-            fi
-        fi
-      '';
+      source = ../scripts/checkport;
       executable = true;
     };
 
     "Scripts/killport" = {
-      text = ''
-        #!/usr/bin/env bash
-        # Kill process using a specific port
-        
-        if [[ $# -eq 0 ]]; then
-            echo "Usage: killport <port>"
-            echo "Example: killport 3000"
-            exit 1
-        fi
-        
-        port=$1
-        
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            # macOS
-            pids=$(lsof -ti :$port 2>/dev/null)
-        else
-            # Linux  
-            pids=$(ss -tulpn | grep ":$port " | awk '{print $7}' | cut -d',' -f2 | cut -d'=' -f2)
-        fi
-        
-        if [[ -n "$pids" ]]; then
-            echo "Killing processes on port $port: $pids"
-            echo "$pids" | xargs kill -9 2>/dev/null
-            echo "Done"
-        else
-            echo "No processes found on port $port"
-        fi
-      '';
+      source = ../scripts/killport;
       executable = true;
     };
-    
+
     "Scripts/serve" = {
-      text = ''
-        #!/usr/bin/env bash
-        # Start simple HTTP server in current directory
-        
-        port=''${1:-8000}
-        
-        echo "Starting HTTP server on port $port..."
-        echo "Serving: $(pwd)"
-        echo "URL: http://localhost:$port"
-        echo "Press Ctrl+C to stop"
-        echo ""
-        
-        if command -v python3 >/dev/null 2>&1; then
-            python3 -m http.server $port
-        elif command -v python >/dev/null 2>&1; then
-            python -m SimpleHTTPServer $port
-        else
-            echo "Error: Python not found"
-            exit 1
-        fi
-      '';
+      source = ../scripts/serve;
       executable = true;
     };
-    
+
     "Scripts/json" = {
-      text = ''
-        #!/usr/bin/env bash
-        # Pretty print JSON from stdin or file
-        
-        if [[ $# -eq 0 ]]; then
-            # Read from stdin
-            if command -v jq >/dev/null 2>&1; then
-                jq .
-            elif command -v python3 >/dev/null 2>&1; then
-                python3 -m json.tool
-            else
-                echo "Error: jq or python3 required for JSON formatting"
-                exit 1
-            fi
-        else
-            # Read from file
-            file="$1"
-            if [[ ! -f "$file" ]]; then
-                echo "Error: File '$file' not found"
-                exit 1
-            fi
-            
-            if command -v jq >/dev/null 2>&1; then
-                jq . "$file"
-            elif command -v python3 >/dev/null 2>&1; then
-                python3 -m json.tool "$file"
-            else
-                echo "Error: jq or python3 required for JSON formatting"
-                exit 1
-            fi
-        fi
-      '';
+      source = ../scripts/json;
       executable = true;
     };
 
-    # Clipboard Integration Scripts
     "Scripts/copy" = {
-      text = ''
-        #!/usr/bin/env bash
-        # Copy file contents or stdin to clipboard
-        
-        if [[ $# -eq 0 ]]; then
-            # Read from stdin
-            if [[ "$OSTYPE" == "darwin"* ]]; then
-                pbcopy
-            elif command -v xclip >/dev/null 2>&1; then
-                xclip -selection clipboard
-            elif command -v wl-copy >/dev/null 2>&1; then
-                wl-copy
-            else
-                echo "Error: No clipboard tool found (pbcopy/xclip/wl-copy)"
-                exit 1
-            fi
-        else
-            # Read from file
-            file="$1"
-            if [[ ! -f "$file" ]]; then
-                echo "Error: File '$file' not found"
-                exit 1
-            fi
-            
-            if [[ "$OSTYPE" == "darwin"* ]]; then
-                pbcopy < "$file"
-            elif command -v xclip >/dev/null 2>&1; then
-                xclip -selection clipboard < "$file"
-            elif command -v wl-copy >/dev/null 2>&1; then
-                wl-copy < "$file"
-            else
-                echo "Error: No clipboard tool found (pbcopy/xclip/wl-copy)"
-                exit 1
-            fi
-            
-            echo "Copied contents of '$file' to clipboard"
-        fi
-      '';
+      source = ../scripts/copy;
       executable = true;
     };
-    
+
     "Scripts/paste" = {
-      text = ''
-        #!/usr/bin/env bash
-        # Paste clipboard contents to file or stdout
-        
-        if [[ $# -eq 0 ]]; then
-            # Output to stdout
-            if [[ "$OSTYPE" == "darwin"* ]]; then
-                pbpaste
-            elif command -v xclip >/dev/null 2>&1; then
-                xclip -selection clipboard -o
-            elif command -v wl-paste >/dev/null 2>&1; then
-                wl-paste
-            else
-                echo "Error: No clipboard tool found (pbpaste/xclip/wl-paste)"
-                exit 1
-            fi
-        else
-            # Write to file
-            file="$1"
-            
-            if [[ "$OSTYPE" == "darwin"* ]]; then
-                pbpaste > "$file"
-            elif command -v xclip >/dev/null 2>&1; then
-                xclip -selection clipboard -o > "$file"
-            elif command -v wl-paste >/dev/null 2>&1; then
-                wl-paste > "$file"
-            else
-                echo "Error: No clipboard tool found (pbpaste/xclip/wl-paste)"
-                exit 1
-            fi
-            
-            echo "Pasted clipboard contents to '$file'"
-        fi
-      '';
+      source = ../scripts/paste;
       executable = true;
     };
-    
+
     "Scripts/copypath" = {
-      text = ''
-        #!/usr/bin/env bash
-        # Copy current directory path or specified path to clipboard
-        
-        if [[ $# -eq 0 ]]; then
-            path=$(pwd)
-        else
-            path=$(realpath "$1" 2>/dev/null || echo "$1")
-        fi
-        
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            echo -n "$path" | pbcopy
-        elif command -v xclip >/dev/null 2>&1; then
-            echo -n "$path" | xclip -selection clipboard
-        elif command -v wl-copy >/dev/null 2>&1; then
-            echo -n "$path" | wl-copy
-        else
-            echo "Error: No clipboard tool found (pbcopy/xclip/wl-copy)"
-            exit 1
-        fi
-        
-        echo "Copied path to clipboard: $path"
-      '';
+      source = ../scripts/copypath;
       executable = true;
     };
 
-    # Enhanced clipboard utilities
     "Scripts/clipwatch" = {
-      text = ''
-        #!/usr/bin/env bash
-        # Watch clipboard contents and show changes
-        
-        echo "📋 Clipboard Watcher - Press Ctrl+C to stop"
-        echo "=========================================="
-        
-        last_clip=""
-        
-        while true; do
-            if [[ "$OSTYPE" == "darwin"* ]]; then
-                current_clip=$(pbpaste 2>/dev/null)
-            elif command -v xclip >/dev/null 2>&1; then
-                current_clip=$(xclip -selection clipboard -o 2>/dev/null)
-            elif command -v wl-paste >/dev/null 2>&1; then
-                current_clip=$(wl-paste 2>/dev/null)
-            else
-                echo "Error: No clipboard tool found"
-                exit 1
-            fi
-            
-            if [[ "$current_clip" != "$last_clip" ]]; then
-                echo "$(date '+%H:%M:%S') - Clipboard changed:"
-                echo "==================="
-                if [[ ''${#current_clip} -gt 100 ]]; then
-                    echo "''${current_clip:0:100}..."
-                else
-                    echo "$current_clip"
-                fi
-                echo ""
-                last_clip="$current_clip"
-            fi
-            
-            sleep 1
-        done
-      '';
+      source = ../scripts/clipwatch;
       executable = true;
     };
-    
+
     "Scripts/clipclear" = {
-      text = ''
-        #!/usr/bin/env bash
-        # Clear clipboard contents
-        
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            echo -n "" | pbcopy
-        elif command -v xclip >/dev/null 2>&1; then
-            echo -n "" | xclip -selection clipboard
-        elif command -v wl-copy >/dev/null 2>&1; then
-            echo -n "" | wl-copy
-        else
-            echo "Error: No clipboard tool found"
-            exit 1
-        fi
-        
-        echo "🗑️  Clipboard cleared"
-      '';
+      source = ../scripts/clipclear;
       executable = true;
     };
-    
+
     "Scripts/clipshow" = {
-      text = ''
-        #!/usr/bin/env bash
-        # Show clipboard contents with formatting
-        
-        echo "📋 Current Clipboard Contents:"
-        echo "=============================="
-        
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            content=$(pbpaste 2>/dev/null)
-        elif command -v xclip >/dev/null 2>&1; then
-            content=$(xclip -selection clipboard -o 2>/dev/null)
-        elif command -v wl-paste >/dev/null 2>&1; then
-            content=$(wl-paste 2>/dev/null)
-        else
-            echo "Error: No clipboard tool found"
-            exit 1
-        fi
-        
-        if [[ -z "$content" ]]; then
-            echo "(empty)"
-        else
-            echo "Length: ''${#content} characters"
-            echo "Lines: $(echo "$content" | wc -l)"
-            echo ""
-            echo "Content:"
-            echo "--------"
-            echo "$content"
-        fi
-      '';
+      source = ../scripts/clipshow;
       executable = true;
     };
 
-    # Network Utility Scripts
     "Scripts/myip" = {
-      text = ''
-        #!/usr/bin/env bash
-        # Get public IP address
-        
-        echo -n "Public IP: "
-        if command -v curl >/dev/null 2>&1; then
-            curl -s --max-time 5 ifconfig.me || \
-            curl -s --max-time 5 ipinfo.io/ip || \
-            curl -s --max-time 5 checkip.amazonaws.com || \
-            echo "Failed to get public IP"
-        else
-            echo "Error: curl is required"
-            exit 1
-        fi
-      '';
+      source = ../scripts/myip;
       executable = true;
     };
-    
+
     "Scripts/localip" = {
-      text = ''
-        #!/usr/bin/env bash
-        # Get local IP address
-        
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            # macOS
-            echo -n "Local IP: "
-            ipconfig getifaddr en0 2>/dev/null || \
-            ipconfig getifaddr en1 2>/dev/null || \
-            echo "No active network interface found"
-        else
-            # Linux
-            echo -n "Local IP: "
-            ip route get 1 2>/dev/null | awk '{print $7; exit}' || \
-            hostname -I 2>/dev/null | awk '{print $1}' || \
-            echo "No active network interface found"
-        fi
-      '';
+      source = ../scripts/localip;
       executable = true;
     };
-    
+
     "Scripts/speedtest" = {
-      text = ''
-        #!/usr/bin/env bash
-        # Run internet speed test
-        
-        echo "Running speed test..."
-        echo ""
-        
-        if command -v speedtest-cli >/dev/null 2>&1; then
-            speedtest-cli
-        else
-            echo "Installing speedtest-cli..."
-            if command -v curl >/dev/null 2>&1; then
-                curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python3
-            else
-                echo "Error: curl and python3 are required"
-                echo "Install speedtest-cli: pip install speedtest-cli"
-                exit 1
-            fi
-        fi
-      '';
+      source = ../scripts/speedtest;
       executable = true;
     };
-    
+
     "Scripts/netinfo" = {
-      text = ''
-        #!/usr/bin/env bash
-        # Show comprehensive network information
-        
-        echo "🌐 Network Information"
-        echo "===================="
-        echo ""
-        
-        # Local IP
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            local_ip=$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null)
-        else
-            local_ip=$(ip route get 1 2>/dev/null | awk '{print $7; exit}' || hostname -I 2>/dev/null | awk '{print $1}')
-        fi
-        
-        if [[ -n "$local_ip" ]]; then
-            echo "🏠 Local IP:  $local_ip"
-        else
-            echo "🏠 Local IP:  Not found"
-        fi
-        
-        # Public IP
-        echo -n "🌍 Public IP: "
-        if command -v curl >/dev/null 2>&1; then
-            public_ip=$(curl -s --max-time 3 ifconfig.me 2>/dev/null)
-            if [[ -n "$public_ip" ]]; then
-                echo "$public_ip"
-            else
-                echo "Unable to fetch"
-            fi
-        else
-            echo "curl not available"
-        fi
-        
-        # DNS servers
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            dns_servers=$(scutil --dns 2>/dev/null | grep nameserver | head -3 | awk '{print $3}' | tr '\n' ', ' | sed 's/,$//')
-        else
-            dns_servers=$(grep nameserver /etc/resolv.conf 2>/dev/null | awk '{print $2}' | tr '\n' ', ' | sed 's/,$//')
-        fi
-        
-        if [[ -n "$dns_servers" ]]; then
-            echo "🔍 DNS:       $dns_servers"
-        fi
-        
-        echo ""
-        echo "Run 'speedtest' for connection speed test"
-      '';
+      source = ../scripts/netinfo;
       executable = true;
     };
 
-    # Smart Nix Helper Scripts
     "Scripts/nixclean" = {
-      text = ''
-        #!/usr/bin/env bash
-        # Enhanced Nix cleanup with statistics
-
-        echo "🧹 Nix Store Cleanup"
-        echo "==================="
-        echo ""
-
-        # Get before stats
-        echo "📊 Current state:"
-
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            gen_count=$(darwin-rebuild --list-generations 2>/dev/null | wc -l || echo "0")
-        else
-            gen_count=$(sudo nixos-rebuild list-generations 2>/dev/null | wc -l || echo "0")
-        fi
-
-        store_size_before=$(du -sh /nix/store 2>/dev/null | awk '{print $1}' || echo "unknown")
-
-        echo "   Generations: $gen_count"
-        echo "   Store size: $store_size_before"
-        echo ""
-
-        # Ask for confirmation
-        read -p "🗑️  Delete old generations and optimize store? [y/N] " -n 1 -r
-        echo ""
-
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            echo "Cancelled."
-            exit 0
-        fi
-
-        echo ""
-        echo "🔄 Cleaning up..."
-        echo ""
-
-        # Delete old generations
-        echo "   → Deleting old generations..."
-        if nix-collect-garbage -d 2>&1 | grep -E "freed|removing" | head -5; then
-            echo "   ✅ Old generations removed"
-        fi
-
-        echo ""
-
-        # Optimize store
-        echo "   → Optimizing Nix store..."
-        if nix-store --optimize 2>&1 | grep -E "freed|bytes" | tail -3; then
-            echo "   ✅ Store optimized"
-        fi
-
-        echo ""
-        echo "─────────────────────────"
-        echo ""
-
-        # Get after stats
-        echo "📊 After cleanup:"
-
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            gen_count_after=$(darwin-rebuild --list-generations 2>/dev/null | wc -l || echo "0")
-        else
-            gen_count_after=$(sudo nixos-rebuild list-generations 2>/dev/null | wc -l || echo "0")
-        fi
-
-        store_size_after=$(du -sh /nix/store 2>/dev/null | awk '{print $1}' || echo "unknown")
-
-        echo "   Generations: $gen_count_after"
-        echo "   Store size: $store_size_after"
-        echo ""
-        echo "✨ Cleanup complete!"
-      '';
+      source = ../scripts/nixclean;
       executable = true;
     };
 
     "Scripts/nixgen" = {
-      text = if pkgs.stdenv.isDarwin then ''
-        #!/usr/bin/env bash
-        # Enhanced generation listing for Darwin
-
-        echo "📜 System Generations (Darwin)"
-        echo "=============================="
-        echo ""
-
-        generations=$(darwin-rebuild --list-generations 2>/dev/null)
-
-        if [[ -z "$generations" ]]; then
-            echo "No generations found"
-            exit 0
-        fi
-
-        # Get current generation
-        current=$(echo "$generations" | tail -1 | awk '{print $1}')
-
-        echo "$generations" | while read -r line; do
-            gen=$(echo "$line" | awk '{print $1}')
-            date=$(echo "$line" | awk '{print $2, $3}')
-
-            if [[ "$gen" == "$current" ]]; then
-                echo "→ #$gen  $date  ⭐ current"
-            else
-                echo "  #$gen  $date"
-            fi
-        done
-
-        echo ""
-        echo "Total: $(echo "$generations" | wc -l) generations"
-      '' else ''
-        #!/usr/bin/env bash
-        # Enhanced generation listing for NixOS
-
-        echo "📜 System Generations (NixOS)"
-        echo "============================"
-        echo ""
-
-        generations=$(sudo nixos-rebuild list-generations 2>/dev/null)
-
-        if [[ -z "$generations" ]]; then
-            echo "No generations found"
-            exit 0
-        fi
-
-        # Get current generation
-        current=$(echo "$generations" | tail -1 | awk '{print $1}')
-
-        echo "$generations" | while read -r line; do
-            gen=$(echo "$line" | awk '{print $1}')
-            date=$(echo "$line" | awk '{print $2, $3}')
-
-            if [[ "$gen" == "$current" ]]; then
-                echo "→ #$gen  $date  ⭐ current"
-            else
-                echo "  #$gen  $date"
-            fi
-        done
-
-        echo ""
-        echo "Total: $(echo "$generations" | wc -l) generations"
-      '';
+      source = ../scripts/nixgen;
       executable = true;
     };
 
     "Scripts/nixsearch" = {
-      text = ''
-        #!/usr/bin/env bash
-        # Enhanced nix search with package preview
-
-        if [[ $# -eq 0 ]]; then
-            echo "Usage: nixsearch <package_name>"
-            echo "Example: nixsearch firefox"
-            exit 1
-        fi
-
-        package="$1"
-        echo "🔍 Searching for: $package"
-        echo ""
-
-        # Search and format output
-        nix search nixpkgs "$package" --json 2>/dev/null | \
-        jq -r 'to_entries[] | "📦 \(.key)\n   \(.value.description // "No description")\n   Version: \(.value.version // "unknown")\n"' | \
-        head -20
-
-        if [[ $? -ne 0 ]]; then
-            echo "Search failed. Trying basic search..."
-            nix search nixpkgs "$package" | head -10
-        fi
-      '';
+      source = ../scripts/nixsearch;
       executable = true;
     };
-    
+
     "Scripts/nixinfo" = {
-      text = ''
-        #!/usr/bin/env bash
-        # Show Nix system information
-        
-        echo "❄️  Nix System Information"
-        echo "========================="
-        echo ""
-        
-        # Nix version
-        echo "📦 Nix version: $(nix --version 2>/dev/null || echo 'Not found')"
-        
-        # Current generation
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            current_gen=$(darwin-rebuild --list-generations 2>/dev/null | tail -1 | awk '{print $1}' || echo "unknown")
-            echo "🔄 Current generation: $current_gen"
-        else
-            current_gen=$(nixos-rebuild list-generations 2>/dev/null | tail -1 | awk '{print $1}' || echo "unknown")  
-            echo "🔄 Current generation: $current_gen"
-        fi
-        
-        # Flake status
-        if [[ -f ~/.dotfiles/flake.lock ]]; then
-            last_update=$(date -r ~/.dotfiles/flake.lock "+%Y-%m-%d %H:%M" 2>/dev/null || echo "unknown")
-            echo "🔒 Flake last updated: $last_update"
-        fi
-        
-        # Store info
-        if command -v nix >/dev/null 2>&1; then
-            store_size=$(du -sh /nix/store 2>/dev/null | awk '{print $1}' || echo "unknown")
-            echo "💾 Store size: $store_size"
-        fi
-        
-        # Available commands
-        echo ""
-        echo "🛠️  Available commands:"
-        echo "   nixswitch  - Apply configuration"
-        echo "   nixup      - Update flake and apply"  
-        echo "   nixtest    - Test configuration"
-        echo "   nixclean   - Clean up old generations"
-        echo "   nixgen     - List generations"
-        echo "   nixsearch  - Search packages"
-      '';
+      source = ../scripts/nixinfo;
       executable = true;
     };
-    
+
     "Scripts/nixvalidate" = {
-      text = ''
-        #!/usr/bin/env bash
-        # Pre-flight checks before nixswitch
+      source = ../scripts/nixvalidate;
+      executable = true;
+    };
 
-        echo "🔍 Validating Nix configuration..."
-        echo ""
-
-        # Check if in correct directory
-        if [[ ! -f ~/.dotfiles/flake.nix ]]; then
-            echo "❌ flake.nix not found in ~/.dotfiles"
-            exit 1
-        fi
-
-        echo "✅ Found flake.nix"
-
-        # Check syntax
-        echo -n "🔧 Checking flake syntax... "
-        if nix flake check ~/.dotfiles --no-build 2>/dev/null; then
-            echo "✅ Syntax OK"
-        else
-            echo "❌ Syntax errors found"
-            echo "Run 'nix flake check ~/.dotfiles' for details"
-            exit 1
-        fi
-
-        # Check for common issues
-        echo -n "🔍 Checking for common issues... "
-
-        # Check for missing files
-        if grep -r "source.*=" ~/.dotfiles/modules/ 2>/dev/null | grep -v ".nix:" | head -1 >/dev/null; then
-            echo "⚠️  Found potential missing file references"
-            grep -r "source.*=" ~/.dotfiles/modules/ | grep -v ".nix:" | head -3
-        else
-            echo "✅ No obvious issues"
-        fi
-
-        echo ""
-        echo "🚀 Configuration looks good! Run 'nixswitch' to apply."
-      '';
+    "Scripts/tmux-quit" = {
+      source = ../scripts/tmux-quit;
       executable = true;
     };
 
     ".config/oh-my-posh/ohmyposhv3-v2.json" = {
       source = ../config/ohmyposhv3-v2.json;
-      recursive = true;
     };
 
     ".omnisharp/omnisharp.json" = {
       source = ../config/omnisharp.json;
-      recursive = true;
     };
 
     ".config/lsd/colors.yaml" = {
       source = ../config/lsdtheme.yaml;
-      recursive = true;
     };
 
     ".config/lsd/config.yaml" = {
       source = ../config/lsdconfig.yaml;
-      recursive = true;
     };
   };
 
@@ -1002,14 +167,14 @@
       ls = "lsd";
       la = "lsd -al";
       ll = "lsd -l";
-      
+
       # File management enhancements
       ".." = "cd ..";
       "..." = "cd ../..";
       "...." = "cd ../../..";
       cdtemp = "cd $(mktemp -d)";
       backup = "cp \"$1\" \"$1.backup.$(date +%Y%m%d_%H%M%S)\"";
-      
+
       # Quick directory shortcuts
       dev = "cd ~/Dev";
       dots = "cd ~/.dotfiles";
@@ -1020,27 +185,23 @@
 
       # Smart Nix helpers
       nixtest = "nix flake check ~/.dotfiles";
-      
+
       # Enhanced clipboard shortcuts
       cb = "clipshow";          # Show clipboard contents
       cbw = "clipwatch";        # Watch clipboard changes
       cbc = "clipclear";        # Clear clipboard
       cbcp = "copypath";        # Copy current path
-      
+
       # Quick pipe to clipboard
       clip = if pkgs.stdenv.isDarwin then "pbcopy" else "xclip -selection clipboard";
     } // (if pkgs.stdenv.isDarwin then {
       claude = "/Users/stefan/.claude/local/claude";
       nixbuild = "nix build ~/.dotfiles#darwinConfigurations.Stefans-MacBook-Pro.system";
       nixcheck = "darwin-rebuild check --flake ~/.dotfiles#Stefans-MacBook-Pro";
-      nixswitch = "darwin-rebuild switch --flake ~/.dotfiles#Stefans-MacBook-Pro";
-      nixup = "pushd ~/.dotfiles; nix flake update; nixswitch; popd";
     } else {
       # claude alias removed - using system claude binary
       nixbuild = "nix build ~/.dotfiles#nixosConfigurations.stefan.config.system.build.toplevel";
       nixcheck = "sudo nixos-rebuild dry-build --flake ~/.dotfiles#stefan";
-      nixswitch = "sudo nixos-rebuild switch --flake ~/.dotfiles#stefan";
-      nixup = "pushd ~/.dotfiles; nix flake update; nixswitch; popd";
     });
     autosuggestion.enable = true;
     enableCompletion = true;
@@ -1102,24 +263,24 @@
       # Enable 24-bit color and proper terminal support
       set-option -ga terminal-overrides ",*256col*:Tc"
       set-option -g default-terminal "screen-256color"
-      
+
       # Increase tmux messages display duration from 750ms to 4s
       set -g display-time 4000
       set -s escape-time 0
-      
+
       # Update status bar every 30 seconds for battery info
       set -g status-interval 30
-      
+
       # Renumber windows automatically
       set-option -g renumber-windows on
-      
+
       # Enhanced clipboard integration
       set -g set-clipboard on
-      
+
       # Copy mode bindings for better clipboard integration
       bind-key -T copy-mode-vi v send-keys -X begin-selection
       bind-key -T copy-mode-vi r send-keys -X rectangle-toggle
-      
+
       # Platform-specific clipboard setup
       if-shell 'test "$(uname)" = "Darwin"' {
         set -s copy-command 'pbcopy'
@@ -1135,54 +296,54 @@
           }
         }
       }
-      
+
       # Quick paste binding
       bind-key ] paste-buffer
       bind-key p paste-buffer
-      
+
       # Easier and faster switching between next/prev window
       bind C-p previous-window
       bind C-n next-window
       bind-key -r f run-shell "tmux neww ~/Scripts/tmux-sessionizer"
-      
+
       # Smart quit using tmux-quit script
       bind-key X run-shell '~/Scripts/tmux-quit'
-      
+
       # Light & Transparent Tokyo Night Theme
       set -g status-position bottom
       set -g status-justify centre
       set -g status-style bg=default,fg=#a9b1d6
       set -g status-left-length 80
       set -g status-right-length 80
-      
+
       # Minimal left status: just session name
       set -g status-left "#[fg=#7aa2f7,bold] #S #[fg=#565f89]│ "
-      
+
       # Right status: battery, path and time
       set -g status-right "#(~/Scripts/tmux-battery) #[fg=#565f89]│ #[fg=#565f89]#{b:pane_current_path} #[fg=#565f89]│ #[fg=#7aa2f7]%H:%M"
-      
+
       # Cleaner window status
       set -g window-status-style fg=#565f89,bg=default
       set -g window-status-current-style fg=#bb9af7,bg=default,bold
       set -g window-status-format " #I #W#{?window_zoomed_flag,󰊓,} "
       set -g window-status-current-format " #I #W#{?window_zoomed_flag,󰊓,} "
-      
+
       # Light pane borders
       set -g pane-border-style fg=#414868
       set -g pane-active-border-style fg=#7aa2f7
       set -g pane-border-status off
-      
+
       # Subtle message styling
       set -g message-style bg=#bb9af7,fg=#1a1b26,bold
       set -g message-command-style bg=#7aa2f7,fg=#1a1b26,bold
-      
+
       # Light copy mode
       set -g mode-style bg=#bb9af7,fg=#1a1b26,bold
-      
+
       # Clock styling
       set -g clock-mode-colour #7aa2f7
       set -g clock-mode-style 24
-      
+
       # Pane indicators
       set -g display-panes-active-colour #7aa2f7
       set -g display-panes-colour #565f89

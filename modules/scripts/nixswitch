@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Enhanced nixswitch with visual feedback (cross-platform)
+
+echo "🔨 Building configuration..."
+echo ""
+
+build_start=$(date +%s)
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    BUILD_TARGET="$HOME/.dotfiles#darwinConfigurations.Stefans-MacBook-Pro.system"
+    SWITCH_CMD="darwin-rebuild switch --flake $HOME/.dotfiles#Stefans-MacBook-Pro"
+    GEN_CMD="darwin-rebuild --list-generations"
+else
+    BUILD_TARGET="$HOME/.dotfiles#nixosConfigurations.stefan.config.system.build.toplevel"
+    SWITCH_CMD="sudo nixos-rebuild switch --flake $HOME/.dotfiles#stefan"
+    GEN_CMD="nixos-rebuild list-generations"
+fi
+
+if nom build "$BUILD_TARGET" "$@"; then
+    build_end=$(date +%s)
+    build_time=$((build_end - build_start))
+
+    echo ""
+    echo "✅ Build completed in ${build_time}s"
+    echo ""
+    echo "🔄 Activating configuration..."
+    echo ""
+
+    switch_start=$(date +%s)
+
+    if $SWITCH_CMD "$@"; then
+        switch_end=$(date +%s)
+        switch_time=$((switch_end - switch_start))
+
+        echo ""
+        echo "✨ Successfully switched! (${switch_time}s)"
+
+        # Show new generation
+        new_gen=$($GEN_CMD 2>/dev/null | tail -1 | awk '{print $1}')
+        echo "   Generation: #$new_gen"
+
+        total_time=$((build_time + switch_time))
+        echo "   Total time: ${total_time}s"
+        echo ""
+    else
+        echo ""
+        echo "❌ Failed to activate configuration"
+        exit 1
+    fi
+else
+    echo ""
+    echo "❌ Build failed"
+    exit 1
+fi

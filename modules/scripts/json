@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Pretty print JSON from stdin or file
+
+if [[ $# -eq 0 ]]; then
+    # Read from stdin
+    if command -v jq >/dev/null 2>&1; then
+        jq .
+    elif command -v python3 >/dev/null 2>&1; then
+        python3 -m json.tool
+    else
+        echo "Error: jq or python3 required for JSON formatting"
+        exit 1
+    fi
+else
+    # Read from file
+    file="$1"
+    if [[ ! -f "$file" ]]; then
+        echo "Error: File '$file' not found"
+        exit 1
+    fi
+
+    if command -v jq >/dev/null 2>&1; then
+        jq . "$file"
+    elif command -v python3 >/dev/null 2>&1; then
+        python3 -m json.tool "$file"
+    else
+        echo "Error: jq or python3 required for JSON formatting"
+        exit 1
+    fi
+fi

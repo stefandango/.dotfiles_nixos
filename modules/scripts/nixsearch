@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Enhanced nix search with package preview
+
+if [[ $# -eq 0 ]]; then
+    echo "Usage: nixsearch <package_name>"
+    echo "Example: nixsearch firefox"
+    exit 1
+fi
+
+package="$1"
+echo "🔍 Searching for: $package"
+echo ""
+
+# Search and format output
+nix search nixpkgs "$package" --json 2>/dev/null | \
+jq -r 'to_entries[] | "📦 \(.key)\n   \(.value.description // "No description")\n   Version: \(.value.version // "unknown")\n"' | \
+head -20
+
+if [[ $? -ne 0 ]]; then
+    echo "Search failed. Trying basic search..."
+    nix search nixpkgs "$package" | head -10
+fi

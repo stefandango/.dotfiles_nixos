@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Show Nix system information
+
+echo "❄️  Nix System Information"
+echo "========================="
+echo ""
+
+# Nix version
+echo "📦 Nix version: $(nix --version 2>/dev/null || echo 'Not found')"
+
+# Current generation
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    current_gen=$(darwin-rebuild --list-generations 2>/dev/null | tail -1 | awk '{print $1}' || echo "unknown")
+    echo "🔄 Current generation: $current_gen"
+else
+    current_gen=$(nixos-rebuild list-generations 2>/dev/null | tail -1 | awk '{print $1}' || echo "unknown")
+    echo "🔄 Current generation: $current_gen"
+fi
+
+# Flake status
+if [[ -f ~/.dotfiles/flake.lock ]]; then
+    last_update=$(date -r ~/.dotfiles/flake.lock "+%Y-%m-%d %H:%M" 2>/dev/null || echo "unknown")
+    echo "🔒 Flake last updated: $last_update"
+fi
+
+# Store info
+if command -v nix >/dev/null 2>&1; then
+    store_size=$(du -sh /nix/store 2>/dev/null | awk '{print $1}' || echo "unknown")
+    echo "💾 Store size: $store_size"
+fi
+
+# Available commands
+echo ""
+echo "🛠️  Available commands:"
+echo "   nixswitch  - Apply configuration"
+echo "   nixup      - Update flake and apply"
+echo "   nixtest    - Test configuration"
+echo "   nixclean   - Clean up old generations"
+echo "   nixgen     - List generations"
+echo "   nixsearch  - Search packages"

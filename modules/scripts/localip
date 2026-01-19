@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Get local IP address
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS
+    echo -n "Local IP: "
+    ipconfig getifaddr en0 2>/dev/null || \
+    ipconfig getifaddr en1 2>/dev/null || \
+    echo "No active network interface found"
+else
+    # Linux
+    echo -n "Local IP: "
+    ip route get 1 2>/dev/null | awk '{print $7; exit}' || \
+    hostname -I 2>/dev/null | awk '{print $1}' || \
+    echo "No active network interface found"
+fi

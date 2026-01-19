@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Copy current directory path or specified path to clipboard
+
+if [[ $# -eq 0 ]]; then
+    path=$(pwd)
+else
+    path=$(realpath "$1" 2>/dev/null || echo "$1")
+fi
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    echo -n "$path" | pbcopy
+elif command -v xclip >/dev/null 2>&1; then
+    echo -n "$path" | xclip -selection clipboard
+elif command -v wl-copy >/dev/null 2>&1; then
+    echo -n "$path" | wl-copy
+else
+    echo "Error: No clipboard tool found (pbcopy/xclip/wl-copy)"
+    exit 1
+fi
+
+echo "Copied path to clipboard: $path"

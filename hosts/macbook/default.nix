@@ -31,12 +31,6 @@
 
   # macOS-specific settings
   nixpkgs.hostPlatform = "aarch64-darwin";
-  nixpkgs.config.packageOverrides = pkgs: {
-    # Skip fish tests - they fail on macOS but fish is only a transitive dependency
-    fish = pkgs.fish.overrideAttrs (old: {
-      doCheck = false;
-    });
-  };
   ids.gids.nixbld = 350;
   
   # Enable shell integration
