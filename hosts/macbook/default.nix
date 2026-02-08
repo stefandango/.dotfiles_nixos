@@ -76,6 +76,7 @@
   homebrew = {
     enable = true;
     onActivation.cleanup = "uninstall";
+    onActivation.upgrade = true;
     caskArgs.appdir = "/Applications";
     caskArgs.no_quarantine = true;
     global.brewfile = true;
