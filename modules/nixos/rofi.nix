@@ -2,7 +2,7 @@
 
 let
 inherit (config.home-manager.users.${vars.user}.lib.formats.rasi) mkLiteral;
-colors = import ../theme/colors.nix;
+colors = import ../../theme/colors.nix;
 in
 {
 	home-manager.users.${vars.user} = {

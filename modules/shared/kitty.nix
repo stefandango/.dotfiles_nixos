@@ -12,6 +12,9 @@
       font_family = "MonoLisa Nerd Font SemiBold";
       font_size = if pkgs.stdenv.isDarwin then "16.0" else "14.0";
 
+      # Window padding (top right bottom left)
+      window_padding_width = "10 20 10 40";
+
       # Enhanced clipboard integration
       clipboard_control = "write-clipboard write-primary read-clipboard read-primary";
 

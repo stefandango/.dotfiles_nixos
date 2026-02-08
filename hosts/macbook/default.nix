@@ -11,11 +11,28 @@
         _FXShowPosixPathInTitle = true;
         AppleShowAllExtensions = true;
       };
+      CustomUserPreferences = {
+        "com.apple.desktopservices" = {
+          DSDontWriteNetworkStores = true;
+          DSDontWriteUSBStores = true;
+        };
+      };
       trackpad = {
         Clicking = true;
         TrackpadThreeFingerDrag = true;
       };
-      NSGlobalDomain.AppleShowAllExtensions = true;
+      NSGlobalDomain = {
+        AppleShowAllExtensions = true;
+        # Key repeat speed (lower = faster)
+        InitialKeyRepeat = 15;
+        KeyRepeat = 2;
+        # Disable auto-correct annoyances
+        NSAutomaticCapitalizationEnabled = false;
+        NSAutomaticSpellingCorrectionEnabled = false;
+        NSAutomaticPeriodSubstitutionEnabled = false;
+        NSAutomaticDashSubstitutionEnabled = false;
+        NSAutomaticQuoteSubstitutionEnabled = false;
+      };
       dock = {
         autohide = true;
         show-recents = false;
