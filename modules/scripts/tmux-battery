@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Cross-platform battery script for tmux
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS using pmset
+    battery_info=$(pmset -g batt)
+    if echo "$battery_info" | grep -q "Battery Power"; then
+        percentage=$(echo "$battery_info" | grep -o '[0-9]\+%' | head -n 1)
+        percentage_num=$(echo "$percentage" | tr -d '%')
+
+        if echo "$battery_info" | grep -q "charging"; then
+            icon="󰂄"
+            color="#40c4ff"
+        elif [[ $percentage_num -le 20 ]]; then
+            icon="󰁺"
+            color="#f7768e"
+        elif [[ $percentage_num -le 50 ]]; then
+            icon="󰁾"
+            color="#e0af68"
+        else
+            icon="󰁹"
+            color="#9ece6a"
+        fi
+
+        echo "#[fg=$color]$icon $percentage"
+    fi
+elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    # Linux using /sys/class/power_supply
+    if [[ -d "/sys/class/power_supply/BAT0" ]]; then
+        capacity=$(cat /sys/class/power_supply/BAT0/capacity 2>/dev/null || echo "0")
+        status=$(cat /sys/class/power_supply/BAT0/status 2>/dev/null || echo "Unknown")
+
+        if [[ "$status" == "Charging" ]]; then
+            icon="󰂄"
+            color="#40c4ff"
+        elif [[ $capacity -le 20 ]]; then
+            icon="󰁺"
+            color="#f7768e"
+        elif [[ $capacity -le 50 ]]; then
+            icon="󰁾"
+            color="#e0af68"
+        else
+            icon="󰁹"
+            color="#9ece6a"
+        fi
+
+        echo "#[fg=$color]$icon $capacity%"
+    fi
+fi

@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Copy file contents or stdin to clipboard
+
+if [[ $# -eq 0 ]]; then
+    # Read from stdin
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        pbcopy
+    elif command -v xclip >/dev/null 2>&1; then
+        xclip -selection clipboard
+    elif command -v wl-copy >/dev/null 2>&1; then
+        wl-copy
+    else
+        echo "Error: No clipboard tool found (pbcopy/xclip/wl-copy)"
+        exit 1
+    fi
+else
+    # Read from file
+    file="$1"
+    if [[ ! -f "$file" ]]; then
+        echo "Error: File '$file' not found"
+        exit 1
+    fi
+
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        pbcopy < "$file"
+    elif command -v xclip >/dev/null 2>&1; then
+        xclip -selection clipboard < "$file"
+    elif command -v wl-copy >/dev/null 2>&1; then
+        wl-copy < "$file"
+    else
+        echo "Error: No clipboard tool found (pbcopy/xclip/wl-copy)"
+        exit 1
+    fi
+
+    echo "Copied contents of '$file' to clipboard"
+fi

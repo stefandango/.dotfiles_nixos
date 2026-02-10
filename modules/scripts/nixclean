@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Enhanced Nix cleanup with statistics
+
+echo "🧹 Nix Store Cleanup"
+echo "==================="
+echo ""
+
+# Get before stats
+echo "📊 Current state:"
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    gen_count=$(darwin-rebuild --list-generations 2>/dev/null | wc -l || echo "0")
+else
+    gen_count=$(sudo nixos-rebuild list-generations 2>/dev/null | wc -l || echo "0")
+fi
+
+store_size_before=$(du -sh /nix/store 2>/dev/null | awk '{print $1}' || echo "unknown")
+
+echo "   Generations: $gen_count"
+echo "   Store size: $store_size_before"
+echo ""
+
+# Ask for confirmation
+read -p "🗑️  Delete old generations and optimize store? [y/N] " -n 1 -r
+echo ""
+
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Cancelled."
+    exit 0
+fi
+
+echo ""
+echo "🔄 Cleaning up..."
+echo ""
+
+# Delete old generations
+echo "   → Deleting old generations..."
+if nix-collect-garbage -d 2>&1 | grep -E "freed|removing" | head -5; then
+    echo "   ✅ Old generations removed"
+fi
+
+echo ""
+
+# Optimize store
+echo "   → Optimizing Nix store..."
+if nix-store --optimize 2>&1 | grep -E "freed|bytes" | tail -3; then
+    echo "   ✅ Store optimized"
+fi
+
+echo ""
+echo "─────────────────────────"
+echo ""
+
+# Get after stats
+echo "📊 After cleanup:"
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    gen_count_after=$(darwin-rebuild --list-generations 2>/dev/null | wc -l || echo "0")
+else
+    gen_count_after=$(sudo nixos-rebuild list-generations 2>/dev/null | wc -l || echo "0")
+fi
+
+store_size_after=$(du -sh /nix/store 2>/dev/null | awk '{print $1}' || echo "unknown")
+
+echo "   Generations: $gen_count_after"
+echo "   Store size: $store_size_after"
+echo ""
+echo "✨ Cleanup complete!"

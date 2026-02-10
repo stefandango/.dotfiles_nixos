@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Show clipboard contents with formatting
+
+echo "📋 Current Clipboard Contents:"
+echo "=============================="
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    content=$(pbpaste 2>/dev/null)
+elif command -v xclip >/dev/null 2>&1; then
+    content=$(xclip -selection clipboard -o 2>/dev/null)
+elif command -v wl-paste >/dev/null 2>&1; then
+    content=$(wl-paste 2>/dev/null)
+else
+    echo "Error: No clipboard tool found"
+    exit 1
+fi
+
+if [[ -z "$content" ]]; then
+    echo "(empty)"
+else
+    echo "Length: ${#content} characters"
+    echo "Lines: $(echo "$content" | wc -l)"
+    echo ""
+    echo "Content:"
+    echo "--------"
+    echo "$content"
+fi

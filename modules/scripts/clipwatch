@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Watch clipboard contents and show changes
+
+echo "📋 Clipboard Watcher - Press Ctrl+C to stop"
+echo "=========================================="
+
+last_clip=""
+
+while true; do
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        current_clip=$(pbpaste 2>/dev/null)
+    elif command -v xclip >/dev/null 2>&1; then
+        current_clip=$(xclip -selection clipboard -o 2>/dev/null)
+    elif command -v wl-paste >/dev/null 2>&1; then
+        current_clip=$(wl-paste 2>/dev/null)
+    else
+        echo "Error: No clipboard tool found"
+        exit 1
+    fi
+
+    if [[ "$current_clip" != "$last_clip" ]]; then
+        echo "$(date '+%H:%M:%S') - Clipboard changed:"
+        echo "==================="
+        if [[ ${#current_clip} -gt 100 ]]; then
+            echo "${current_clip:0:100}..."
+        else
+            echo "$current_clip"
+        fi
+        echo ""
+        last_clip="$current_clip"
+    fi
+
+    sleep 1
+done

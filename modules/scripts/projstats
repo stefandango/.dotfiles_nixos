@@ -1,0 +1,358 @@
+#!/usr/bin/env bash
+# Show comprehensive project statistics
+
+set -euo pipefail
+
+# Determine project directory
+if [[ $# -eq 0 ]]; then
+    project_dir=$(pwd)
+else
+    project_dir="$1"
+    if [[ ! -d "$project_dir" ]]; then
+        echo "Error: Directory '$project_dir' does not exist"
+        exit 1
+    fi
+fi
+
+cd "$project_dir"
+project_name=$(basename "$project_dir")
+
+echo "📊 Project Statistics: $project_name"
+printf '=%.0s' {1..50}
+echo ""
+echo ""
+
+# Check if it's a git repository
+if [[ -d .git ]]; then
+    echo "📁 Repository Information"
+    printf '─%.0s' {1..50}
+    echo ""
+
+    # Repository URL
+    if remote_url=$(git config --get remote.origin.url 2>/dev/null); then
+        echo "🌐 Remote: $remote_url"
+    fi
+
+    # Current branch
+    current_branch=$(git branch --show-current 2>/dev/null || echo "detached HEAD")
+    echo "🌿 Branch: $current_branch"
+
+    # Total commits
+    total_commits=$(git rev-list --count HEAD 2>/dev/null || echo "0")
+    echo "📝 Total commits: $total_commits"
+
+    # Contributors
+    contributors=$(git shortlog -sn --all 2>/dev/null | wc -l | tr -d ' ')
+    echo "👥 Contributors: $contributors"
+
+    # Last commit
+    if last_commit=$(git log -1 --format="%ar by %an" 2>/dev/null); then
+        echo "⏱️  Last commit: $last_commit"
+    fi
+
+    # Repository age
+    if first_commit=$(git log --reverse --format="%ar" 2>/dev/null | head -1); then
+        echo "📅 Repository age: $first_commit"
+    fi
+
+    echo ""
+fi
+
+# Code statistics
+echo "💻 Code Statistics"
+printf '─%.0s' {1..50}
+echo ""
+
+# Try to use tokei if available (faster and more accurate)
+if command -v tokei >/dev/null 2>&1; then
+    tokei --sort lines
+else
+    # Fallback: manual counting
+
+    # Count files by type (excluding common non-code files)
+    echo "Files by type:"
+    find . -type f \
+        -not -path '*/\.*' \
+        -not -path '*/node_modules/*' \
+        -not -path '*/vendor/*' \
+        -not -path '*/dist/*' \
+        -not -path '*/build/*' \
+        -not -path '*/target/*' \
+        -not -path '*/__pycache__/*' \
+        2>/dev/null | \
+        sed 's/.*\.//' | \
+        sort | uniq -c | \
+        sort -rn | \
+        head -10 | \
+        awk '{printf "   %-15s %s files\n", $2, $1}'
+
+    echo ""
+
+    # Total lines of code (rough estimate)
+    echo "Lines of code (estimate):"
+
+    total_lines=0
+    for ext in rs go py js ts tsx jsx java c cpp h hpp cs sh nix yaml yml json toml; do
+        count=$(find . -type f -name "*.$ext" \
+            -not -path '*/\.*' \
+            -not -path '*/node_modules/*' \
+            -not -path '*/vendor/*' \
+            -not -path '*/dist/*' \
+            -not -path '*/build/*' \
+            -not -path '*/target/*' \
+            2>/dev/null | \
+            xargs wc -l 2>/dev/null | \
+            tail -1 | \
+            awk '{print $1}' || echo "0")
+
+        if [[ "$count" -gt 0 ]] && [[ "$count" != "0" ]]; then
+            echo "   $ext: $count lines"
+            total_lines=$((total_lines + count))
+        fi
+    done
+
+    if [[ $total_lines -gt 0 ]]; then
+        echo ""
+        echo "   Total: ~$total_lines lines"
+    else
+        echo "   No common code files found"
+    fi
+fi
+
+echo ""
+
+# Project size
+echo "📦 Project Size"
+printf '─%.0s' {1..50}
+echo ""
+
+# Total size
+total_size=$(du -sh . 2>/dev/null | awk '{print $1}')
+echo "💾 Total size: $total_size"
+
+# Size breakdown (excluding common heavy directories)
+if [[ -d node_modules ]]; then
+    node_size=$(du -sh node_modules 2>/dev/null | awk '{print $1}')
+    echo "   node_modules: $node_size"
+fi
+
+if [[ -d target ]]; then
+    target_size=$(du -sh target 2>/dev/null | awk '{print $1}')
+    echo "   target: $target_size"
+fi
+
+if [[ -d dist ]] || [[ -d build ]]; then
+    build_size=$(du -sh dist build 2>/dev/null | awk '{s+=$1} END {print s"M"}' || echo "0")
+    if [[ "$build_size" != "0" ]]; then
+        echo "   build artifacts: $build_size"
+    fi
+fi
+
+# File count
+file_count=$(find . -type f -not -path '*/\.*' 2>/dev/null | wc -l | tr -d ' ')
+echo "📄 Total files: $file_count"
+
+echo ""
+
+# Git statistics (if available)
+if [[ -d .git ]]; then
+    echo "📈 Recent Activity (Last 30 days)"
+    printf '─%.0s' {1..50}
+    echo ""
+
+    # Commits in last 30 days
+    commits_30d=$(git log --since="30 days ago" --oneline 2>/dev/null | wc -l | tr -d ' ')
+    echo "📝 Commits: $commits_30d"
+
+    # Active contributors in last 30 days
+    active_contributors=$(git shortlog -sn --since="30 days ago" 2>/dev/null | wc -l | tr -d ' ')
+    echo "👥 Active contributors: $active_contributors"
+
+    # Files changed in last 30 days
+    files_changed=$(git log --since="30 days ago" --name-only --pretty=format: 2>/dev/null | sort -u | grep -v '^$' | wc -l | tr -d ' ')
+    echo "📁 Files changed: $files_changed"
+
+    echo ""
+
+    # Top contributors
+    echo "🏆 Top Contributors (all time)"
+    printf '─%.0s' {1..50}
+    echo ""
+    git shortlog -sn --all 2>/dev/null | head -5 | \
+        awk '{commits=$1; $1=""; printf "   %5d commits  %s\n", commits, substr($0, 2)}'
+
+    echo ""
+fi
+
+# Package/dependency info
+if [[ -f package.json ]]; then
+    echo "📦 Node.js Project"
+    printf '─%.0s' {1..50}
+    echo ""
+
+    if command -v jq >/dev/null 2>&1; then
+        deps=$(jq -r '.dependencies | length' package.json 2>/dev/null || echo "0")
+        devdeps=$(jq -r '.devDependencies | length' package.json 2>/dev/null || echo "0")
+        echo "   Dependencies: $deps"
+        echo "   Dev dependencies: $devdeps"
+    else
+        echo "   (install jq for detailed package info)"
+    fi
+    echo ""
+fi
+
+if [[ -f Cargo.toml ]]; then
+    echo "🦀 Rust Project"
+    printf '─%.0s' {1..50}
+    echo ""
+
+    deps=$(grep '^\[dependencies\]' -A 100 Cargo.toml 2>/dev/null | grep -c '^[a-zA-Z]' || echo "0")
+    echo "   Dependencies: ~$deps"
+    echo ""
+fi
+
+if [[ -f go.mod ]]; then
+    echo "🐹 Go Project"
+    printf '─%.0s' {1..50}
+    echo ""
+
+    go_version=$(grep '^go ' go.mod 2>/dev/null | awk '{print $2}')
+    echo "   Go version: $go_version"
+
+    requires=$(grep -c '^[[:space:]]*[a-zA-Z]' go.mod 2>/dev/null || echo "0")
+    echo "   Dependencies: ~$requires"
+    echo ""
+fi
+
+if [[ -f requirements.txt ]] || [[ -f pyproject.toml ]]; then
+    echo "🐍 Python Project"
+    printf '─%.0s' {1..50}
+    echo ""
+
+    if [[ -f requirements.txt ]]; then
+        deps=$(grep -c '^[a-zA-Z]' requirements.txt 2>/dev/null || echo "0")
+        echo "   Dependencies (requirements.txt): $deps"
+    fi
+
+    if [[ -f pyproject.toml ]]; then
+        echo "   Using pyproject.toml"
+    fi
+    echo ""
+fi
+
+# Check for .NET projects (search recursively up to 3 levels deep)
+if [[ -f global.json ]] || [[ -f Directory.Build.props ]] || \
+   find . -maxdepth 3 -type f \( -name "*.csproj" -o -name "*.fsproj" -o -name "*.vbproj" -o -name "*.sln" -o -name "*.slnx" \) 2>/dev/null | grep -q .; then
+    echo "🔷 .NET Project"
+    printf '─%.0s' {1..50}
+    echo ""
+
+    # Check for .NET SDK version from global.json
+    if [[ -f global.json ]]; then
+        sdk_version=$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' global.json 2>/dev/null | head -1)
+        if [[ -n "$sdk_version" ]]; then
+            echo "   .NET SDK: $sdk_version"
+        fi
+    fi
+
+    # Count project files recursively
+    csproj_count=$(find . -maxdepth 3 -name "*.csproj" 2>/dev/null | wc -l | tr -d ' ')
+    fsproj_count=$(find . -maxdepth 3 -name "*.fsproj" 2>/dev/null | wc -l | tr -d ' ')
+    vbproj_count=$(find . -maxdepth 3 -name "*.vbproj" 2>/dev/null | wc -l | tr -d ' ')
+
+    total_projects=$((csproj_count + fsproj_count + vbproj_count))
+
+    if [[ $csproj_count -gt 0 ]]; then
+        echo "   C# projects: $csproj_count"
+    fi
+
+    if [[ $fsproj_count -gt 0 ]]; then
+        echo "   F# projects: $fsproj_count"
+    fi
+
+    if [[ $vbproj_count -gt 0 ]]; then
+        echo "   VB.NET projects: $vbproj_count"
+    fi
+
+    # Check for solution files (both .sln and .slnx)
+    sln_count=$(find . -maxdepth 2 -name "*.sln" 2>/dev/null | wc -l | tr -d ' ')
+    slnx_count=$(find . -maxdepth 2 -name "*.slnx" 2>/dev/null | wc -l | tr -d ' ')
+    total_sln=$((sln_count + slnx_count))
+
+    if [[ $total_sln -gt 0 ]]; then
+        if [[ $sln_count -gt 0 ]] && [[ $slnx_count -gt 0 ]]; then
+            echo "   Solution files: $total_sln (.sln: $sln_count, .slnx: $slnx_count)"
+        elif [[ $sln_count -gt 0 ]]; then
+            echo "   Solution files: $sln_count (.sln)"
+        else
+            echo "   Solution files: $slnx_count (.slnx)"
+        fi
+    fi
+
+    # Try to get target framework and dependencies from first csproj
+    if [[ $csproj_count -gt 0 ]]; then
+        first_csproj=$(find . -maxdepth 3 -name "*.csproj" 2>/dev/null | head -1)
+        if [[ -f "$first_csproj" ]]; then
+            # Extract target framework (works on both macOS and Linux)
+            target_framework=$(sed -n 's/.*<TargetFramework>\([^<]*\)<\/TargetFramework>.*/\1/p' "$first_csproj" | head -1)
+            if [[ -z "$target_framework" ]]; then
+                # Try TargetFrameworks (plural) for multi-targeting
+                target_framework=$(sed -n 's/.*<TargetFrameworks>\([^<]*\)<\/TargetFrameworks>.*/\1/p' "$first_csproj" | head -1)
+            fi
+
+            if [[ -n "$target_framework" ]]; then
+                echo "   Target framework: $target_framework"
+            fi
+
+            # Count PackageReference dependencies (check all csproj files)
+            total_pkg_refs=0
+            while IFS= read -r proj; do
+                [[ -z "$proj" ]] && continue
+                count=$(grep -c '<PackageReference' "$proj" 2>/dev/null || echo "0")
+                count=$(echo "$count" | tr -d '[:space:]')
+                [[ -n "$count" && "$count" =~ ^[0-9]+$ ]] && total_pkg_refs=$((total_pkg_refs + count))
+            done < <(find . -maxdepth 3 -name "*.csproj" 2>/dev/null)
+
+            # Also check Directory.Packages.props for central package management
+            if [[ -f Directory.Packages.props ]]; then
+                central_pkgs=$(grep -c '<PackageVersion' Directory.Packages.props 2>/dev/null || echo "0")
+                if [[ $central_pkgs -gt 0 ]]; then
+                    echo "   NuGet packages: $central_pkgs (centrally managed)"
+                fi
+            elif [[ $total_pkg_refs -gt 0 ]]; then
+                echo "   NuGet packages: $total_pkg_refs"
+            fi
+
+            # Count ProjectReference dependencies
+            total_proj_refs=0
+            while IFS= read -r proj; do
+                [[ -z "$proj" ]] && continue
+                count=$(grep -c '<ProjectReference' "$proj" 2>/dev/null || echo "0")
+                count=$(echo "$count" | tr -d '[:space:]')
+                [[ -n "$count" && "$count" =~ ^[0-9]+$ ]] && total_proj_refs=$((total_proj_refs + count))
+            done < <(find . -maxdepth 3 -name "*.csproj" 2>/dev/null)
+
+            if [[ $total_proj_refs -gt 0 ]]; then
+                echo "   Project references: $total_proj_refs"
+            fi
+        fi
+    fi
+
+    # If packages.config exists (older .NET Framework style)
+    if [[ -f packages.config ]]; then
+        packages_count=$(grep -c '<package ' packages.config 2>/dev/null || echo "0")
+        if [[ $packages_count -gt 0 ]]; then
+            echo "   NuGet packages: $packages_count (packages.config)"
+        fi
+    fi
+
+    echo ""
+fi
+
+# Show useful tips
+echo "💡 Tips"
+printf '─%.0s' {1..50}
+echo ""
+echo "   Run 'tokei' for detailed code statistics"
+echo "   Add tokei to Nix: home.packages = [ pkgs.tokei ]"
+echo ""

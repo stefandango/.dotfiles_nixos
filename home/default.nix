@@ -4,7 +4,7 @@
   # Home Manager configuration that works on both platforms
   home = {
     username = vars.user;
-    homeDirectory = if pkgs.stdenv.isDarwin 
+    homeDirectory = if pkgs.stdenv.isDarwin
       then "/Users/${vars.user}"
       else "/home/${vars.user}";
     stateVersion = "23.11";
@@ -18,9 +18,14 @@
 
   # Cross-platform home packages
   home.packages = with pkgs; [
-    # Add user-specific packages here
-    bat
-    ripgrep
+    # Development tools
+    gopls         # Go language server
+
+    # Modern CLI tools
+    zoxide        # Smarter cd command (learns your habits)
+    delta         # Beautiful git diffs
+
+    # System utilities
     curl
     btop
   ];

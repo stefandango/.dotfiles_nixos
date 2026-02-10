@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Run internet speed test
+
+echo "Running speed test..."
+echo ""
+
+if command -v speedtest-cli >/dev/null 2>&1; then
+    speedtest-cli
+else
+    echo "Installing speedtest-cli..."
+    if command -v curl >/dev/null 2>&1; then
+        curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python3
+    else
+        echo "Error: curl and python3 are required"
+        echo "Install speedtest-cli: pip install speedtest-cli"
+        exit 1
+    fi
+fi

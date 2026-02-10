@@ -1,7 +1,7 @@
 {config, lib, system, pkgs, vars, host, ... }:
 
 let
-  colors = import ../theme/colors.nix;
+  colors = import ../../theme/colors.nix;
 in
 {
 
@@ -110,8 +110,8 @@ in
 			gaps_in = 5
 				gaps_out = 20
 				border_size = 2
-				col.active_border = rgba(33ccffee) rgba(00ff99ee) 45deg
-				col.inactive_border = rgba(595959aa)
+				col.active_border = rgba(${cyan}ee) rgba(${green}ee) 45deg
+				col.inactive_border = rgba(${gray}aa)
 
 				layout = dwindle
 
@@ -173,7 +173,7 @@ in
 			disable_splash_rendering = true
 			mouse_move_enables_dpms = true
 			key_press_enables_dpms = true
-			background_color = 0x111111
+			background_color = 0x${bg}
 			enable_swallow = true
 			swallow_regex = ^(kitty)$
 		}

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Clear clipboard contents
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    echo -n "" | pbcopy
+elif command -v xclip >/dev/null 2>&1; then
+    echo -n "" | xclip -selection clipboard
+elif command -v wl-copy >/dev/null 2>&1; then
+    echo -n "" | wl-copy
+else
+    echo "Error: No clipboard tool found"
+    exit 1
+fi
+
+echo "🗑️  Clipboard cleared"

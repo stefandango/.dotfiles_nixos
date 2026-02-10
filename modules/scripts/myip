@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Get public IP address
+
+echo -n "Public IP: "
+if command -v curl >/dev/null 2>&1; then
+    curl -s --max-time 5 ifconfig.me || \
+    curl -s --max-time 5 ipinfo.io/ip || \
+    curl -s --max-time 5 checkip.amazonaws.com || \
+    echo "Failed to get public IP"
+else
+    echo "Error: curl is required"
+    exit 1
+fi

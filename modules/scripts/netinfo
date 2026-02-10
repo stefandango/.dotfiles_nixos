@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Show comprehensive network information
+
+echo "🌐 Network Information"
+echo "===================="
+echo ""
+
+# Local IP
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    local_ip=$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null)
+else
+    local_ip=$(ip route get 1 2>/dev/null | awk '{print $7; exit}' || hostname -I 2>/dev/null | awk '{print $1}')
+fi
+
+if [[ -n "$local_ip" ]]; then
+    echo "🏠 Local IP:  $local_ip"
+else
+    echo "🏠 Local IP:  Not found"
+fi
+
+# Public IP
+echo -n "🌍 Public IP: "
+if command -v curl >/dev/null 2>&1; then
+    public_ip=$(curl -s --max-time 3 ifconfig.me 2>/dev/null)
+    if [[ -n "$public_ip" ]]; then
+        echo "$public_ip"
+    else
+        echo "Unable to fetch"
+    fi
+else
+    echo "curl not available"
+fi
+
+# DNS servers
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    dns_servers=$(scutil --dns 2>/dev/null | grep nameserver | head -3 | awk '{print $3}' | tr '\n' ', ' | sed 's/,$//')
+else
+    dns_servers=$(grep nameserver /etc/resolv.conf 2>/dev/null | awk '{print $2}' | tr '\n' ', ' | sed 's/,$//')
+fi
+
+if [[ -n "$dns_servers" ]]; then
+    echo "🔍 DNS:       $dns_servers"
+fi
+
+echo ""
+echo "Run 'speedtest' for connection speed test"

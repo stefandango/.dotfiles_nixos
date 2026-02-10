@@ -11,11 +11,28 @@
         _FXShowPosixPathInTitle = true;
         AppleShowAllExtensions = true;
       };
+      CustomUserPreferences = {
+        "com.apple.desktopservices" = {
+          DSDontWriteNetworkStores = true;
+          DSDontWriteUSBStores = true;
+        };
+      };
       trackpad = {
         Clicking = true;
         TrackpadThreeFingerDrag = true;
       };
-      NSGlobalDomain.AppleShowAllExtensions = true;
+      NSGlobalDomain = {
+        AppleShowAllExtensions = true;
+        # Key repeat speed (lower = faster)
+        InitialKeyRepeat = 15;
+        KeyRepeat = 2;
+        # Disable auto-correct annoyances
+        NSAutomaticCapitalizationEnabled = false;
+        NSAutomaticSpellingCorrectionEnabled = false;
+        NSAutomaticPeriodSubstitutionEnabled = false;
+        NSAutomaticDashSubstitutionEnabled = false;
+        NSAutomaticQuoteSubstitutionEnabled = false;
+      };
       dock = {
         autohide = true;
         show-recents = false;
@@ -43,6 +60,7 @@
   environment.systemPackages = with pkgs; [
     powershell
     vlc-bin
+    pom  # Terminal-based Pomodoro timer with notifications
   ];
 
   # Font management
@@ -58,6 +76,7 @@
   homebrew = {
     enable = true;
     onActivation.cleanup = "uninstall";
+    onActivation.upgrade = true;
     caskArgs.appdir = "/Applications";
     caskArgs.no_quarantine = true;
     global.brewfile = true;

@@ -11,8 +11,4 @@
         vscode-fhs
         jetbrains.rider
     ];
-    
-    nixpkgs.config.permittedInsecurePackages = [
-        "electron-25.9.0"
-    ];
 }

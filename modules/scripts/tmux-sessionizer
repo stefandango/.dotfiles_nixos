@@ -12,7 +12,7 @@ SESSIONIZER_MAX_DEPTH="${SESSIONIZER_MAX_DEPTH:-2}"
 # Function to find project directories (simplified)
 find_projects() {
     local paths=($SESSIONIZER_SEARCH_PATHS)
-    
+
     # Find Git repositories and immediate subdirectories only
     for path in "${paths[@]}"; do
         [[ -d "$path" ]] || continue
@@ -22,13 +22,13 @@ find_projects() {
             -not -name ".git" \
             -not -path "*/.git" \
             -print 2>/dev/null
-        
+
         # First, find direct subdirectories that are Git repos
-        find "$path" -mindepth 1 -maxdepth "$SESSIONIZER_MAX_DEPTH" -name ".git" -type d 2>/dev/null | \
+        find "$path" -mindepth 1 -maxdepth "$SESSIONIZER_MAX_DEPTH" -name ".git" -type d 2>/dev/null |
             while IFS= read -r gitdir; do
                 echo "${gitdir%/.git}"
             done
-        
+
         # Also include the search path itself if it's a Git repo
         if [[ -d "$path/.git" ]]; then
             echo "$path"
@@ -40,7 +40,7 @@ find_projects() {
 generate_session_name() {
     local path="$1"
     local name
-    
+
     # If it's a Git repo, prefer repo name over directory name
     if [[ -d "$path/.git" ]]; then
         local repo_name
@@ -50,12 +50,12 @@ generate_session_name() {
     else
         name=$(basename "$path")
     fi
-    
+
     # Clean up name: replace problematic characters
     name="${name//[.]/_}"
     name="${name//[-]/_}"
     name="${name//[ ]/_}"
-    
+
     echo "$name"
 }
 
@@ -63,33 +63,39 @@ generate_session_name() {
 setup_dev_session() {
     local selected_path="$1"
     local session_name="$2"
-    
+
     # Create the session if it doesn't exist
     if ! tmux has-session -t="$session_name" 2>/dev/null; then
-        # Create session with first window (AI)
-        tmux new-session -ds "$session_name" -c "$selected_path" -n "🤖 AI"
-        
+        # Create session with first window (Terminal with projstats)
+        tmux new-session -ds "$session_name" -c "$selected_path" -n " Terminal"
+
         # Create additional windows for development workflow
-        tmux new-window -t "$session_name" -c "$selected_path" -n "📝 Editor"
-        tmux new-window -t "$session_name" -c "$selected_path" -n "🔨 Build"
-        tmux new-window -t "$session_name" -c "$selected_path" -n "💻 Terminal"
-        
-        # Setup AI window with Claude (if available)
-        if command -v claude >/dev/null 2>&1; then
-            tmux send-keys -t "$session_name:🤖 AI" "claude" Enter
+        tmux new-window -t "$session_name" -c "$selected_path" -n " Editor"
+        tmux new-window -t "$session_name" -c "$selected_path" -n " AI"
+
+        # Setup Terminal window with projstats
+        if command -v projstats >/dev/null 2>&1; then
+            tmux send-keys -t "$session_name:  Terminal" "projstats" Enter
         else
-            tmux send-keys -t "$session_name:🤖 AI" "# AI Assistant - run 'claude' to start Claude" Enter
+            tmux send-keys -t "$session_name:  Terminal" "clear" Enter
         fi
-        
+
         # Setup Editor window with nvim (if available)
         if command -v nvim >/dev/null 2>&1; then
-            tmux send-keys -t "$session_name:📝 Editor" "nvim ." Enter
+            tmux send-keys -t "$session_name:  Editor" "nvim ." Enter
         fi
-        
-        # Select the AI window by default
-        tmux select-window -t "$session_name:🤖 AI"
+
+        # Setup AI window with Claude (if available)
+        if command -v claude >/dev/null 2>&1; then
+            tmux send-keys -t "$session_name:  AI" "claude" Enter
+        else
+            tmux send-keys -t "$session_name:  AI" "# AI Assistant - run 'claude' to start Claude" Enter
+        fi
+
+        # Select the Terminal window by default
+        tmux select-window -t "$session_name:  Terminal"
     fi
-    
+
     # Switch to the session
     if [[ -z "${TMUX:-}" ]]; then
         exec tmux attach-session -t "$session_name"
@@ -102,20 +108,20 @@ setup_dev_session() {
 manage_session() {
     local selected_path="$1"
     local session_name="$2"
-    
+
     # Check if this is a Dev folder project for special setup
     if [[ "$selected_path" == "$HOME/Dev"* ]]; then
         setup_dev_session "$selected_path" "$session_name"
         return
     fi
-    
+
     # Standard session handling for non-Dev projects
     # Check if tmux is running
-    if ! pgrep tmux > /dev/null; then
+    if ! pgrep tmux >/dev/null; then
         # No tmux running, create new session
         exec tmux new-session -s "$session_name" -c "$selected_path"
     fi
-    
+
     # Check if we're inside tmux
     if [[ -z "${TMUX:-}" ]]; then
         # Outside tmux, attach to session or create new one
@@ -136,7 +142,7 @@ manage_session() {
 # Main logic
 main() {
     local selected_path
-    
+
     if [[ $# -eq 1 ]]; then
         selected_path="$1"
         if [[ ! -d "$selected_path" ]]; then
@@ -145,36 +151,37 @@ main() {
         fi
     else
         # Use fzf to select project with simple preview
-        selected_path=$(find_projects | sort -u | fzf \
-            --height=40% \
-            --border \
-            --preview 'echo "📁 {}" && echo "" && ls -1 {} | head -10' \
-            --preview-window=right:40% \
-            --prompt="🚀 Select project: " \
-            --header="Dev projects get multi-window setup"
+        selected_path=$(
+            find_projects | sort -u | fzf \
+                --height=40% \
+                --border \
+                --preview 'echo "📁 {}" && echo "" && ls -1 {} | head -10' \
+                --preview-window=right:40% \
+                --prompt="🚀 Select project: " \
+                --header="Dev projects get multi-window setup"
         )
-        
+
         if [[ -z "$selected_path" ]]; then
             echo "No project selected" >&2
             exit 0
         fi
     fi
-    
+
     local session_name
     session_name=$(generate_session_name "$selected_path")
-    
+
     # Validate session name
     if [[ -z "$session_name" ]]; then
         echo "Error: Could not generate session name" >&2
         exit 1
     fi
-    
+
     manage_session "$selected_path" "$session_name"
 }
 
 # Show usage information
 usage() {
-    cat << EOF
+    cat <<EOF
 Usage: $(basename "$0") [directory]
 
 Simplified tmux session manager focused on development projects.
@@ -193,10 +200,9 @@ Examples:
 Features:
   - Simplified search focused on Dev and .dotfiles directories
   - Special multi-window setup for Dev folder projects:
-    * 🤖 AI window (opens claude automatically)
-    * 📝 Editor window (opens nvim automatically)
-    * 🔨 Build window (for running builds/tests)
-    * 💻 Terminal window (for general commands)
+    *   Terminal window (runs projstats on startup)
+    *   Editor window (opens nvim automatically)
+    *   AI window (opens claude automatically)
   - Clean fzf interface with project preview
   - Automatic session name generation from Git repos
 
@@ -205,10 +211,10 @@ EOF
 
 # Handle help flag
 case "${1:-}" in
-    -h|--help)
-        usage
-        exit 0
-        ;;
+-h | --help)
+    usage
+    exit 0
+    ;;
 esac
 
 main "$@"

@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Check what's running on a specific port
+
+if [[ $# -eq 0 ]]; then
+    echo "Usage: checkport <port>"
+    echo "Example: checkport 3000"
+    exit 1
+fi
+
+port=$1
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS
+    result=$(lsof -i :$port -P -n 2>/dev/null)
+    if [[ -n "$result" ]]; then
+        echo "Port $port is in use:"
+        echo "$result"
+    else
+        echo "Port $port is free"
+    fi
+else
+    # Linux
+    result=$(ss -tulpn | grep ":$port ")
+    if [[ -n "$result" ]]; then
+        echo "Port $port is in use:"
+        echo "$result"
+    else
+        echo "Port $port is free"
+    fi
+fi

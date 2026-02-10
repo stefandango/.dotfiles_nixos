@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Kill process using a specific port
+
+if [[ $# -eq 0 ]]; then
+    echo "Usage: killport <port>"
+    echo "Example: killport 3000"
+    exit 1
+fi
+
+port=$1
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS
+    pids=$(lsof -ti :$port 2>/dev/null)
+else
+    # Linux
+    pids=$(ss -tulpn | grep ":$port " | awk '{print $7}' | cut -d',' -f2 | cut -d'=' -f2)
+fi
+
+if [[ -n "$pids" ]]; then
+    echo "Killing processes on port $port: $pids"
+    echo "$pids" | xargs kill -9 2>/dev/null
+    echo "Done"
+else
+    echo "No processes found on port $port"
+fi
