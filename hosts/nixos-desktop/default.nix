@@ -33,8 +33,8 @@
   hardware = {
     graphics = {
       enable = true;
-      extraPackages = with pkgs; [ amdvlk ];
-      extraPackages32 = with pkgs; [ driversi686Linux.amdvlk ];
+      # RADV (AMD's Vulkan driver) is now enabled by default
+      # amdvlk has been removed from nixpkgs as it was deprecated
     };
     openrazer = {
       enable = true;

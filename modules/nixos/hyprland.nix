@@ -59,6 +59,7 @@ in
 	programs = {
 		hyprland = {                            # Window Manager
 			enable = true;
+			withUWSM = true;
 			#package = hyprland.packages.${pkgs.system}.hyprland;
 			#nvidiaPatches = true;
 			xwayland.enable = true;
@@ -161,7 +162,6 @@ in
 
 		gestures {
 		# See https://wiki.hyprland.org/Configuring/Variables/ for more
-			workspace_swipe = off
 		}
 
 		misc {
@@ -179,25 +179,20 @@ in
 		}
 
 
-		# Example windowrule v1
-		# windowrule = float, ^(kitty)$
-		# Example windowrule v2
-		# windowrulev2 = float,class:^(kitty)$,title:^(kitty)$
 		# See https://wiki.hyprland.org/Configuring/Window-Rules/ for more
-
 
 		# See https://wiki.hyprland.org/Configuring/Keywords/ for more
 		$mainMod = SUPER
 
 		# Example binds, see https://wiki.hyprland.org/Configuring/Binds/ for more
 		bind = $mainMod, Return, exec, kitty
-		bind = $mainMod, Q, killactive,
-		bind = SUPERSHIFT, SPACE, togglefloating,
+		bind = $mainMod, Q, killactive
+		bind = SUPERSHIFT, SPACE, togglefloating
 		bind = $mainMod, D, exec, pkill rofi || rofi -show drun -theme ~/.config/rofi/launcher.rasi
-		bind = $mainMod, P, pseudo, # dwindle
-		bind = $mainMod, J, togglesplit, # dwindle
+		bind = $mainMod, P, pseudo # dwindle
+		bind = $mainMod, J, togglesplit # dwindle
 		bind=SUPERSHIFT,R,exec,${pkgs.hyprland}/bin/hyprctl reload
-     		bind=SUPER,F,fullscreen,
+		bind=SUPER,F,fullscreen
 		bind=SUPER,L,exec,~/Scripts/swaylock.sh
 		bind=SUPER,N,exec,${pkgs.swaynotificationcenter}/bin/swaync-client -t
 		bind = SUPERSHIFT, E,exec, pkill rofi || .config/rofi/powermenu.sh
@@ -272,33 +267,52 @@ in
 		bind=,escape,submap,reset
 		submap=reset
 
-        #Steam
-        windowrule=float,title:^(Steam)$
-        windowrule=float,title:^(Friends List)$
+		# Steam
+		windowrule = float on, match:title ^(Steam)$
+		windowrule = float on, match:title ^(Friends List)$
 
-		windowrulev2 = float,title:^(Insync)(.*)$
-		$scratchpad = class:^(scratchpad)$
-       		windowrulev2 = float,$scratchpad
-       		windowrulev2 = workspace special silent,$scratchpad
-       		windowrulev2 = center,$scratchpad
+		# Insync
+		windowrule = float on, match:title ^(Insync)(.*)$
 
-		$pavucontrol = class:^(pavucontrol)$
-       		windowrulev2 = float,$pavucontrol
-       		windowrulev2 = size 50% 40%,$pavucontrol
-       		windowrulev2 = move 50% 6%,$pavucontrol
-       		windowrulev2 = workspace special silent,$pavucontrol
-       		windowrulev2 = opacity 0.80,$pavucontrol
+		# Scratchpad
+		windowrule {
+			name = scratchpad
+			match:class = ^(scratchpad)$
+			float = on
+			center = on
+			workspace = special silent
+		}
 
-		$thunar = class:^(thunar)$
-		windowrulev2 = float,$thunar
-		windowrulev2 = opacity 0.90,$thunar
+		# Pavucontrol
+		windowrule {
+			name = pavucontrol
+			match:class = ^(pavucontrol)$
+			float = on
+			size = 50% 40%
+			move = 50% 6%
+			workspace = special silent
+			opacity = 0.80
+		}
 
-		$imv = class:^(imv)$
-		windowrulev2 = float,$imv
-		windowrulev2 = size 70% 70%,$imv
-		windowrulev2 = center,$imv
+		# Thunar
+		windowrule {
+			name = thunar
+			match:class = ^(thunar)$
+			float = on
+			opacity = 0.90
+		}
 
-		windowrulev2 = opacity 0.9 0.9,class:^(Slack|WebCord|Spotify|Kitty)$
+		# Imv
+		windowrule {
+			name = imv
+			match:class = ^(imv)$
+			float = on
+			size = 70% 70%
+			center = on
+		}
+
+		# Opacity for certain apps
+		windowrule = opacity 0.9 0.9, match:class ^(Slack|WebCord|Spotify|Kitty)$
 
 		exec-once=${pkgs.swww}/bin/swww-daemon
 		exec-once=${pkgs.waybar}/bin/waybar
