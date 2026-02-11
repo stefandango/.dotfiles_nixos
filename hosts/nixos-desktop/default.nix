@@ -40,8 +40,10 @@
       enable = true;
       batteryNotifier.enable = true;
     };
-    pulseaudio.enable = false;
   };
+
+  # PulseAudio (disabled in favor of PipeWire)
+  services.pulseaudio.enable = false;
 
   # Networking
   networking = {

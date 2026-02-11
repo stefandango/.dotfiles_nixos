@@ -35,8 +35,8 @@ in
 			cliphist
 			swww			# Wallpaper daemon
 			insync			# Gdrive integration
-			xfce.thunar		# File explorer GUI
-			xfce.thunar-volman	# Auto manage removable drives etc..
+			thunar			# File explorer GUI
+			thunar-volman		# Auto manage removable drives etc..
 			imv			# Simple image viewer
 
 			# Should be moved to own files
