@@ -9,8 +9,8 @@ client_active = "<span>{icon}</span>"
 workspace = "<b><span>{id}:</span></b>{delim}{clients}"
 workspace_empty = "<b><span>{id}:</span></b>"
 client_dup = "{icon} <sup><span size='large'>{counter}</span></sup>{delim}"
-client_dup_fullscreen = "[{icon}]{delim}{icon} <sup><span size='large'>{counter_unfocused}</span></sup>"
-client_fullscreen = "[{icon}]{delim}"
+client_dup_fullscreen = "{icon} <sup><span size='large'>↑{counter_unfocused}</span></sup>{delim}"
+client_fullscreen = "{icon} <sup><span size='large'>↑</span></sup>{delim}"
 
 # ── Active window overrides ──────────────────────────────────────────────────
 [class_active]
@@ -95,10 +95,11 @@ DEFAULT = ""
 "(?i)foot" = ""
 
 # Editors & IDEs
-"(?i)code|code-oss" = ""
+"(?i)code|code-oss|vscode" = ""
 "(?i)zed" = ""
 "(?i)jetbrains-rider" = ""
 "(?i)obsidian" = ""
+"(?i)azuredatastudio" = ""
 "(?i)neovim|neovide" = ""
 
 # Communication
@@ -115,19 +116,27 @@ DEFAULT = ""
 "(?i)vlc" = ""
 "(?i)mpv" = ""
 "(?i)plexamp" = ""
+"(?i)imv" = ""
 
 # File managers
 "(?i)thunar" = "󰣪"
 "(?i)nemo" = ""
 
 # System & Utils
+"(?i)meld" = ""
 "(?i)pavucontrol" = ""
 "(?i)nm-connection-editor" = ""
 "(?i)btop" = ""
+"(?i)insync" = ""
 "(?i)font-manager" = ""
 
 # Gaming
 "(?i)steam" = ""
+"(?i)lutris" = ""
+"(?i)heroic" = ""
+"(?i)minecraft.*" = ""
+"(?i)gamescope.*" = ""
+"ProjectGorgon" = ""
 
 # Creative
 "(?i)gimp.*" = ""
