@@ -5,16 +5,24 @@ dedup = true
 dedup_inactive_fullscreen = false
 delim = " "
 client = "{icon}{delim}"
-client_active = "<span>{icon}</span>"
-workspace = "<b><span>{id}:</span></b>{delim}{clients}"
-workspace_empty = "<b><span>{id}:</span></b>"
-client_dup = "{icon} <sup><span size='large'>{counter}</span></sup>{delim}"
-client_dup_fullscreen = "{icon} <sup><span size='large'>↑{counter_unfocused}</span></sup>{delim}"
-client_fullscreen = "{icon} <sup><span size='large'>↑</span></sup>{delim}"
+client_active = "<span color='#e2be7d' size='large'>{icon}</span>"
+workspace = "<b><span color='#61afef'>{id}:</span></b>{delim}{clients}"
+workspace_empty = "<b><span color='#5c6370'>{id}:</span></b>"
+client_dup = "{icon}<sup><span color='#5c6370' size='small'>{counter}</span></sup>{delim}"
+client_dup_fullscreen = "{icon}<sup><span color='#61afef' size='small'>↑{counter_unfocused}</span></sup>{delim}"
+client_fullscreen = "{icon}<sup><span color='#61afef'>↑</span></sup>{delim}"
 
 # ── Active window overrides ──────────────────────────────────────────────────
 [class_active]
-DEFAULT = "{icon}"
+"(?i)firefox" = "<span color='#a65700' size='large'></span>"
+"(?i)chrom.*" = "<span color='#61afef' size='large'></span>"
+"(?i)kitty" = "<span color='#98c379' size='large'></span>"
+"(?i)alacritty" = "<span color='#98c379' size='large'></span>"
+"(?i)discord" = "<span color='#c678dd' size='large'></span>"
+"(?i)spotify" = "<span color='#98c379' size='large'></span>"
+"(?i)slack" = "<span color='#d19a66' size='large'></span>"
+"(?i)steam" = "<span color='#61afef' size='large'></span>"
+"(?i)signal" = "<span color='#61afef' size='large'></span>"
 
 # ── Title-based icon overrides (browser) ─────────────────────────────────────
 [title_in_class.'(firefox|chrom.*)']
@@ -42,8 +50,13 @@ DEFAULT = "{icon}"
 '(?i)nixos|search\.nixos' = ""
 
 [title_active.'(firefox|chrom.*)']
-"(?i)youtube" = ""
-"(?i)twitch" = ""
+"(?i)youtube" = "<span color='#e06c75'></span>"
+"(?i)twitch" = "<span color='#c678dd'></span>"
+"(?i)github" = "<span color='#98c379'></span>"
+"(?i)reddit" = "<span color='#d19a66'></span>"
+"(?i)chatgpt|openai" = "<span color='#56b6c2'></span>"
+"(?i)claude" = "<span color='#d19a66'></span>"
+"(?i)spotify" = "<span color='#98c379'></span>"
 
 # ── Title-based icon overrides (terminal) ────────────────────────────────────
 [title_in_class.'(?i)kitty']
@@ -69,17 +82,17 @@ DEFAULT = "{icon}"
 
 # ── Workspace names ──────────────────────────────────────────────────────
 [workspaces_name]
-0 = "zero"
-1 = "one"
-2 = "two"
-3 = "three"
-4 = "four"
-5 = "five"
-6 = "six"
-7 = "seven"
-8 = "eight"
-9 = "nine"
-10 = "ten"
+0 = "0"
+1 = "I"
+2 = "II"
+3 = "III"
+4 = "IV"
+5 = "V"
+6 = "VI"
+7 = "VII"
+8 = "VIII"
+9 = "IX"
+10 = "X"
 
 # ── Window class to icon mapping ───────────────────────────────────────────
 [class]
