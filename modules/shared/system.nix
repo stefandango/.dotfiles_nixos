@@ -42,6 +42,7 @@
     direnv
     nix-direnv
     go
+    pnpm
 
     # Modern CLI tools
     btop
