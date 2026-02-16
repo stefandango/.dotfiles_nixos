@@ -10,5 +10,6 @@
         github-copilot-intellij-agent
         vscode-fhs
         jetbrains.rider
+        zed-editor
     ];
 }
