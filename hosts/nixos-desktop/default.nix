@@ -27,14 +27,17 @@
     };
     kernelPackages = pkgs.linuxPackages_latest;
     initrd.kernelModules = [ "amdgpu" ];
+    kernel.sysctl = {
+      "vm.max_map_count" = 1048576;
+      "vm.swappiness" = 10;
+    };
   };
 
   # Hardware configuration
   hardware = {
     graphics = {
       enable = true;
-      # RADV (AMD's Vulkan driver) is now enabled by default
-      # amdvlk has been removed from nixpkgs as it was deprecated
+      enable32Bit = true;
     };
     openrazer = {
       enable = true;
@@ -98,6 +101,10 @@
     lshw
     protontricks
     winetricks
+
+    # Gaming performance
+    mangohud
+    corectrl
   ];
 
   # Font configuration
@@ -109,7 +116,32 @@
     noto-fonts-color-emoji
     nerd-fonts.fira-code
     nerd-fonts.jetbrains-mono
+    liberation_ttf
+    inter
   ];
+
+  fonts.fontconfig = {
+    antialias = true;
+    hinting = {
+      enable = true;
+      style = "slight";
+    };
+    subpixel = {
+      rgba = "rgb";
+      lcdfilter = "default";
+    };
+    localConf = ''
+      <?xml version="1.0"?>
+      <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
+      <fontconfig>
+        <match target="pattern">
+          <edit name="dpi" mode="assign">
+            <double>108</double>
+          </edit>
+        </match>
+      </fontconfig>
+    '';
+  };
 
   # Services
   services = {
@@ -135,6 +167,8 @@
       enable = true;
       gamescopeSession.enable = true;
     };
+    gamemode.enable = true;
+    corectrl.enable = true;
   };
 
   # Steam package overrides
@@ -159,6 +193,6 @@
   users.users.${vars.user} = {
     isNormalUser = true;
     shell = pkgs.zsh;
-    extraGroups = [ "wheel" "video" "audio" "networkmanager" "lp" "input" "openrazer" "docker" ];
+    extraGroups = [ "wheel" "video" "audio" "networkmanager" "lp" "input" "openrazer" "docker" "corectrl" "gamemode" ];
   };
 }
