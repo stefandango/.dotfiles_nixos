@@ -46,6 +46,8 @@ in
 			#Other
 			font-manager
 			#obsidian
+			playerctl		# Media playback control
+			brightnessctl		# Brightness control
 
 		];
 
@@ -120,16 +122,43 @@ in
 				allow_tearing = false
 		}
 
+		group {
+			col.border_active = rgba(${cyan}ee)
+			col.border_inactive = rgba(${gray}aa)
+
+			groupbar {
+				enabled = true
+				font_size = 14
+				height = 30
+				render_titles = true
+				col.active = rgb(${blue})
+				col.inactive = rgb(${gray})
+				text_color = rgb(ffffff)
+				rounding = 6
+				gaps_in = 3
+				gaps_out = 3
+			}
+		}
+
 		decoration {
 		# See https://wiki.hyprland.org/Configuring/Variables/ for more
 
 			rounding = 10
+			dim_inactive = true
+			dim_strength = 0.15
 
 				blur {
 					enabled = true
 					size = 8
-					passes = 1
+					passes = 2
 					vibrancy = 0.1696
+				}
+
+				shadow {
+					enabled = true
+					range = 15
+					render_power = 2
+					color = rgba(1a1a1aee)
 				}
 
 		}
@@ -204,11 +233,48 @@ in
 		bind=SUPER,E,exec,pypr toggle files
 		bind=SUPER,I,exec,~/Scripts/imv_launcher.sh
 
-        	bind=,XF86AudioLowerVolume,exec,pactl set-sink-volume @DEFAULT_SINK@ -10%
-        	bind=,XF86AudioRaiseVolume,exec,pactl set-sink-volume @DEFAULT_SINK@ +5%
-         	bind=,XF86AudioMute,exec,pactl set-sink-mute @DEFAULT_SINK@ toggle
+        	binde=,XF86AudioLowerVolume,exec,${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ -5%
+        	binde=,XF86AudioRaiseVolume,exec,${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ +5%
+         	bind=,XF86AudioMute,exec,${pkgs.pulseaudio}/bin/pactl set-sink-mute @DEFAULT_SINK@ toggle
 
-        	bind=,XF86AudioMicMute,exec, pactl set-source-mute @DEFAULT_SOURCE@ 1
+        	bind=,XF86AudioMicMute,exec,${pkgs.pulseaudio}/bin/pactl set-source-mute @DEFAULT_SOURCE@ 1
+
+		# Media playback
+		bind=,XF86AudioPlay,exec,${pkgs.playerctl}/bin/playerctl play-pause
+		bind=,XF86AudioNext,exec,${pkgs.playerctl}/bin/playerctl next
+		bind=,XF86AudioPrev,exec,${pkgs.playerctl}/bin/playerctl previous
+		bind=,XF86AudioStop,exec,${pkgs.playerctl}/bin/playerctl stop
+
+		# Brightness
+		binde=,XF86MonBrightnessUp,exec,${pkgs.brightnessctl}/bin/brightnessctl set +5%
+		binde=,XF86MonBrightnessDown,exec,${pkgs.brightnessctl}/bin/brightnessctl set 5%-
+
+		# Scratchpads
+		bind=SUPER,B,exec,pypr toggle systeminfo
+		bind=SUPERSHIFT,B,exec,pypr toggle lazydocker
+		bind=SUPER,A,exec,pypr toggle pavucontrol
+
+		# Center floating window
+		bind=SUPER,C,centerwindow
+
+		# Pin floating window to all workspaces
+		bind=SUPERSHIFT,P,pin
+
+		# Move windows between monitors
+		bind=SUPERALT,left,focusmonitor,-1
+		bind=SUPERALT,right,focusmonitor,+1
+		bind=SUPERALTSHIFT,left,movewindow,mon:-1
+		bind=SUPERALTSHIFT,right,movewindow,mon:+1
+
+		# Alt-tab window cycling
+		bind=ALT,Tab,cyclenext
+		bind=ALTSHIFT,Tab,cyclenext,prev
+
+		# Window grouping (tabs)
+		bind=SUPER,G,togglegroup
+		bind=SUPERSHIFT,G,lockactivegroup,toggle
+		bind=SUPER,Tab,changegroupactive,f
+		bind=SUPERSHIFT,Tab,changegroupactive,b
 
 		# Move focus with mainMod + arrow keys
 		bind = $mainMod, left, movefocus, l
@@ -267,6 +333,39 @@ in
 		bind=,escape,submap,reset
 		submap=reset
 
+		# Float common dialogs and popups
+		windowrule = float on, match:title ^(Open File)(.*)$
+		windowrule = float on, match:title ^(Open Folder)(.*)$
+		windowrule = float on, match:title ^(Select a File)(.*)$
+		windowrule = float on, match:title ^(Save As)(.*)$
+		windowrule = float on, match:title ^(Save File)(.*)$
+		windowrule = float on, match:title ^(File Upload)(.*)$
+		windowrule = float on, match:title ^(Confirm)(.*)$
+		windowrule = float on, match:title ^(Authentication)(.*)$
+		windowrule = float on, match:title ^(Preferences)$
+		windowrule = float on, match:title ^(Properties)$
+		windowrule = float on, match:title ^(About )(.*)$
+		windowrule = float on, match:title ^(Print)(.*)$
+		windowrule = float on, match:title ^(Color Picker)(.*)$
+		windowrule = float on, match:title ^(Sign in)(.*)$
+		windowrule = float on, match:title ^(Settings)(.*)$
+		windowrule = float on, match:title ^(Options)(.*)$
+		windowrule = float on, match:title ^(Warning)(.*)$
+		windowrule = float on, match:title ^(Error)(.*)$
+		windowrule = float on, match:title ^(Progress)(.*)$
+		windowrule = float on, match:title ^(Export)(.*)$
+		windowrule = float on, match:title ^(Import)(.*)$
+		windowrule = float on, match:title ^(Update)(.*)$
+		windowrule = float on, match:title ^(Download)(.*)$
+
+		# Float common popup app classes
+		windowrule = float on, match:class ^(xdg-desktop-portal)(.*)$
+		windowrule = float on, match:class ^(polkit)(.*)$
+		windowrule = float on, match:class ^(zenity)(.*)$
+		windowrule = float on, match:class ^(nm-connection-editor)$
+		windowrule = float on, match:class ^(blueman)(.*)$
+		windowrule = float on, match:class ^(font-manager)$
+
 		# Steam
 		windowrule = float on, match:title ^(Steam)$
 		windowrule = float on, match:title ^(Friends List)$
@@ -286,11 +385,10 @@ in
 		# Pavucontrol
 		windowrule {
 			name = pavucontrol
-			match:class = ^(pavucontrol)$
+			match:class = ^(org\.pulseaudio\.pavucontrol|pavucontrol)$
 			float = on
 			size = 50% 40%
-			move = 50% 6%
-			workspace = special silent
+			center = on
 			opacity = 0.80
 		}
 
@@ -309,6 +407,14 @@ in
 			float = on
 			size = 70% 70%
 			center = on
+		}
+
+		# Layer rules for blur
+		layerrule {
+			name = blur-layers
+			match:namespace = ^(rofi|waybar|swaync)$
+			blur = on
+			ignore_alpha = 0.5
 		}
 
 		# Opacity for certain apps
