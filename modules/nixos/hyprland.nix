@@ -232,6 +232,7 @@ in
 		bind=SUPER,Z,exec, pypr zoom
 		bind=SUPER,E,exec,pypr toggle files
 		bind=SUPER,I,exec,~/Scripts/imv_launcher.sh
+		bind=SUPERSHIFT,T,exec,pkill rofi || ~/Scripts/theme-rofi.sh
 
         	binde=,XF86AudioLowerVolume,exec,${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ -5%
         	binde=,XF86AudioRaiseVolume,exec,${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ +5%
@@ -420,6 +421,9 @@ in
 		# Opacity for certain apps
 		windowrule = opacity 0.9 0.9, match:class ^(Slack|WebCord|Spotify|Kitty)$
 
+		# Initialize theme files from Nix defaults before apps start
+		exec-once = [ ! -f $HOME/.config/waybar/style.css ] && cp $HOME/.config/waybar/style.default.css $HOME/.config/waybar/style.css && chmod u+w $HOME/.config/waybar/style.css; [ ! -f $HOME/.config/rofi/shared/colors.rasi ] && cp $HOME/.config/rofi/shared/colors.default.rasi $HOME/.config/rofi/shared/colors.rasi && chmod u+w $HOME/.config/rofi/shared/colors.rasi; [ ! -f $HOME/.config/swaync/style.css ] && cp $HOME/.config/swaync/style.default.css $HOME/.config/swaync/style.css && chmod u+w $HOME/.config/swaync/style.css; true
+
 		exec-once=${pkgs.swww}/bin/swww-daemon
 		exec-once=${pkgs.waybar}/bin/waybar
 		exec-once=${pkgs.swaynotificationcenter}/bin/swaync
@@ -432,6 +436,8 @@ in
 		exec-once = rm "$HOME/.cache/cliphist/db"   #it'll delete history at every restart
 		exec-once = sleep 3 && ~/Scripts/swww_random.sh ~/Pictures/Wallpapers/
 		exec-once = sleep 4 && insync start --qt-qpa-platform=xcb --no-daemon
+		# Restore saved theme if one was selected
+		exec-once = sleep 2 && test -f $HOME/.config/theme/current && ~/Scripts/theme-switcher.sh $HOME/.config/theme/themes/$(cat $HOME/.config/theme/current).json
 		${execute}
 		'';
 	in

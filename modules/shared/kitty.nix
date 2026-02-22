@@ -23,6 +23,9 @@
       listen_on = "unix:/tmp/kitty";
     };
     extraConfig = ''
+      # Load theme override from theme switcher (overrides themeFile colors)
+      include ~/.config/kitty/theme-override.conf
+
       font_features MonoLisa-Medium +zero +ss04 +ss07 +ss08 +ss09
       font_features MonoLisa-MediumItalic +zero +ss04 +ss07 +ss08 +ss09
 

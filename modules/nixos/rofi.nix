@@ -13,7 +13,7 @@ in
 
 			file = with colors.scheme.default.hex; {
 
-				".config/rofi/shared/colors.rasi" = with colors.scheme.default; {
+				".config/rofi/shared/colors.default.rasi" = with colors.scheme.default; {
 					text = ''
 						* {
     /* Modern glass theme with enhanced transparency */

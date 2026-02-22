@@ -23,7 +23,7 @@ in
 
 
 
-				".config/waybar/style.css".text = with colors.scheme.default; ''
+				".config/waybar/style.default.css".text = with colors.scheme.default; ''
 					* {
 						border: none;
 						border-radius: 0;
