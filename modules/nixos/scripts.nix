@@ -69,6 +69,11 @@ in
 				recursive = true;
 				executable = true;
 			};
+			"Scripts/hypr-zones.sh" = {
+				source = ../scripts/hypr-zones.sh;
+				recursive = true;
+				executable = true;
+			};
 
 			# Theme JSON files
 			".config/theme/themes/onedark.json".source = ../../theme/themes/onedark.json;

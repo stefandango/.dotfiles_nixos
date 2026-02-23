@@ -136,7 +136,7 @@
       <fontconfig>
         <match target="pattern">
           <edit name="dpi" mode="assign">
-            <double>108</double>
+            <double>120</double>
           </edit>
         </match>
       </fontconfig>

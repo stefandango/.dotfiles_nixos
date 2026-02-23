@@ -18,7 +18,7 @@ in
 				"control-center-margin-bottom": 8,
 				"control-center-margin-right": 8,
 				"control-center-margin-left": 8,
-				"control-center-width": 500,
+				"control-center-width": 650,
 				"control-center-height": 1024,
 				"fit-to-screen": false,
 
@@ -32,7 +32,7 @@ in
 				"timeout": 10,
 				"timeout-low": 5,
 				"timeout-critical": 0,
-				"notification-window-width": 500,
+				"notification-window-width": 550,
 				"keyboard-shortcuts": true,
 				"image-visibility": "when-available",
 				"transition-time": 200,
