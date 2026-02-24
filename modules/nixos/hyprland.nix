@@ -199,7 +199,7 @@ in
 		# See https://wiki.hyprland.org/Configuring/Variables/ for more
 			force_default_wallpaper = 0
 			vfr = true
-			vrr = 1
+			vrr = 2
 			disable_hyprland_logo = true
 			disable_splash_rendering = true
 			mouse_move_enables_dpms = true

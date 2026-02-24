@@ -50,6 +50,7 @@ RGB_BG=$(hex2rgb "$BG")
 RGB_FG=$(hex2rgb "$FG")
 RGB_RED=$(hex2rgb "$RED")
 RGB_YELLOW=$(hex2rgb "$YELLOW")
+RGB_BLUE=$(hex2rgb "$BLUE")
 RGB_ACTIVE=$(hex2rgb "$ACTIVE")
 
 # ─── 1. Hyprland ───────────────────────────────────────────────────────────────
@@ -385,7 +386,7 @@ cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
 
 .notification-row {
   outline: none;
-  margin: 10px;
+  margin: 12px;
   padding: 0;
 }
 
@@ -397,26 +398,27 @@ cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
 
 .notification-content {
   background: @cc-bg;
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #${ACTIVE};
+  padding: 16px;
+  border-radius: 12px;
+  border: 2px solid #${BLUE};
+  box-shadow: 0 4px 20px rgba(${RGB_BLUE}, 0.25), 0 2px 8px rgba(0, 0, 0, 0.4);
   margin: 0;
 }
 
 .notification-default-action {
   margin: 0;
   padding: 0;
-  border-radius: 5px;
+  border-radius: 12px;
 }
 
 .close-button {
   background: #${RED};
   color: @cc-bg;
   text-shadow: none;
-  padding: 0;
-  border-radius: 5px;
-  margin-top: 5px;
-  margin-right: 5px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  margin-top: 8px;
+  margin-right: 8px;
 }
 
 .close-button:hover {
@@ -427,34 +429,34 @@ cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
 }
 
 .notification-action {
-  border: 2px solid #${ACTIVE};
+  border: 2px solid #${BLUE};
   border-top: none;
-  border-radius: 5px;
+  border-radius: 8px;
 }
 
 .notification-default-action:hover,
 .notification-action:hover {
   color: #${FG};
-  background: #${FG};
+  background: @noti-bg-hover;
 }
 
 .notification-default-action {
-  border-radius: 5px;
+  border-radius: 12px;
   margin: 0px;
 }
 
 .notification-default-action:not(:only-child) {
-  border-bottom-left-radius: 7px;
-  border-bottom-right-radius: 7px;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
 }
 
 .notification-action:first-child {
-  border-bottom-left-radius: 10px;
+  border-bottom-left-radius: 12px;
   background: @noti-bg-hover;
 }
 
 .notification-action:last-child {
-  border-bottom-right-radius: 10px;
+  border-bottom-right-radius: 12px;
   background: @noti-bg-hover;
 }
 
@@ -495,7 +497,7 @@ cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
 }
 
 .summary {
-  font-size: 10px;
+  font-size: 18px;
   font-weight: 700;
   background: transparent;
   color: rgba(${RGB_FG}, 1);
@@ -503,7 +505,7 @@ cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
 }
 
 .time {
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 700;
   background: transparent;
   color: @text-color;
@@ -512,7 +514,7 @@ cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
 }
 
 .body {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 400;
   background: transparent;
   color: @text-color;
@@ -521,8 +523,8 @@ cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
 
 .control-center {
   background: @cc-bg;
-  border: 2px solid #${ACTIVE};
-  border-radius: 10px;
+  border: 2px solid #${BLUE};
+  border-radius: 14px;
 }
 
 .control-center-list {
@@ -543,14 +545,14 @@ cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
 
 .widget-title {
   color: #${FG};
-  padding: 0px 10px;
+  padding: 4px 12px;
   margin: 10px 10px 5px 10px;
-  font-size: 12px;
-  border-radius: 5px;
+  font-size: 15px;
+  border-radius: 8px;
 }
 
 .widget-title>button {
-  font-size: 10px;
+  font-size: 13px;
   color: @text-color;
   text-shadow: none;
   background: @noti-bg;
@@ -565,10 +567,10 @@ cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
 
 .widget-dnd {
   background: @noti-bg-darker;
-  padding: 5px 10px;
+  padding: 8px 14px;
   margin: 10px 10px 5px 10px;
   border-radius: 10px;
-  font-size: 12px;
+  font-size: 14px;
   color: #${FG};
 }
 
@@ -597,7 +599,7 @@ cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
 }
 
 .widget-label>label {
-  font-size: 1rem;
+  font-size: 1.1rem;
   color: @text-color;
 }
 
@@ -619,18 +621,18 @@ cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
 }
 
 .widget-mpris-title {
-  font-size: 12px;
+  font-size: 15px;
 }
 
 .widget-mpris-subtitle {
-  font-size: 10px;
+  font-size: 13px;
 }
 
 .widget-buttons-grid {
-  font-size: 14px;
+  font-size: 16px;
   padding: 0px;
   margin: 10px 10px 5px 10px;
-  border-radius: 5px;
+  border-radius: 8px;
 }
 
 .widget-buttons-grid>flowbox>flowboxchild>button {

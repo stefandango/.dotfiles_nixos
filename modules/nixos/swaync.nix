@@ -14,25 +14,25 @@ in
 				"positiony": "top",
 				"control-center-positionx": "none",
 				"control-center-positiony": "none",
-				"control-center-margin-top": 8,
-				"control-center-margin-bottom": 8,
-				"control-center-margin-right": 8,
-				"control-center-margin-left": 8,
-				"control-center-width": 650,
-				"control-center-height": 1024,
+				"control-center-margin-top": 12,
+				"control-center-margin-bottom": 12,
+				"control-center-margin-right": 12,
+				"control-center-margin-left": 12,
+				"control-center-width": 800,
+				"control-center-height": 1200,
 				"fit-to-screen": false,
 
 				"layer": "overlay",
 				"control-center-layer": "overlay",
 				"csspriority": "user",
-				"notification-icon-size": 64,
-				"notification-body-image-height": 100,
-				"notification-body-image-width": 200,
+				"notification-icon-size": 96,
+				"notification-body-image-height": 150,
+				"notification-body-image-width": 300,
 				"notification-inline-replies": true,
 				"timeout": 10,
 				"timeout-low": 5,
 				"timeout-critical": 0,
-				"notification-window-width": 550,
+				"notification-window-width": 850,
 				"keyboard-shortcuts": true,
 				"image-visibility": "when-available",
 				"transition-time": 200,
@@ -153,7 +153,7 @@ in
 
           .notification-row {
             outline: none;
-            margin: 10px;
+            margin: 12px;
             padding: 0;
           }
 
@@ -165,26 +165,27 @@ in
 
           .notification-content {
             background: @cc-bg;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #${hex.active};
+            padding: 16px;
+            border-radius: 12px;
+            border: 2px solid #${hex.blue};
+            box-shadow: 0 4px 20px rgba(${rgb.blue}, 0.25), 0 2px 8px rgba(0, 0, 0, 0.4);
             margin: 0;
           }
 
           .notification-default-action {
             margin: 0;
             padding: 0;
-            border-radius: 5px;
+            border-radius: 12px;
           }
 
           .close-button {
             background: #${hex.red};
             color: @cc-bg;
             text-shadow: none;
-            padding: 0;
-            border-radius: 5px;
-            margin-top: 5px;
-            margin-right: 5px;
+            padding: 2px 8px;
+            border-radius: 8px;
+            margin-top: 8px;
+            margin-right: 8px;
           }
 
           .close-button:hover {
@@ -195,34 +196,34 @@ in
           }
 
           .notification-action {
-            border: 2px solid #${hex.active};
+            border: 2px solid #${hex.blue};
             border-top: none;
-            border-radius: 5px;
+            border-radius: 8px;
           }
 
           .notification-default-action:hover,
           .notification-action:hover {
             color: #${hex.fg};
-            background: #${hex.fg};
+            background: @noti-bg-hover;
           }
 
           .notification-default-action {
-            border-radius: 5px;
+            border-radius: 12px;
             margin: 0px;
           }
 
           .notification-default-action:not(:only-child) {
-            border-bottom-left-radius: 7px;
-            border-bottom-right-radius: 7px;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
           }
 
           .notification-action:first-child {
-            border-bottom-left-radius: 10px;
+            border-bottom-left-radius: 12px;
             background: #1b1b2b;
           }
 
           .notification-action:last-child {
-            border-bottom-right-radius: 10px;
+            border-bottom-right-radius: 12px;
             background: #1b1b2b;
           }
 
@@ -263,7 +264,7 @@ in
           }
 
           .summary {
-            font-size: 10px;
+            font-size: 18px;
             font-weight: 700;
             background: transparent;
             color: rgba(${rgb.fg}, 1);
@@ -271,7 +272,7 @@ in
           }
 
           .time {
-            font-size: 10px;
+            font-size: 13px;
             font-weight: 700;
             background: transparent;
             color: @text-color;
@@ -280,7 +281,7 @@ in
           }
 
           .body {
-            font-size: 12px;
+            font-size: 15px;
             font-weight: 400;
             background: transparent;
             color: @text-color;
@@ -289,8 +290,8 @@ in
 
           .control-center {
             background: @cc-bg;
-            border: 2px solid #${hex.active};
-            border-radius: 10px;
+            border: 2px solid #${hex.blue};
+            border-radius: 14px;
           }
 
           .control-center-list {
@@ -312,14 +313,14 @@ in
           .widget-title {
             color: #${hex.fg};
             /*background: @noti-bg-darker;*/
-            padding: 0px 10px;
+            padding: 4px 12px;
             margin: 10px 10px 5px 10px;
-            font-size: 12px;
-            border-radius: 5px;
+            font-size: 15px;
+            border-radius: 8px;
           }
 
           .widget-title>button {
-            font-size: 10px;
+            font-size: 13px;
             color: @text-color;
             text-shadow: none;
             background: @noti-bg;
@@ -334,10 +335,10 @@ in
 
           .widget-dnd {
             background: @noti-bg-darker;
-            padding: 5px 10px;
+            padding: 8px 14px;
             margin: 10px 10px 5px 10px;
             border-radius: 10px;
-            font-size: 12px;
+            font-size: 14px;
             color: #${hex.fg};
           }
 
@@ -366,7 +367,7 @@ in
           }
 
           .widget-label>label {
-            font-size: 1rem;
+            font-size: 1.1rem;
             color: @text-color;
           }
 
@@ -388,18 +389,18 @@ in
           }
 
           .widget-mpris-title {
-            font-size: 12px;
+            font-size: 15px;
           }
 
           .widget-mpris-subtitle {
-            font-size: 10px;
+            font-size: 13px;
           }
 
           .widget-buttons-grid {
-            font-size: 14px;
+            font-size: 16px;
             padding: 0px;
             margin: 10px 10px 5px 10px;
-            border-radius: 5px;
+            border-radius: 8px;
             /*background: @noti-bg-darker;*/
           }
 

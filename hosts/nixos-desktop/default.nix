@@ -27,6 +27,9 @@
     };
     kernelPackages = pkgs.linuxPackages_latest;
     initrd.kernelModules = [ "amdgpu" ];
+    kernelParams = [
+      "amdgpu.dcdebugmask=0x610"  # Disable PSR + PSR-SU + Panel Replay to prevent flickering
+    ];
     kernel.sysctl = {
       "vm.max_map_count" = 1048576;
       "vm.swappiness" = 10;
