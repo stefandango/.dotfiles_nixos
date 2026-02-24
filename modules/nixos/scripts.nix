@@ -38,6 +38,11 @@ in
 				recursive = true;
 				executable = true;
 			};
+			"Scripts/waybar-submap.sh" = {
+				source = ../scripts/waybar-submap.sh;
+				recursive = true;
+				executable = true;
+			};
 			"Scripts/swww_random.sh" = {	
 				source = ../scripts/swww_random.sh;
 				recursive = true;
@@ -69,12 +74,6 @@ in
 				recursive = true;
 				executable = true;
 			};
-			"Scripts/hypr-zones.sh" = {
-				source = ../scripts/hypr-zones.sh;
-				recursive = true;
-				executable = true;
-			};
-
 			# Theme JSON files
 			".config/theme/themes/onedark.json".source = ../../theme/themes/onedark.json;
 			".config/theme/themes/doom.json".source = ../../theme/themes/doom.json;

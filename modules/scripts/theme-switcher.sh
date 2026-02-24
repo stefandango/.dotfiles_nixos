@@ -49,6 +49,7 @@ hex2rgb() {
 RGB_BG=$(hex2rgb "$BG")
 RGB_FG=$(hex2rgb "$FG")
 RGB_RED=$(hex2rgb "$RED")
+RGB_YELLOW=$(hex2rgb "$YELLOW")
 RGB_ACTIVE=$(hex2rgb "$ACTIVE")
 
 # ─── 1. Hyprland ───────────────────────────────────────────────────────────────
@@ -260,6 +261,53 @@ tooltip {
 #tray > .needs-attention {
     -gtk-icon-effect: highlight;
     background-color: #${RED};
+}
+
+@keyframes submap-pulse {
+    0%   { box-shadow: 0 0 4px rgba(${RGB_YELLOW}, 0.4); }
+    50%  { box-shadow: 0 0 12px rgba(${RGB_YELLOW}, 0.8); }
+    100% { box-shadow: 0 0 4px rgba(${RGB_YELLOW}, 0.4); }
+}
+
+@keyframes submap-kill-pulse {
+    0%   { box-shadow: 0 0 8px rgba(${RGB_RED}, 0.6); }
+    50%  { box-shadow: 0 0 20px rgba(${RGB_RED}, 1.0); }
+    100% { box-shadow: 0 0 8px rgba(${RGB_RED}, 0.6); }
+}
+
+@keyframes submap-shake {
+    0%   { margin-left: 6px; }
+    20%  { margin-left: 10px; }
+    40%  { margin-left: 2px; }
+    60%  { margin-left: 9px; }
+    80%  { margin-left: 3px; }
+    100% { margin-left: 6px; }
+}
+
+#custom-submap {
+    color: #${BG};
+    font-weight: bold;
+    font-size: 14px;
+    padding: 4px 14px;
+    border-radius: 8px;
+    margin: 2px 6px;
+}
+
+#custom-submap.window {
+    background: linear-gradient(135deg, #${YELLOW}, #${ORANGE});
+    animation: submap-pulse 2s ease-in-out infinite;
+}
+
+#custom-submap.kill {
+    background: #${RED};
+    padding: 4px 30px;
+    margin: 2px 8px;
+    animation: submap-kill-pulse 0.8s ease-in-out infinite, submap-shake 0.4s ease-in-out infinite;
+}
+
+#custom-submap.empty {
+    padding: 0;
+    margin: 0;
 }
 WAYBAR_EOF
 

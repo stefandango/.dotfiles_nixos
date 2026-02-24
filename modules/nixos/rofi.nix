@@ -113,11 +113,6 @@ in
 	recursive = true;
 	};
 
-".config/rofi/zones.rasi" = {
-	source = ./rofi/zones.rasi;
-	recursive = true;
-	};
-
 
 			};
 		};

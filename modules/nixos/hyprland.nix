@@ -217,7 +217,15 @@ in
 
 		# Example binds, see https://wiki.hyprland.org/Configuring/Binds/ for more
 		bind = $mainMod, Return, exec, kitty
-		bind = $mainMod, Q, killactive
+		bind = $mainMod, Q, submap, kill
+		submap=kill
+		bind =,Q,killactive
+		bind =,Q,submap,reset
+		bind =,Return,killactive
+		bind =,Return,submap,reset
+		bind =,escape,submap,reset
+		bind =,catchall,submap,reset
+		submap=reset
 		bind = SUPERSHIFT, SPACE, togglefloating
 		bind = $mainMod, D, exec, pkill rofi || rofi -show drun -theme ~/.config/rofi/launcher.rasi
 		bind = $mainMod, P, pseudo # dwindle
@@ -257,8 +265,40 @@ in
 		bind=SUPERSHIFT,B,exec,pypr toggle lazydocker
 		bind=SUPER,A,exec,pypr toggle pavucontrol
 
-		# Ultrawide zone picker
-		bind = SUPER, W, exec, pkill rofi || ~/Scripts/hypr-zones.sh
+		# Window management submap
+		bind = SUPER,R,exec,hyprctl keyword general:col.active_border "rgba(${yellow}ee) rgba(${orange}ee) 45deg"
+		bind = SUPER,R,submap,window
+		submap=window
+
+		# Ratio presets (auto-exit after selection)
+		bind =,1,exec,hyprctl --batch "keyword general:col.active_border 'rgba(${cyan}ee) rgba(${green}ee) 45deg'; dispatch splitratio exact 0.667; dispatch submap reset"
+		bind =,2,exec,hyprctl --batch "keyword general:col.active_border 'rgba(${cyan}ee) rgba(${green}ee) 45deg'; dispatch splitratio exact 0.8; dispatch submap reset"
+		bind =,3,exec,hyprctl --batch "keyword general:col.active_border 'rgba(${cyan}ee) rgba(${green}ee) 45deg'; dispatch splitratio exact 1.0; dispatch submap reset"
+		bind =,4,exec,hyprctl --batch "keyword general:col.active_border 'rgba(${cyan}ee) rgba(${green}ee) 45deg'; dispatch splitratio exact 1.25; dispatch submap reset"
+		bind =,5,exec,hyprctl --batch "keyword general:col.active_border 'rgba(${cyan}ee) rgba(${green}ee) 45deg'; dispatch splitratio exact 1.5; dispatch submap reset"
+		bind =,e,exec,hyprctl --batch "keyword general:col.active_border 'rgba(${cyan}ee) rgba(${green}ee) 45deg'; dispatch splitratio exact 1.0; dispatch submap reset"
+
+		# Toggle split direction
+		bind =,s,exec,hyprctl --batch "keyword general:col.active_border 'rgba(${cyan}ee) rgba(${green}ee) 45deg'; dispatch togglesplit; dispatch submap reset"
+
+		# Coarse resize for ultrawide (stay in submap, repeatable)
+		binde =,right,resizeactive,100 0
+		binde =,left,resizeactive,-100 0
+		binde =,up,resizeactive,0 -100
+		binde =,down,resizeactive,0 100
+
+		# Very coarse resize
+		binde =SHIFT,right,resizeactive,400 0
+		binde =SHIFT,left,resizeactive,-400 0
+		binde =SHIFT,up,resizeactive,0 -400
+		binde =SHIFT,down,resizeactive,0 400
+
+		# Exit
+		bind =,escape,exec,hyprctl keyword general:col.active_border "rgba(${cyan}ee) rgba(${green}ee) 45deg"
+		bind =,escape,submap,reset
+		bind =SUPER,R,exec,hyprctl keyword general:col.active_border "rgba(${cyan}ee) rgba(${green}ee) 45deg"
+		bind =SUPER,R,submap,reset
+		submap=reset
 
 		# Center floating window
 		bind=SUPER,C,centerwindow
@@ -330,14 +370,6 @@ in
 		bindm = $mainMod, mouse:272, movewindow
 		bindm = $mainMod, mouse:273, resizewindow
 
-		bind = SUPER,R,submap,resize
-		submap=resize
-		binde =,right,resizeactive,20 0
-		binde =,left,resizeactive,-20 0
-		binde =,up,resizeactive,0 -20
-		binde =,down,resizeactive,0 20
-		bind=,escape,submap,reset
-		submap=reset
 
 		# Float common dialogs and popups
 		windowrule = float on, match:title ^(Open File)(.*)$
@@ -439,7 +471,7 @@ in
 		exec-once = wl-clipboard-history -t
 		exec-once = wl-paste --watch cliphist store
 		exec-once = rm "$HOME/.cache/cliphist/db"   #it'll delete history at every restart
-		exec-once = sleep 3 && ~/Scripts/swww_random.sh ~/Pictures/Wallpapers/
+		exec-once = sleep 3 && ~/Scripts/swww_random.sh
 		exec-once = sleep 4 && insync start --qt-qpa-platform=xcb --no-daemon
 		# Restore saved theme if one was selected
 		exec-once = sleep 2 && test -f $HOME/.config/theme/current && ~/Scripts/theme-switcher.sh $HOME/.config/theme/themes/$(cat $HOME/.config/theme/current).json

@@ -13,6 +13,7 @@
 		"custom/clipboard"
 	],
 	"modules-center": [
+		"custom/submap",
 		"custom/weather"
 	],
 	"modules-right": [
@@ -34,6 +35,14 @@
 		"format-alt": "󰨲 {:%d/%m}",
 		"tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
 		"on-click": "xdg-open https://calendar.google.com/calendar/u/0/r/week"
+	},
+	"custom/submap": {
+		"format": "{}",
+		"return-type": "json",
+		"exec": "~/Scripts/waybar-submap.sh",
+		"exec-on-event": false,
+		"restart-interval": 5,
+		"tooltip": true
 	},
 	"hyprland/workspaces": {
 		"disable-scroll": true,
