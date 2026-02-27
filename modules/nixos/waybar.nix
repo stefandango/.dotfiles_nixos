@@ -11,6 +11,7 @@ in
 			packages = with pkgs; [
 				waybar
 				jq
+				socat
 			];
 
 			file = with colors.scheme.default.hex; {
@@ -23,7 +24,7 @@ in
 
 
 
-				".config/waybar/style.css".text = with colors.scheme.default; ''
+				".config/waybar/style.default.css".text = with colors.scheme.default; ''
 					* {
 						border: none;
 						border-radius: 0;
@@ -126,6 +127,53 @@ in
 					#custom-notification:hover,
 					#custom-logout:hover {
 						background: rgba(${rgb.active}, 0.2);
+					}
+
+					@keyframes submap-pulse {
+						0%   { box-shadow: 0 0 4px rgba(${rgb.yellow}, 0.4); }
+						50%  { box-shadow: 0 0 12px rgba(${rgb.yellow}, 0.8); }
+						100% { box-shadow: 0 0 4px rgba(${rgb.yellow}, 0.4); }
+					}
+
+					@keyframes submap-kill-pulse {
+						0%   { box-shadow: 0 0 8px rgba(${rgb.red}, 0.6); }
+						50%  { box-shadow: 0 0 20px rgba(${rgb.red}, 1.0); }
+						100% { box-shadow: 0 0 8px rgba(${rgb.red}, 0.6); }
+					}
+
+					@keyframes submap-shake {
+						0%   { margin-left: 6px; }
+						20%  { margin-left: 10px; }
+						40%  { margin-left: 2px; }
+						60%  { margin-left: 9px; }
+						80%  { margin-left: 3px; }
+						100% { margin-left: 6px; }
+					}
+
+					#custom-submap {
+						color: #${hex.bg};
+						font-weight: bold;
+						font-size: 14px;
+						padding: 4px 14px;
+						border-radius: 8px;
+						margin: 2px 6px;
+					}
+
+					#custom-submap.window {
+						background: linear-gradient(135deg, #${hex.yellow}, #${hex.orange});
+						animation: submap-pulse 2s ease-in-out infinite;
+					}
+
+					#custom-submap.kill {
+						background: #${hex.red};
+						padding: 4px 30px;
+						margin: 2px 8px;
+						animation: submap-kill-pulse 0.8s ease-in-out infinite, submap-shake 0.4s ease-in-out infinite;
+					}
+
+					#custom-submap.empty {
+						padding: 0;
+						margin: 0;
 					}
 
 					#clock {
