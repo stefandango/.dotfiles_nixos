@@ -90,6 +90,7 @@
       "alt-tab"
       "dbeaver-community"
       "jordanbaird-ice"
+      "zen-browser"
       "font-monaspice-nerd-font"
       "font-noto-sans-symbols-2"
     ];
