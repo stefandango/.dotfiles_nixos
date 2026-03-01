@@ -230,7 +230,7 @@
       ];
     };
     initContent = ''
-      export PATH="$PATH:/home/stefan/.dotnet/tools:/Users/stefan/.dotnet/tools:$HOME/Scripts:$HOME/go/bin"
+      export PATH="$HOME/.local/bin:$PATH:/home/stefan/.dotnet/tools:/Users/stefan/.dotnet/tools:$HOME/Scripts:$HOME/go/bin"
 
       # Initialize zoxide (smarter cd)
       eval "$(zoxide init zsh)"

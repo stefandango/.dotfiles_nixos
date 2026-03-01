@@ -1,4 +1,4 @@
-{ config, lib, pkgs, vars, ... }:
+{ config, lib, pkgs, vars, inputs, ... }:
 
 {
   imports = [
@@ -81,6 +81,7 @@
     zsh  # Add zsh at system level
     # GUI Applications
     firefox
+    inputs.zen-browser.packages.${pkgs.system}.default
     neofetch
     
     # Audio/Video tools

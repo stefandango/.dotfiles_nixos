@@ -50,6 +50,9 @@
         cmd = "meld $BASE $LOCAL $REMOTE $MERGED";
         keepBackup = false;
       };
+      init = {
+        defaultBranch = "master";
+      };
       credential = {
         helper = "cache";
       };
