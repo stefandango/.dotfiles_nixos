@@ -39,10 +39,17 @@ in
 				"hide-on-clear": true,
 				"hide-on-action": true,
 				"script-fail-notify": true,
+				"scripts": {
+					"2fa-copy": {
+						"exec": "bash -c 'echo \"$SWAYNC_BODY\" | grep -oP \"\\b[0-9]{4,8}\\b\" | head -1 | tr -d \"\\n\" | ${pkgs.wl-clipboard}/bin/wl-copy && ${pkgs.libnotify}/bin/notify-send -a swaync -u low \"Code Copied\" \"Verification code copied to clipboard\"'",
+						"run-on": "receive",
+						"body": ".*(code|Code|OTP|otp|verify|Verify|verification|pin|PIN|token).*[0-9]{4,}.*|.*[0-9]{4,}.*(code|Code|OTP|otp|verify|Verify|verification|pin|PIN|token).*"
+					}
+				},
 				"widgets": [
     "menubar#label",
-/*					"title", */
 				"volume",
+				"backlight",
 				"mpris",
 				"dnd",
 				"notifications"
@@ -67,7 +74,11 @@ in
 					"volume": {
 						"label": "󰕾"
 					},
-					"menubar#label": {
+					"backlight": {
+						"label": "󰃟",
+						"device": "brightnessctl"
+					},
+						"menubar#label": {
 						"menu#power-buttons": {
 							"label": "⏻", 
 							"position": "right",
@@ -105,6 +116,10 @@ in
 	{
 								"label": "󰸉\tSwitch wallpaper",
 								"command": "pkill swww_random.sh && ~/Scripts/swww_random.sh ~/Pictures/Wallpapers/ &"
+							},
+							{
+								"label": "󰊴\tGameMode",
+								"command": "~/Scripts/gamemode-toggle.sh"
 							}
 
 							]
@@ -170,6 +185,16 @@ in
             border: 2px solid #${hex.blue};
             box-shadow: 0 4px 20px rgba(${rgb.blue}, 0.25), 0 2px 8px rgba(0, 0, 0, 0.4);
             margin: 0;
+          }
+
+          .critical .notification-content {
+            border: 2px solid #${hex.red};
+            box-shadow: 0 4px 24px rgba(${rgb.red}, 0.35), 0 2px 8px rgba(0, 0, 0, 0.5);
+          }
+
+          .low .notification-content {
+            border: 2px solid #${hex.gray};
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
           }
 
           .notification-default-action {
@@ -449,9 +474,9 @@ in
 
           .widget-backlight {
             background: @noti-bg-darker;
-            padding: 5px;
+            padding: 10px;
             margin: 10px 10px 5px 10px;
-            border-radius: 5px;
+            border-radius: 8px;
             font-size: x-large;
             color: @text-color;
           }

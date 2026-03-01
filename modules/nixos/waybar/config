@@ -17,6 +17,8 @@
 		"custom/weather"
 	],
 	"modules-right": [
+		"custom/focusmode",
+		"custom/gamemode",
 		"custom/tmux",
 		"custom/razerviperbattery",
 		"custom/disks",
@@ -188,7 +190,21 @@
 		"exec": "~/Scripts/waybar-memory.sh",
 		"return-type": "json",
 		"format": "{}",
-		"on-click": "pypr toggle systeminfo", 
+		"on-click": "pypr toggle systeminfo",
 		"interval": 30
+	},
+	"custom/focusmode": {
+		"format": "{}",
+		"return-type": "json",
+		"exec": "~/Scripts/waybar-focusmode.sh",
+		"interval": 3,
+		"on-click": "~/Scripts/focus-mode-toggle.sh"
+	},
+	"custom/gamemode": {
+		"format": "{}",
+		"return-type": "json",
+		"exec": "~/Scripts/waybar-gamemode.sh",
+		"interval": 5,
+		"on-click": "~/Scripts/gamemode-toggle.sh"
 	}
 }

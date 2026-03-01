@@ -51,6 +51,8 @@ RGB_FG=$(hex2rgb "$FG")
 RGB_RED=$(hex2rgb "$RED")
 RGB_YELLOW=$(hex2rgb "$YELLOW")
 RGB_BLUE=$(hex2rgb "$BLUE")
+RGB_GREEN=$(hex2rgb "$GREEN")
+RGB_CYAN=$(hex2rgb "$CYAN")
 RGB_ACTIVE=$(hex2rgb "$ACTIVE")
 
 # ─── 1. Hyprland ───────────────────────────────────────────────────────────────
@@ -137,6 +139,8 @@ tooltip {
 #custom-docker,
 #custom-clipboard,
 #custom-razerviperbattery,
+#custom-focusmode,
+#custom-gamemode,
 #custom-disks,
 #memory,
 #cpu,
@@ -160,6 +164,8 @@ tooltip {
 #custom-docker:hover,
 #custom-clipboard:hover,
 #custom-razerviperbattery:hover,
+#custom-focusmode:hover,
+#custom-gamemode:hover,
 #custom-disks:hover,
 #memory:hover,
 #cpu:hover,
@@ -242,6 +248,42 @@ tooltip {
 
 #custom-devserver {
     color: #${CYAN};
+}
+
+#custom-focusmode {
+    color: #${CYAN};
+    font-weight: bold;
+}
+
+#custom-focusmode.active {
+    background: rgba(${RGB_CYAN}, 0.15);
+    border: 1px solid rgba(${RGB_CYAN}, 0.4);
+    padding: 4px 10px;
+    margin: 2px 4px;
+}
+
+#custom-focusmode.inactive {
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+}
+
+#custom-gamemode {
+    color: #${GREEN};
+    font-weight: bold;
+}
+
+#custom-gamemode.active {
+    background: rgba(${RGB_GREEN}, 0.15);
+    border: 1px solid rgba(${RGB_GREEN}, 0.4);
+    padding: 4px 10px;
+    margin: 2px 4px;
+}
+
+#custom-gamemode.inactive {
+    padding: 0;
+    margin: 0;
+    min-width: 0;
 }
 
 #custom-tmux {
@@ -403,6 +445,16 @@ cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
   border: 2px solid #${BLUE};
   box-shadow: 0 4px 20px rgba(${RGB_BLUE}, 0.25), 0 2px 8px rgba(0, 0, 0, 0.4);
   margin: 0;
+}
+
+.critical .notification-content {
+  border: 2px solid #${RED};
+  box-shadow: 0 4px 24px rgba(${RGB_RED}, 0.35), 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.low .notification-content {
+  border: 2px solid #${GRAY};
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .notification-default-action {
@@ -680,9 +732,9 @@ cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
 
 .widget-backlight {
   background: @noti-bg-darker;
-  padding: 5px;
+  padding: 10px;
   margin: 10px 10px 5px 10px;
-  border-radius: 5px;
+  border-radius: 8px;
   font-size: x-large;
   color: @text-color;
 }

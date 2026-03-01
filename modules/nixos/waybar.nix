@@ -95,6 +95,8 @@ in
 					#custom-docker,
 					#custom-clipboard,
 					#custom-razerviperbattery,
+					#custom-focusmode,
+				#custom-gamemode,
 					#custom-disks,
 					#memory,
 					#cpu,
@@ -118,6 +120,8 @@ in
 					#custom-docker:hover,
 					#custom-clipboard:hover,
 					#custom-razerviperbattery:hover,
+					#custom-focusmode:hover,
+				#custom-gamemode:hover,
 					#custom-disks:hover,
 					#memory:hover,
 					#cpu:hover,
@@ -248,6 +252,42 @@ in
 
 					#custom-devserver {
 						color: #${hex.cyan};
+					}
+
+					#custom-focusmode {
+						color: #${hex.cyan};
+						font-weight: bold;
+					}
+
+					#custom-focusmode.active {
+						background: rgba(${rgb.cyan}, 0.15);
+						border: 1px solid rgba(${rgb.cyan}, 0.4);
+						padding: 4px 10px;
+						margin: 2px 4px;
+					}
+
+					#custom-focusmode.inactive {
+						padding: 0;
+						margin: 0;
+						min-width: 0;
+					}
+
+					#custom-gamemode {
+						color: #${hex.green};
+						font-weight: bold;
+					}
+
+					#custom-gamemode.active {
+						background: rgba(${rgb.green}, 0.15);
+						border: 1px solid rgba(${rgb.green}, 0.4);
+						padding: 4px 10px;
+						margin: 2px 4px;
+					}
+
+					#custom-gamemode.inactive {
+						padding: 0;
+						margin: 0;
+						min-width: 0;
 					}
 
 					#custom-tmux {
