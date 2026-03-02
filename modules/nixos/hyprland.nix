@@ -243,6 +243,7 @@ in
 		bind=SUPER,E,exec,pypr toggle files
 		bind=SUPER,I,exec,~/Scripts/imv_launcher.sh
 		bind=SUPERSHIFT,T,exec,pkill rofi || ~/Scripts/theme-rofi.sh
+		bind=SUPERSHIFT,F,exec,~/Scripts/focus-mode-toggle.sh
 
         	binde=,XF86AudioLowerVolume,exec,${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ -5%
         	binde=,XF86AudioRaiseVolume,exec,${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ +5%

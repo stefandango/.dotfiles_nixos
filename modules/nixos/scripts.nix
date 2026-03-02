@@ -64,6 +64,16 @@ in
 				executable = true;
 			};
 
+			"Scripts/waybar-gamemode.sh" = {
+				source = ../scripts/waybar-gamemode.sh;
+				recursive = true;
+				executable = true;
+			};
+			"Scripts/gamemode-toggle.sh" = {
+				source = ../scripts/gamemode-toggle.sh;
+				recursive = true;
+				executable = true;
+			};
 			"Scripts/theme-switcher.sh" = {
 				source = ../scripts/theme-switcher.sh;
 				recursive = true;
@@ -71,6 +81,21 @@ in
 			};
 			"Scripts/theme-rofi.sh" = {
 				source = ../scripts/theme-rofi.sh;
+				recursive = true;
+				executable = true;
+			};
+			"Scripts/focus-mode-toggle.sh" = {
+				source = ../scripts/focus-mode-toggle.sh;
+				recursive = true;
+				executable = true;
+			};
+			"Scripts/focus-mode-daemon.sh" = {
+				source = ../scripts/focus-mode-daemon.sh;
+				recursive = true;
+				executable = true;
+			};
+			"Scripts/waybar-focusmode.sh" = {
+				source = ../scripts/waybar-focusmode.sh;
 				recursive = true;
 				executable = true;
 			};
