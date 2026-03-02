@@ -28,6 +28,7 @@
     # System utilities
     curl
     btop
+    gum           # Glamorous shell scripts
   ];
 
   # Enable home-manager
