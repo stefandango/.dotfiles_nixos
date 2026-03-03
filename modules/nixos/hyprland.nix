@@ -405,9 +405,17 @@ in
 		windowrule = float on, match:class ^(blueman)(.*)$
 		windowrule = float on, match:class ^(font-manager)$
 
-		# Steam
+		# Steam client
 		windowrule = float on, match:title ^(Steam)$
 		windowrule = float on, match:title ^(Friends List)$
+
+		# Steam games → workspace 10 fullscreen
+		windowrule {
+			name = steam-game
+			match:class = ^(steam_app_.*)$
+			workspace = 10
+			fullscreen = on
+		}
 
 		# Insync
 		windowrule = float on, match:title ^(Insync)(.*)$
