@@ -94,6 +94,11 @@ in
 				recursive = true;
 				executable = true;
 			};
+			"Scripts/cheatsheet.sh" = {
+				source = ../scripts/cheatsheet.sh;
+				recursive = true;
+				executable = true;
+			};
 			"Scripts/waybar-focusmode.sh" = {
 				source = ../scripts/waybar-focusmode.sh;
 				recursive = true;

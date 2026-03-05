@@ -113,6 +113,11 @@ in
 	recursive = true;
 	};
 
+".config/rofi/cheatsheet.rasi" = {
+	source = ./rofi/cheatsheet.rasi;
+	recursive = true;
+	};
+
 
 			};
 		};
