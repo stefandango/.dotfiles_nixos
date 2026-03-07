@@ -244,6 +244,7 @@ in
 		bind=SUPER,I,exec,~/Scripts/imv_launcher.sh
 		bind=SUPERSHIFT,T,exec,pkill rofi || ~/Scripts/theme-rofi.sh
 		bind=SUPERSHIFT,F,exec,~/Scripts/focus-mode-toggle.sh
+		bind=SUPERSHIFT,plus,exec,pkill rofi || ~/Scripts/cheatsheet.sh
 
         	binde=,XF86AudioLowerVolume,exec,${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ -5%
         	binde=,XF86AudioRaiseVolume,exec,${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ +5%
@@ -405,9 +406,17 @@ in
 		windowrule = float on, match:class ^(blueman)(.*)$
 		windowrule = float on, match:class ^(font-manager)$
 
-		# Steam
+		# Steam client
 		windowrule = float on, match:title ^(Steam)$
 		windowrule = float on, match:title ^(Friends List)$
+
+		# Steam games → workspace 10 fullscreen
+		windowrule {
+			name = steam-game
+			match:class = ^(steam_app_.*)$
+			workspace = 10
+			fullscreen = on
+		}
 
 		# Insync
 		windowrule = float on, match:title ^(Insync)(.*)$

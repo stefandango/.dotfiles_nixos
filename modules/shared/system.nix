@@ -41,7 +41,9 @@
     # Development tools
     direnv
     nix-direnv
+    gcc
     go
+    nodejs
     pnpm
 
     # Modern CLI tools
