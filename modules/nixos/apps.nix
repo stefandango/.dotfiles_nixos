@@ -11,5 +11,6 @@
         vscode-fhs
         jetbrains.rider
         zed-editor
+        discord
     ];
 }

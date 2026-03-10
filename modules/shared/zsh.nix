@@ -236,19 +236,25 @@
       # Initialize zoxide (smarter cd)
       eval "$(zoxide init zsh)"
 
-      # Tmux sessionizer
-      bindkey -s ^f '~/Scripts/tmux-sessionizer\n'
-
-      # Enhanced clipboard bindings
-      bindkey -s '^[c' 'clipshow\n'        # Alt+c to show clipboard
-      bindkey -s '^[v' 'paste\n'           # Alt+v to paste from clipboard
-      bindkey -s '^[x' 'clipclear\n'       # Alt+x to clear clipboard
-
       # Quick clipboard functions
       cpwd() { pwd | clip && echo "📋 Copied current directory to clipboard"; }
       ccat() { cat "$1" | clip && echo "📋 Copied $1 to clipboard"; }
 
       eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)"
+
+      # Keybindings - MUST be after oh-my-posh init and all plugin sourcing
+      # Using a zle widget instead of bindkey -s for robustness
+      tmux-sessionizer-widget() {
+        ~/Scripts/tmux-sessionizer </dev/tty
+        zle reset-prompt
+      }
+      zle -N tmux-sessionizer-widget
+      bindkey '^f' tmux-sessionizer-widget
+
+      # Enhanced clipboard bindings
+      bindkey -s '^[c' 'clipshow\n'        # Alt+c to show clipboard
+      bindkey -s '^[v' 'paste\n'           # Alt+v to paste from clipboard
+      bindkey -s '^[x' 'clipclear\n'       # Alt+x to clear clipboard
     '';
   };
 
