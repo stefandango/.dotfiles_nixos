@@ -51,7 +51,7 @@
         keepBackup = false;
       };
       init = {
-        defaultBranch = "master";
+        defaultBranch = "main";
       };
       credential = {
         helper = "cache";
