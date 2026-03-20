@@ -183,7 +183,7 @@ in
 					#clock {
 						color: #${hex.fg};
 						font-weight: bold;
-						min-width: 80px;
+						min-width: 200px;
 					}
 
 					#custom-weather {
