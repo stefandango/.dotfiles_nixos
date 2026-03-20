@@ -91,6 +91,7 @@
       "dbeaver-community"
       "jordanbaird-ice"
       "discord"
+      "fork"
       "zen-browser"
       "font-monaspice-nerd-font"
       "font-noto-sans-symbols-2"
