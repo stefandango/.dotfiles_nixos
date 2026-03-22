@@ -10,6 +10,29 @@
     stateVersion = "23.11";
   };
 
+  # Enable XDG base directories (cross-platform)
+  xdg.enable = true;
+
+  # Redirect apps to XDG paths
+  home.sessionVariables = {
+    # History files
+    LESSHISTFILE = "${config.xdg.stateHome}/lesshst";
+    NODE_REPL_HISTORY = "${config.xdg.stateHome}/node_repl_history";
+    PYTHON_HISTORY = "${config.xdg.stateHome}/python_history";
+
+    # Development tools
+    CARGO_HOME = "${config.xdg.dataHome}/cargo";
+    RUSTUP_HOME = "${config.xdg.dataHome}/rustup";
+    GOPATH = "${config.xdg.dataHome}/go";
+    GOMODCACHE = "${config.xdg.cacheHome}/go/mod";
+    DOTNET_CLI_HOME = "${config.xdg.dataHome}/dotnet";
+    NUGET_PACKAGES = "${config.xdg.cacheHome}/NuGetPackages";
+
+    # npm
+    NPM_CONFIG_CACHE = "${config.xdg.cacheHome}/npm";
+    NPM_CONFIG_PREFIX = "${config.xdg.dataHome}/npm";
+  };
+
   # Import shared home modules
   imports = [
     ../modules/shared/default.nix

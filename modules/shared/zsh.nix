@@ -143,6 +143,11 @@
       executable = true;
     };
 
+    "Scripts/nixhome" = {
+      source = ../scripts/nixhome;
+      executable = true;
+    };
+
     ".config/oh-my-posh/ohmyposhv3-v2.json" = {
       source = ../config/ohmyposhv3-v2.json;
     };
@@ -230,8 +235,7 @@
       ];
     };
     initContent = ''
-      export NPM_CONFIG_PREFIX="$HOME/.npm-global"
-      export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH:/home/stefan/.dotnet/tools:/Users/stefan/.dotnet/tools:$HOME/Scripts:$HOME/go/bin"
+      export PATH="$HOME/.local/share/npm/bin:$HOME/.local/share/cargo/bin:$HOME/.local/share/go/bin:$HOME/.local/share/dotnet/tools:$HOME/.local/bin:$HOME/Scripts:$PATH"
 
       # Initialize zoxide (smarter cd)
       eval "$(zoxide init zsh)"
