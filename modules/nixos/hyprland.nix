@@ -90,7 +90,7 @@ in
 		monitor=,preferred,auto,auto
 
 		env = XCURSOR_SIZE,28
-		env = XCURSOR_THEME,Adwaita
+		env = XCURSOR_THEME,Bibata-Modern-Classic
 
 		# For all categories, see https://wiki.hyprland.org/Configuring/Variables/
 		input {

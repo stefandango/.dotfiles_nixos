@@ -106,7 +106,9 @@
     protontricks
     winetricks
 
-    # Gaming performance
+    # Gaming
+    lutris
+    wineWowPackages.stagingFull
     mangohud
     corectrl
   ];

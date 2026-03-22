@@ -33,8 +33,7 @@
 		"custom/logout"
 	],
 	"clock": {
-		"format": "󰅐 {:%H:%M}",
-		"format-alt": "󰨲 {:%d/%m}",
+		"format": "󰅐 {:%H:%M   󰨲 %a %d %b}",
 		"tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
 		"on-click": "xdg-open https://calendar.google.com/calendar/u/0/r/week"
 	},

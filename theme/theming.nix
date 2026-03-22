@@ -9,7 +9,15 @@
   home.packages = lib.mkIf pkgs.stdenv.isLinux (with pkgs; [
     adwaita-icon-theme
     gnome-themes-extra
+    bibata-cursors
   ]);
+
+  home.pointerCursor = lib.mkIf pkgs.stdenv.isLinux {
+    name = "Bibata-Modern-Classic";
+    package = pkgs.bibata-cursors;
+    size = 28;
+    gtk.enable = true;
+  };
 
   gtk = lib.mkIf pkgs.stdenv.isLinux {
     enable = true;
