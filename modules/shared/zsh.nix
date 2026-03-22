@@ -214,6 +214,7 @@
     history = {
       size = 1000;
       save = 1000;
+      path = "${config.xdg.stateHome}/zsh/zsh_history";
       share = true;
       ignoreAllDups = true;
     };
