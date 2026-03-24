@@ -3,7 +3,7 @@
 # tmux-sessionizer - Simplified project session manager
 # Focus on key development directories with smart dev session setup
 
-set -euo pipefail
+set -uo pipefail
 
 # Configuration - simplified to focus on key directories
 SESSIONIZER_SEARCH_PATHS="${SESSIONIZER_SEARCH_PATHS:-$HOME/Dev $HOME/.dotfiles}"
@@ -59,6 +59,16 @@ generate_session_name() {
     echo "$name"
 }
 
+# Attach or switch to a session
+attach_or_switch() {
+    local session_name="$1"
+    if [[ -z "${TMUX:-}" ]]; then
+        exec tmux attach-session -t "$session_name"
+    else
+        tmux switch-client -t "$session_name"
+    fi
+}
+
 # Function to setup development session with multiple windows
 setup_dev_session() {
     local selected_path="$1"
@@ -67,41 +77,35 @@ setup_dev_session() {
     # Create the session if it doesn't exist
     if ! tmux has-session -t="$session_name" 2>/dev/null; then
         # Create session with first window (Terminal with projstats)
-        tmux new-session -ds "$session_name" -c "$selected_path" -n " Terminal"
+        tmux new-session -ds "$session_name" -c "$selected_path" -n "🖥 Terminal"
 
         # Create additional windows for development workflow
-        tmux new-window -t "$session_name" -c "$selected_path" -n " Editor"
-        tmux new-window -t "$session_name" -c "$selected_path" -n " AI"
+        tmux new-window -t "$session_name" -c "$selected_path" -n "🍯 Editor"
+        tmux new-window -t "$session_name" -c "$selected_path" -n "🤖 AI"
 
-        # Setup Terminal window with projstats
+        # Setup windows using indices — far more reliable than targeting by emoji name
+        # base-index=1 in tmux.conf, so: 1=Terminal, 2=Editor, 3=AI
         if command -v projstats >/dev/null 2>&1; then
-            tmux send-keys -t "$session_name:  Terminal" "projstats" Enter
+            tmux send-keys -t "$session_name:1" "projstats" Enter || true
         else
-            tmux send-keys -t "$session_name:  Terminal" "clear" Enter
+            tmux send-keys -t "$session_name:1" "clear" Enter || true
         fi
 
-        # Setup Editor window with nvim (if available)
         if command -v nvim >/dev/null 2>&1; then
-            tmux send-keys -t "$session_name:  Editor" "nvim ." Enter
+            tmux send-keys -t "$session_name:2" "nvim ." Enter || true
         fi
 
-        # Setup AI window with Claude (if available)
         if command -v claude >/dev/null 2>&1; then
-            tmux send-keys -t "$session_name:  AI" "claude" Enter
+            tmux send-keys -t "$session_name:3" "claude" Enter || true
         else
-            tmux send-keys -t "$session_name:  AI" "# AI Assistant - run 'claude' to start Claude" Enter
+            tmux send-keys -t "$session_name:3" "# AI Assistant - run 'claude' to start Claude" Enter || true
         fi
 
         # Select the Terminal window by default
-        tmux select-window -t "$session_name:  Terminal"
+        tmux select-window -t "$session_name:1" || true
     fi
 
-    # Switch to the session
-    if [[ -z "${TMUX:-}" ]]; then
-        exec tmux attach-session -t "$session_name"
-    else
-        tmux switch-client -t "$session_name"
-    fi
+    attach_or_switch "$session_name"
 }
 
 # Function to create or switch to session
@@ -116,27 +120,11 @@ manage_session() {
     fi
 
     # Standard session handling for non-Dev projects
-    # Check if tmux is running
-    if ! pgrep tmux >/dev/null; then
-        # No tmux running, create new session
-        exec tmux new-session -s "$session_name" -c "$selected_path"
+    if ! tmux has-session -t="$session_name" 2>/dev/null; then
+        tmux new-session -ds "$session_name" -c "$selected_path"
     fi
 
-    # Check if we're inside tmux
-    if [[ -z "${TMUX:-}" ]]; then
-        # Outside tmux, attach to session or create new one
-        if tmux has-session -t="$session_name" 2>/dev/null; then
-            exec tmux attach-session -t "$session_name"
-        else
-            exec tmux new-session -s "$session_name" -c "$selected_path"
-        fi
-    else
-        # Inside tmux, create session if needed and switch to it
-        if ! tmux has-session -t="$session_name" 2>/dev/null; then
-            tmux new-session -ds "$session_name" -c "$selected_path"
-        fi
-        tmux switch-client -t "$session_name"
-    fi
+    attach_or_switch "$session_name"
 }
 
 # Main logic
@@ -159,10 +147,9 @@ main() {
                 --preview-window=right:40% \
                 --prompt="🚀 Select project: " \
                 --header="Dev projects get multi-window setup"
-        )
+        ) || true
 
         if [[ -z "$selected_path" ]]; then
-            echo "No project selected" >&2
             exit 0
         fi
     fi
@@ -196,7 +183,7 @@ Environment Variables:
 Examples:
   $(basename "$0")                    # Interactive project selection
   $(basename "$0") ~/Dev/my-project   # Create session for specific project
-  
+
 Features:
   - Simplified search focused on Dev and .dotfiles directories
   - Special multi-window setup for Dev folder projects:

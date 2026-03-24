@@ -1,0 +1,135 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Home directory cleanup & maintenance
+
+HOME_DIR="$HOME"
+FOUND=()
+
+echo "🏠 Home Directory Maintenance"
+echo "============================="
+echo ""
+
+# --- Detect clutter ---
+
+# Nix result symlinks
+while IFS= read -r -d '' f; do
+    FOUND+=("result symlink|$f")
+done < <(find "$HOME_DIR" -maxdepth 1 -name "result" -type l -print0 2>/dev/null)
+while IFS= read -r -d '' f; do
+    FOUND+=("result symlink|$f")
+done < <(find "$HOME_DIR" -maxdepth 1 -name "result-*" -type l -print0 2>/dev/null)
+
+# .DS_Store files
+while IFS= read -r -d '' f; do
+    FOUND+=("macOS metadata|$f")
+done < <(find "$HOME_DIR" -maxdepth 1 -name ".DS_Store" -print0 2>/dev/null)
+
+# Stale history / state files (should be in XDG dirs now)
+for name in .viminfo .bash_history .lesshst .node_repl_history .python_history .wget-hsts; do
+    if [[ -f "$HOME_DIR/$name" ]]; then
+        FOUND+=("stale history file|$HOME_DIR/$name")
+    fi
+done
+
+# .profile leftover (cargo installer creates this)
+if [[ -f "$HOME_DIR/.profile" ]]; then
+    FOUND+=("leftover profile|$HOME_DIR/.profile")
+fi
+
+# claude backup files (keep the most recent one)
+claude_backups=()
+while IFS= read -r -d '' f; do
+    claude_backups+=("$f")
+done < <(find "$HOME_DIR" -maxdepth 1 -name ".claude.json.backup.*" -print0 2>/dev/null | sort -z)
+
+if (( ${#claude_backups[@]} > 1 )); then
+    # Mark all but the last (newest) for removal
+    for (( i=0; i < ${#claude_backups[@]} - 1; i++ )); do
+        FOUND+=("old claude backup|${claude_backups[$i]}")
+    done
+fi
+
+# home-manager .backup files
+while IFS= read -r -d '' f; do
+    FOUND+=("home-manager backup|$f")
+done < <(find "$HOME_DIR" -maxdepth 2 -name "*.backup" -newer "$HOME_DIR" -print0 2>/dev/null || true)
+
+# --- Report ---
+
+if (( ${#FOUND[@]} == 0 )); then
+    echo "✨ Home directory is clean! Nothing to do."
+    echo ""
+else
+    echo "Found ${#FOUND[@]} item(s) to clean up:"
+    echo ""
+    for entry in "${FOUND[@]}"; do
+        IFS='|' read -r category path <<< "$entry"
+        size=$(du -sh "$path" 2>/dev/null | awk '{print $1}' || echo "?")
+        printf "   %-24s %6s  %s\n" "[$category]" "$size" "$path"
+    done
+    echo ""
+
+    read -p "🗑️  Remove these files? [y/N] " -n 1 -r
+    echo ""
+
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo ""
+        for entry in "${FOUND[@]}"; do
+            IFS='|' read -r _ path <<< "$entry"
+            rm -rf "$path"
+            echo "   ✅ Removed $path"
+        done
+        echo ""
+        echo "✨ Cleanup complete!"
+    else
+        echo "Cancelled."
+    fi
+fi
+
+# --- Informational: non-standard visible items ---
+
+echo ""
+echo "📋 Visible items in ~:"
+echo ""
+
+# Expected top-level directories/files
+expected=(
+    "Applications" "Desktop" "Dev" "Documents" "Downloads" "Library"
+    "Movies" "Music" "Pictures" "Public" "Scripts"
+    ".cache" ".config" ".local" ".nix-defexpr" ".nix-profile"
+    ".dotfiles" ".claude" ".claude.json" ".ssh" ".gnupg"
+)
+
+while IFS= read -r -d '' item; do
+    name=$(basename "$item")
+    # Skip hidden files (handled above) unless they're unexpected
+    is_expected=false
+    for e in "${expected[@]}"; do
+        if [[ "$name" == "$e" ]]; then
+            is_expected=true
+            break
+        fi
+    done
+    if ! $is_expected && [[ ! "$name" =~ ^\. ]]; then
+        echo "   ? $name"
+    fi
+done < <(find "$HOME_DIR" -maxdepth 1 -mindepth 1 -print0 2>/dev/null | sort -z)
+
+# Check for unexpected dotfiles/dotdirs
+while IFS= read -r -d '' item; do
+    name=$(basename "$item")
+    is_expected=false
+    for e in "${expected[@]}"; do
+        if [[ "$name" == "$e" ]]; then
+            is_expected=true
+            break
+        fi
+    done
+    if ! $is_expected; then
+        echo "   ? $name"
+    fi
+done < <(find "$HOME_DIR" -maxdepth 1 -mindepth 1 -name ".*" -print0 2>/dev/null | sort -z)
+
+echo ""
+echo "Items marked with ? are not in the expected list — review manually if needed."
+echo ""
