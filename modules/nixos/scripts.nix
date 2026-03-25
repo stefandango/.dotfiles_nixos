@@ -104,6 +104,11 @@ in
 				recursive = true;
 				executable = true;
 			};
+			"Scripts/ao-launch.sh" = {
+				source = ../scripts/ao-launch.sh;
+				recursive = true;
+				executable = true;
+			};
 			# Theme JSON files
 			".config/theme/themes/onedark.json".source = ../../theme/themes/onedark.json;
 			".config/theme/themes/doom.json".source = ../../theme/themes/doom.json;

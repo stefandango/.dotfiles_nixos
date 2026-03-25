@@ -418,6 +418,15 @@ in
 			fullscreen = on
 		}
 
+		# Anarchy Online multiboxing
+		# Positioning handled by ao-launch.sh via hyprctl
+		windowrule {
+			name = ao-client
+			match:class = ^(anarchyonline\.exe)$
+			float = on
+			opacity = 1.0 0.85
+		}
+
 		# Insync
 		windowrule = float on, match:title ^(Insync)(.*)$
 
