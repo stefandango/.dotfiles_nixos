@@ -91,7 +91,7 @@ launch_instance() {
     fi
 
     echo "Launching: $name (cores $cores)"
-    (cd "$ao_dir" && WINEPREFIX="$prefix" WINEDEBUG=-all taskset -c "$cores" wine "./AnarchyOnline.exe") &
+    (cd "$ao_dir" && WINEPREFIX="$prefix" WINEDEBUG=-all AMD_DEBUG=nodma taskset -c "$cores" wine "./AnarchyOnline.exe") &
 
     # Wait for the new window to appear
     echo "  Waiting for window..."
