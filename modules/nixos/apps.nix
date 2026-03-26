@@ -12,5 +12,6 @@
         jetbrains.rider
         zed-editor
         discord
+        hyperhdr
     ];
 }
