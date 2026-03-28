@@ -13,12 +13,12 @@ AO_BASE="$HOME/Games"
 AO_DIR="drive_c/Funcom/Anarchy Online"
 
 # Layout for 5120x2160 ultrawide:
-#  [  Adventurer 3072×2160  |  Fixer 2048×1080      ]
-#  [                        |  Bureaucrat 2048×1080  ]
+#  Workspace 8: Adventurer fullscreen
+#  Workspace 9: Fixer (left) + Bureaucrat (right) side by side
 INSTANCES=(
-    "Adventurer:ao-adventurer:0-3:3072 2160:0 0"
-    "Fixer:ao-fixer:4-7:2048 1080:3072 0"
-    "Bureaucrat:ao-bureaucrat:8-11:2048 1080:3072 1080"
+    "Adventurer:ao-adventurer:0-3:5120 2160:0 0:8"
+    "Fixer:ao-fixer:4-7:2560 2160:0 0:9"
+    "Bureaucrat:ao-bureaucrat:8-11:2560 2160:2560 0:9"
 )
 
 # Track addresses of windows we've already claimed
@@ -75,6 +75,7 @@ launch_instance() {
     local cores="$3"
     local size="$4"
     local pos="$5"
+    local ws="$6"
 
     if [ ! -d "$prefix" ]; then
         echo "ERROR: Prefix not found: $prefix"
@@ -106,9 +107,9 @@ launch_instance() {
 
     if [ -n "$addr" ]; then
         CLAIMED_ADDRS+=("$addr")
-        # Move to workspace 9, set size and position
-        hyprctl --batch "dispatch movetoworkspacesilent 9,address:$addr; dispatch resizewindowpixel exact $size,address:$addr; dispatch movewindowpixel exact $pos,address:$addr" > /dev/null
-        echo "  Positioned: $name [${size// /x}] at (${pos// /,})"
+        # Move to workspace, set size and position
+        hyprctl --batch "dispatch movetoworkspacesilent $ws,address:$addr; dispatch resizewindowpixel exact $size,address:$addr; dispatch movewindowpixel exact $pos,address:$addr" > /dev/null
+        echo "  Positioned: $name on workspace $ws [${size// /x}] at (${pos// /,})"
     else
         echo "  Warning: Could not find window for $name after ${attempts}s"
     fi
@@ -133,8 +134,8 @@ fi
 # Launch specific instance
 if [[ "$1" =~ ^[1-3]$ ]]; then
     idx=$(( $1 - 1 ))
-    IFS=':' read -r name dir cores size pos <<< "${INSTANCES[$idx]}"
-    launch_instance "$name" "$AO_BASE/$dir" "$cores" "$size" "$pos"
+    IFS=':' read -r name dir cores size pos ws <<< "${INSTANCES[$idx]}"
+    launch_instance "$name" "$AO_BASE/$dir" "$cores" "$size" "$pos" "$ws"
     exit 0
 fi
 
@@ -142,8 +143,8 @@ fi
 echo "=== Anarchy Online Triple Launcher ==="
 echo ""
 for inst in "${INSTANCES[@]}"; do
-    IFS=':' read -r name dir cores size pos <<< "$inst"
-    launch_instance "$name" "$AO_BASE/$dir" "$cores" "$size" "$pos"
+    IFS=':' read -r name dir cores size pos ws <<< "$inst"
+    launch_instance "$name" "$AO_BASE/$dir" "$cores" "$size" "$pos" "$ws"
 done
 echo ""
 echo "All instances launched!"
