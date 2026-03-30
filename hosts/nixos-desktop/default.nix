@@ -76,6 +76,24 @@
     sudo.wheelNeedsPassword = false;
   };
 
+  # Network drives
+  fileSystems."/mnt/piserver" = {
+    device = "//192.168.68.109/shared";
+    fsType = "cifs";
+    options = [
+      "credentials=/etc/samba/credentials"
+      "uid=1000"
+      "gid=1000"
+      "iocharset=utf8"
+      "nofail"
+      "_netdev"
+      "x-systemd.automount"
+      "x-systemd.idle-timeout=60"
+      "x-systemd.device-timeout=5s"
+      "x-systemd.mount-timeout=5s"
+    ];
+  };
+
   # NixOS-specific packages
   environment.systemPackages = with pkgs; [
     claude-code
