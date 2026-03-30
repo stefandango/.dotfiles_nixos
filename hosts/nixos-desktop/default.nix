@@ -30,9 +30,6 @@
     kernelParams = [
       "amdgpu.dcdebugmask=0x610"                       # Disable PSR + PSR-SU + Panel Replay to prevent flickering
       "amdgpu.gpu_recovery=1"                           # Enable GPU reset on hang instead of crashing
-      "amdgpu.ppfeaturemask=0xfffd7fff"                 # Disable GFXOFF + Stutter Mode (Navi 10 stability)
-      "amdgpu.aspm=0"                                   # Disable PCIe ASPM for GPU
-      "amdgpu.lockup_timeout=10000,60000,30000,10000"   # Increase SDMA timeout to 30s
     ];
     kernel.sysctl = {
       "vm.max_map_count" = 1048576;
@@ -105,6 +102,9 @@
       openrazer
     ]))
     
+    # Network filesystems
+    cifs-utils
+
     # Hardware tools
     lshw
     protontricks
@@ -177,7 +177,18 @@
       enable = true;
       gamescopeSession.enable = true;
     };
-    gamemode.enable = true;
+    gamemode = {
+      enable = true;
+      settings = {
+        general = {
+          renice = 10;
+        };
+        gpu = {
+          apply_gpu_optimisations = "accept-responsibility";
+          gpu_device = 1;
+        };
+      };
+    };
     corectrl.enable = true;
   };
 
@@ -188,8 +199,20 @@
         pango
         libthai
         harfbuzz
+        gamemode
       ];
     };
+  };
+
+  # I/O scheduler: none for NVMe (lowest overhead)
+  services.udev.extraRules = ''
+    ACTION=="add|change", KERNEL=="nvme[0-9]*", ATTR{queue/scheduler}="none"
+  '';
+
+  # Process priority optimization for gaming
+  services.ananicy = {
+    enable = true;
+    package = pkgs.ananicy-cpp;
   };
 
   # Docker
