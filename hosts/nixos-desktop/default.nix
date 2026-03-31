@@ -101,7 +101,7 @@
     # GUI Applications
     firefox
     inputs.zen-browser.packages.${pkgs.system}.default
-    neofetch
+    fastfetch
     
     # Audio/Video tools
     alsa-utils
@@ -130,7 +130,7 @@
 
     # Gaming
     lutris
-    wineWowPackages.stagingFull
+    wineWow64Packages.staging
     mangohud
     corectrl
   ];

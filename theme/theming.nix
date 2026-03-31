@@ -21,11 +21,13 @@
 
   gtk = lib.mkIf pkgs.stdenv.isLinux {
     enable = true;
-    
+
     theme = {
       name = "Adwaita-dark";
     };
-    
+
+    gtk4.theme = null;
+
     iconTheme = {
       name = "Adwaita";
     };

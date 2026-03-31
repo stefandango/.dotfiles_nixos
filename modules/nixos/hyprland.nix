@@ -66,12 +66,12 @@ in
 			xwayland.enable = true;
 		};
 	};
-	systemd.sleep.extraConfig = ''
-		AllowSuspend=no
-		AllowHibernation=no
-		AllowSuspendThenHibernate=no
-		AllowHybridSleep=yes
-		'';
+	systemd.sleep.settings.Sleep = {
+		AllowSuspend = "no";
+		AllowHibernation = "no";
+		AllowSuspendThenHibernate = "no";
+		AllowHybridSleep = "yes";
+	};
 
 	home-manager.users.${vars.user} =
 	let
