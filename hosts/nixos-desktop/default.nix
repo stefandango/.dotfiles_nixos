@@ -96,7 +96,7 @@
 
   # NixOS-specific packages
   environment.systemPackages = with pkgs; [
-    claude-code
+    inputs.nix-claude-code.packages.${pkgs.system}.default
     zsh  # Add zsh at system level
     # GUI Applications
     firefox

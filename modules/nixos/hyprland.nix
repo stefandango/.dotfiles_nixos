@@ -32,7 +32,7 @@ in
 			hyprland-autoname-workspaces
 			networkmanagerapplet
 			cliphist
-			swww			# Wallpaper daemon
+			awww			# Wallpaper daemon
 			insync			# Gdrive integration
 			thunar			# File explorer GUI
 			thunar-volman		# Auto manage removable drives etc..
@@ -165,8 +165,7 @@ in
 		}
 
 		render {
-			# Experimental: can improve FPS on underpowered devices
-			# new_render_scheduling = true
+			new_render_scheduling = true
 		}
 
 		animations {
@@ -174,7 +173,7 @@ in
 
 		# Some default animations, see https://wiki.hyprland.org/Configuring/Animations/ for more
 
-				bezier = myBezier, 0.05, 0.9, 0.1, 1.05
+				bezier = myBezier, 0.25, 1, 0.5, 1
 
 				animation = windows, 1, 7, myBezier
 				animation = windowsOut, 1, 7, default, popin 80%
@@ -479,7 +478,7 @@ in
 		# Initialize theme files from Nix defaults before apps start
 		exec-once = [ ! -f $HOME/.config/waybar/style.css ] && cp $HOME/.config/waybar/style.default.css $HOME/.config/waybar/style.css && chmod u+w $HOME/.config/waybar/style.css; [ ! -f $HOME/.config/rofi/shared/colors.rasi ] && cp $HOME/.config/rofi/shared/colors.default.rasi $HOME/.config/rofi/shared/colors.rasi && chmod u+w $HOME/.config/rofi/shared/colors.rasi; [ ! -f $HOME/.config/swaync/style.css ] && cp $HOME/.config/swaync/style.default.css $HOME/.config/swaync/style.css && chmod u+w $HOME/.config/swaync/style.css; true
 
-		exec-once=${pkgs.swww}/bin/swww-daemon
+		exec-once=${pkgs.awww}/bin/awww-daemon
 		exec-once=${pkgs.waybar}/bin/waybar
 		exec-once=${pkgs.swaynotificationcenter}/bin/swaync
 		exec-once=${pkgs.openrazer-daemon}/bin/openrazer-daemon
@@ -489,7 +488,7 @@ in
 		exec-once = wl-clipboard-history -t
 		exec-once = wl-paste --watch cliphist store
 		exec-once = rm "$HOME/.cache/cliphist/db"   #it'll delete history at every restart
-		exec-once = sleep 3 && ~/Scripts/swww_random.sh
+		exec-once = sleep 3 && ~/Scripts/awww_random.sh
 		exec-once = sleep 4 && insync start --qt-qpa-platform=xcb --no-daemon
 		# Restore saved theme if one was selected
 		exec-once = sleep 2 && test -f $HOME/.config/theme/current && ~/Scripts/theme-switcher.sh $HOME/.config/theme/themes/$(cat $HOME/.config/theme/current).json

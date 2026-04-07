@@ -183,6 +183,7 @@
       # Quick directory shortcuts
       dev = "cd ~/Dev";
       dots = "cd ~/.dotfiles";
+      nas = "cd /mnt/piserver";
 
       # Zoxide shortcuts (smarter cd)
       z = "zoxide";

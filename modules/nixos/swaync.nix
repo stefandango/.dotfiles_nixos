@@ -115,7 +115,7 @@ in
 							},
 	{
 								"label": "󰸉\tSwitch wallpaper",
-								"command": "pkill swww_random.sh && ~/Scripts/swww_random.sh ~/Pictures/Wallpapers/ &"
+								"command": "pkill awww_random.sh && ~/Scripts/awww_random.sh ~/Pictures/Wallpapers/ &"
 							},
 							{
 								"label": "󰊴\tGameMode",
