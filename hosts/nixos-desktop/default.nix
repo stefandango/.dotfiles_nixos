@@ -96,11 +96,11 @@
 
   # NixOS-specific packages
   environment.systemPackages = with pkgs; [
-    inputs.nix-claude-code.packages.${pkgs.system}.default
+    inputs.nix-claude-code.packages.${pkgs.stdenv.hostPlatform.system}.default
     zsh  # Add zsh at system level
     # GUI Applications
-    firefox
-    inputs.zen-browser.packages.${pkgs.system}.default
+    # firefox is now managed declaratively via modules/shared/firefox.nix (home-manager)
+    inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
     fastfetch
     
     # Audio/Video tools
