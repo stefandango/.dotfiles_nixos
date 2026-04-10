@@ -4,6 +4,12 @@
   programs.firefox = {
     enable = true;
 
+    # On macOS, Firefox is installed via Homebrew (see hosts/macbook/default.nix
+    # casks list) so it lives in /Applications as a normal .app. We set package
+    # to null here to tell home-manager: "manage only the profile/prefs, don't
+    # install a Nix copy of Firefox". On Linux we use the regular Nix package.
+    package = if pkgs.stdenv.isDarwin then null else pkgs.firefox;
+
     # Enterprise policies — stronger than prefs (locked, can't be re-enabled by accident).
     # https://mozilla.github.io/policy-templates/
     policies = {
@@ -81,8 +87,11 @@
       id = 0;
       isDefault = true;
       # Point at the existing on-disk profile so we don't orphan extensions/bookmarks/logins.
-      # The directory name is whatever Firefox originally generated (check ~/.mozilla/firefox/).
-      path = "9h3zrqwi.default-1770747314768";
+      # Firefox generates these directory names randomly per machine, so they differ
+      # between Linux (~/.mozilla/firefox/) and macOS (~/Library/Application Support/Firefox/Profiles/).
+      path = if pkgs.stdenv.isDarwin
+        then "6o6zuxp7.default-release"
+        else "9h3zrqwi.default-1770747314768";
 
       settings = {
         # ── Telemetry ────────────────────────────────────────────────────────
