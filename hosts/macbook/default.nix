@@ -82,6 +82,7 @@
     global.brewfile = true;
     masApps = { };
     casks = [
+      "firefox"
       "raycast"
       "kitty"
       "pearcleaner"

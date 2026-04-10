@@ -10,6 +10,7 @@
 
   programs.git = {
     enable = true;
+    signing.format = null;
     settings = {
       user = {
         email = "5796872+stefandango@users.noreply.github.com";

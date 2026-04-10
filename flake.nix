@@ -23,6 +23,10 @@
 			url = "github:0xc000022070/zen-browser-flake";
 			inputs.nixpkgs.follows = "nixpkgs";
 		};
+
+		nix-claude-code = {
+			url = "github:ryoppippi/nix-claude-code";
+		};
 	};
 
 	outputs = inputs @ { self, nixpkgs, home-manager, nixvim, darwin, ... }:
@@ -51,9 +55,9 @@
 		# Host configurations
 		darwinConfigurations = {
 			"Stefans-MacBook-Pro" = darwin.lib.darwinSystem {
-				system = "aarch64-darwin";
 				specialArgs = { inherit inputs vars; };
 				modules = [
+					{ nixpkgs.hostPlatform = "aarch64-darwin"; }
 					./hosts/macbook
 					./modules/shared/system.nix
 					./modules/darwin
@@ -70,9 +74,9 @@
 
 		nixosConfigurations = {
 			stefan = nixpkgs.lib.nixosSystem {
-				system = "x86_64-linux";
 				specialArgs = { inherit inputs vars; };
 				modules = [
+					{ nixpkgs.hostPlatform = "x86_64-linux"; }
 					./hosts/nixos-desktop
 					./modules/shared/system.nix
 					./modules/nixos

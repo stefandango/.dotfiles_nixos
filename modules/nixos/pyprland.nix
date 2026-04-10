@@ -34,55 +34,49 @@ in
     home = {
         file = {
 
-            ".config/hypr/pyprland.json" = {
+            ".config/pypr/config.toml" = {
                 text = ''
-                    {
-                        "pyprland": {
-                            "plugins": ["scratchpads", "magnify"]
-                        },
-                        "scratchpads": {
-                            "term": {
-                                "command": "kitty --class scratchpad",
-                                "margin": 50,
-                                "unfocus": "hide",
-                                "animation": "fromTop",
-                                "lazy": true,
-                                "size": "60% 80%"
+                    [pyprland]
+                    plugins = ["scratchpads", "magnify"]
 
-                            },
-                            "systeminfo": {
-                                "command": "kitty --class scratchpad -e btop",
-                                "margin": 50,
-                                "unfocus": "hide",
-                                "animation": "fromTop",
-                                "lazy": true,
-                                "size": "60% 80%"
-                            },
-                            "lazydocker": {
-                                "command": "kitty --class scratchpad -e lazydocker",
-                                "margin": 50,
-                                "unfocus": "hide",
-                                "animation": "fromTop",
-                                "lazy": true,
-                                "size": "60% 80%"
-                            },
-                            "pavucontrol": {
-                                "command": "pavucontrol",
-                                "margin": 50,
-                                "unfocus": "hide",
-                                "animation": "fromTop",
-                                "lazy": true
-                            },
-                            "files": {
-                                "command": "thunar",
-                                "margin": 50,
-                                "unfocus": "hide",
-                                "animation": "fromTop",
-                                "lazy": true,
-                                "size": "60% 80%"
-                            }
-                        }
-                    }
+                    [scratchpads.term]
+                    command = "kitty --class scratchpad"
+                    margin = 50
+                    unfocus = "hide"
+                    animation = "fromTop"
+                    lazy = true
+                    size = "60% 80%"
+
+                    [scratchpads.systeminfo]
+                    command = "kitty --class scratchpad -e btop"
+                    margin = 50
+                    unfocus = "hide"
+                    animation = "fromTop"
+                    lazy = true
+                    size = "60% 80%"
+
+                    [scratchpads.lazydocker]
+                    command = "kitty --class scratchpad -e lazydocker"
+                    margin = 50
+                    unfocus = "hide"
+                    animation = "fromTop"
+                    lazy = true
+                    size = "60% 80%"
+
+                    [scratchpads.pavucontrol]
+                    command = "pavucontrol"
+                    margin = 50
+                    unfocus = "hide"
+                    animation = "fromTop"
+                    lazy = true
+
+                    [scratchpads.files]
+                    command = "thunar"
+                    margin = 50
+                    unfocus = "hide"
+                    animation = "fromTop"
+                    lazy = true
+                    size = "60% 80%"
                 '';
             };
         };

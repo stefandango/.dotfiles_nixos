@@ -43,8 +43,8 @@ in
 				recursive = true;
 				executable = true;
 			};
-			"Scripts/swww_random.sh" = {	
-				source = ../scripts/swww_random.sh;
+			"Scripts/awww_random.sh" = {
+				source = ../scripts/awww_random.sh;
 				recursive = true;
 				executable = true;
 			};
