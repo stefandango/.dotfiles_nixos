@@ -80,6 +80,9 @@
     profiles.default = {
       id = 0;
       isDefault = true;
+      # Point at the existing on-disk profile so we don't orphan extensions/bookmarks/logins.
+      # The directory name is whatever Firefox originally generated (check ~/.mozilla/firefox/).
+      path = "9h3zrqwi.default-1770747314768";
 
       settings = {
         # ── Telemetry ────────────────────────────────────────────────────────
@@ -132,7 +135,10 @@
         # Unlike resistFingerprinting, this won't force English/letterboxing/fixed timezone.
         "privacy.fingerprintingProtection" = true;
 
-        # ── Referer policy: trim to origin on cross-origin (privacy + compat) ─
+        # ── Referer: never send. May break hotlink-protected images, some
+        #    CDN downloads, and a handful of forums that use Referer for CSRF.
+        #    XOriginTrimmingPolicy is kept as a fallback if you ever flip this back to 2.
+        "network.http.sendRefererHeader" = 0;
         "network.http.referer.XOriginTrimmingPolicy" = 2;
 
         # ── HTTPS only ───────────────────────────────────────────────────────
@@ -141,6 +147,12 @@
 
         # ── DNS over HTTPS (mode 2 = TRR first, fallback) ────────────────────
         "network.trr.mode" = 2;
+
+        # ── WebRTC off (prevents local IP leak; breaks in-browser video calls) ─
+        "media.peerconnection.enabled" = false;
+
+        # ── <a ping> beacons (link-click tracking) ───────────────────────────
+        "browser.send_pings" = false;
 
         # ── Disable speculative/prefetch leaks (minor perf cost) ─────────────
         "network.prefetch-next" = false;
@@ -182,7 +194,6 @@
         #   privacy.firstparty.isolate         — breaks logins on federated sites
         #   webgl.disabled                      — breaks maps, games, many sites
         #   javascript.options.*                — breaks the modern web
-        #   media.peerconnection.enabled=false  — breaks WebRTC (calls, screenshare)
       };
     };
   };
