@@ -89,7 +89,7 @@ in
 							},
 							{
 								"label": "\tLock",
-								"command": "~/Scripts/swaylock.sh"
+								"command": "hyprlock"
 							},
 							{
 								"label": "\tLogout",

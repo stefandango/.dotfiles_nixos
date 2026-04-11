@@ -72,7 +72,7 @@ confirm_run () {
 # Execute Command
 run_cmd() {
 	if [[ "$1" == '--opt1' ]]; then
-		exec ~/Scripts/swaylock.sh
+		exec hyprlock
 	elif [[ "$1" == '--opt2' ]]; then
 		confirm_run "loginctl terminate-user $USER"
 	elif [[ "$1" == '--opt3' ]]; then

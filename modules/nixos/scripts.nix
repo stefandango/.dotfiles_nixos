@@ -7,11 +7,6 @@ in
 		home = {
 
 			file = {
-			"Scripts/swaylock.sh" = {
-				source = ../scripts/swaylock.sh;
-				recursive = true;
-				executable = true;
-			};
 			"Scripts/waybar-wttr.py" = {
 				source = ../scripts/waybar-wttr.py;
 				recursive = true;
