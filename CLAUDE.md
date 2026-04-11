@@ -10,16 +10,19 @@ This is a cross-platform Nix configuration repository supporting both NixOS (Lin
 
 The repository is structured as a unified flake supporting multiple system configurations:
 
-- **flake.nix**: Main entry point defining inputs (nixpkgs, home-manager, nixvim, nix-darwin) and outputs for both NixOS and Darwin configurations
-- **configuration/**: System-specific configurations
-  - `nixos/`: NixOS (Linux) configuration files
-  - `darwin/`: nix-darwin (macOS) configuration files
+- **flake.nix**: Main entry point defining inputs (`nixpkgs` unstable, `home-manager`, `nixvim`, `nix-darwin`, `zen-browser`, `nix-claude-code`) and outputs for both NixOS and Darwin configurations
+- **hosts/**: Host-specific system configurations
+  - `macbook/`: Darwin host (`Stefans-MacBook-Pro`) — system defaults, Homebrew casks, Touch ID, fonts
+  - `nixos-desktop/`: NixOS host (`stefan`) — boot, hardware, PipeWire, Hyprland, Steam, Docker, plus `hardware-configuration.nix`
+- **home/**: Cross-platform home-manager entry point (`home/default.nix`) consumed by both host outputs
 - **modules/**: Reusable Nix modules organized by functionality
-  - `shared/`: Cross-platform modules (git, kitty, zsh)
-  - `nixos/`: Linux-specific modules
-  - `darwin/`: macOS-specific modules
-- **nix/**: Home-manager and application configurations
-- **theme/**: Theming and color scheme definitions
+  - `shared/`: Cross-platform home-manager modules (`git.nix`, `zsh.nix`, `kitty.nix`, `firefox.nix`) and the shared `system.nix`
+  - `darwin/`: macOS-specific home-manager modules (placeholder)
+  - `nixos/`: Linux-specific modules — `hyprland.nix`, `waybar.nix`, `rofi.nix`, `swaync.nix`, `greetd.nix`, `pyprland.nix`, `apps.nix`, `dotnet.nix`, `env.nix`, `scripts.nix`
+  - `config/`: Static dotfile assets (`ohmyposhv3-v2.json`, `lsdconfig.yaml`, `lsdtheme.yaml`, `omnisharp.json`)
+  - `scripts/`: Shell scripts packaged via `modules/nixos/scripts.nix` and exposed to `~/Scripts`
+- **nix/**: Standalone nix configs (`nvim.nix` for nixvim)
+- **theme/**: Theming and color scheme definitions (`colors.nix`, `theming.nix`, `themes/`)
 
 ## Common Commands
 
@@ -142,10 +145,10 @@ Key variables defined in flake.nix:
 ## System Configurations
 
 The flake defines configurations for:
-- **NixOS**: `stefan` (x86_64-linux)
-- **Darwin**: `Stefans-MacBook-Pro` (aarch64-darwin)
+- **NixOS**: `stefan` (x86_64-linux) — built via `sudo nixos-rebuild switch --flake .#stefan`
+- **Darwin**: `Stefans-MacBook-Pro` (aarch64-darwin) — built via `nix run nix-darwin -- switch --flake .#Stefans-MacBook-Pro`
 
-Both configurations use home-manager for user environment management with home.stateVersion = "23.11".
+Both configurations use home-manager for user environment management with `home.stateVersion = "23.11"`, sharing a single entry point at `home/default.nix`.
 
 ## Package Management
 

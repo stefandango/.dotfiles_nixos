@@ -12,9 +12,10 @@ Cross-platform Nix configuration for NixOS and macOS using Nix flakes with enhan
 - **Smart Tmux Integration**: Mouse scrolling, battery indicator, and project-focused sessionizer
 - **Seamless Clipboard Experience**: Universal system clipboard across terminal, tmux, and neovim
 - **Development Workflow Optimizations**: Port management, quick file serving, and network diagnostics
+- **Hyprland Desktop (NixOS)**: Wayland compositor with Waybar, Rofi, SwayNC, greetd, and pyprland
 - **Modern Audio Stack**: PipeWire with ALSA/JACK/PulseAudio compatibility (NixOS)
-- **Gaming Support**: Steam with gamescope session support (NixOS)
-- **Development Environment**: Docker, .NET, Node.js, Python with intelligent tooling
+- **Gaming Support (NixOS)**: Steam with gamescope session, GameMode, MangoHud, Lutris, CoreCtrl
+- **Development Environment**: Docker, .NET (via omnisharp/netcoredbg), Node.js, Python with intelligent tooling
 - **Tokyo Night Theme**: Consistent theming across all applications
 
 ## Installation
@@ -41,12 +42,12 @@ cd ~/.dotfiles
 
 **For macOS (Darwin):**
 ```bash
-nix run nix-darwin --extra-experimental-features nix-command --extra-experimental-features flakes -- switch --flake .
+nix run nix-darwin --extra-experimental-features nix-command --extra-experimental-features flakes -- switch --flake .#Stefans-MacBook-Pro
 ```
 
 **For NixOS:**
 ```bash
-sudo nixos-rebuild switch --flake .
+sudo nixos-rebuild switch --flake .#stefan
 ```
 
 ## Usage
@@ -181,17 +182,20 @@ This configuration uses a hybrid approach:
 .dotfiles/
 ├── flake.nix              # Main flake configuration
 ├── CLAUDE.md              # Claude Code assistant instructions
+├── AGENTS.md              # Contributor guidelines
 ├── hosts/                 # Host-specific configurations
-│   └── nixos-desktop/    # NixOS configuration
-├── configuration/         # Legacy configuration (unused)
+│   ├── macbook/          # Darwin host (Stefans-MacBook-Pro)
+│   └── nixos-desktop/    # NixOS host (stefan) + hardware-configuration.nix
+├── home/                 # Cross-platform home-manager entry point
 ├── modules/              # Reusable modules
-│   ├── shared/           # Cross-platform modules (git, zsh, tmux)
-│   ├── darwin/           # macOS-specific modules
-│   ├── nixos/            # NixOS-specific modules
-│   ├── config/           # Configuration files (oh-my-posh, etc)
-│   └── scripts/          # Shell scripts (tmux-sessionizer)
-├── nix/                  # Home-manager configuration
-└── theme/                # UI theming configuration
+│   ├── shared/           # Cross-platform (git, zsh, kitty, firefox, system)
+│   ├── darwin/           # macOS-specific home-manager modules
+│   ├── nixos/            # NixOS-specific modules (hyprland, waybar, rofi,
+│   │                     #   swaync, greetd, pyprland, apps, dotnet, env)
+│   ├── config/           # Dotfile assets (oh-my-posh, lsd, omnisharp)
+│   └── scripts/          # Shell scripts (nix helpers, clipboard, tmux, waybar)
+├── nix/                  # Standalone nix configs (nvim.nix via nixvim)
+└── theme/                # UI theming (colors.nix, theming.nix, themes/)
 ```
 
 ### Key Components
@@ -202,9 +206,11 @@ This configuration uses a hybrid approach:
 - **Consistent UX**: Unified command interface across all tools with PATH integration
 - **Development Tools**: Git, Neovim (via nixvim), ripgrep, lazygit, gh (GitHub CLI) with enhanced workflows
 - **Modern CLI Tools**: bat, lsd, fzf, fd, tree-sitter for enhanced terminal experience
+- **Hyprland Desktop (NixOS)**: Wayland compositor orchestrated with Waybar, Rofi, SwayNC, pyprland, and greetd as the login manager
 - **Audio System**: PipeWire with ALSA/JACK/PulseAudio compatibility (NixOS)
-- **Gaming**: Steam with gamescope session support (NixOS)
+- **Gaming (NixOS)**: Steam + gamescope session, GameMode, MangoHud, Lutris, CoreCtrl, and Wine/Proton tooling
 - **Docker**: Container development environment with port management utilities
+- **Flake Inputs**: `nixpkgs` (unstable), `home-manager`, `nixvim`, `nix-darwin`, `zen-browser`, and `nix-claude-code`
 
 ## Common Workflows
 
