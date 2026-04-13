@@ -1,14 +1,17 @@
 { lib, pkgs, ... }:
 
-{
+# On macOS, Firefox is installed via Homebrew (see hosts/macbook/default.nix
+# casks list) and manages its own profiles.ini / [Install<hash>] section.
+# home-manager's programs.firefox takes over profiles.ini via a read-only
+# /nix/store symlink, which breaks Firefox 67+'s per-install default profile
+# tracking and causes it to spawn ghost profiles and crash on launch.
+# Also, with Firefox coming from Homebrew there is no wrapped binary, so the
+# `policies = { ... }` block below would be silently ignored on Darwin anyway.
+# → Manage Firefox declaratively on Linux only; leave macOS alone.
+lib.mkIf (!pkgs.stdenv.isDarwin) {
   programs.firefox = {
     enable = true;
-
-    # On macOS, Firefox is installed via Homebrew (see hosts/macbook/default.nix
-    # casks list) so it lives in /Applications as a normal .app. We set package
-    # to null here to tell home-manager: "manage only the profile/prefs, don't
-    # install a Nix copy of Firefox". On Linux we use the regular Nix package.
-    package = if pkgs.stdenv.isDarwin then null else pkgs.firefox;
+    package = pkgs.firefox;
 
     # Enterprise policies — stronger than prefs (locked, can't be re-enabled by accident).
     # https://mozilla.github.io/policy-templates/
@@ -87,11 +90,8 @@
       id = 0;
       isDefault = true;
       # Point at the existing on-disk profile so we don't orphan extensions/bookmarks/logins.
-      # Firefox generates these directory names randomly per machine, so they differ
-      # between Linux (~/.mozilla/firefox/) and macOS (~/Library/Application Support/Firefox/Profiles/).
-      path = if pkgs.stdenv.isDarwin
-        then "6o6zuxp7.default-release"
-        else "9h3zrqwi.default-1770747314768";
+      # Firefox generates this directory name randomly per machine; update if you reinstall.
+      path = "9h3zrqwi.default-1770747314768";
 
       settings = {
         # ── Telemetry ────────────────────────────────────────────────────────

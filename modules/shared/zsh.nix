@@ -201,7 +201,7 @@
       # Quick pipe to clipboard
       clip = if pkgs.stdenv.isDarwin then "pbcopy" else "xclip -selection clipboard";
     } // (if pkgs.stdenv.isDarwin then {
-      claude = "/Users/stefan/.claude/local/claude";
+      # claude alias removed - using native claude binary at ~/.local/bin/claude
       nixbuild = "nix build ~/.dotfiles#darwinConfigurations.Stefans-MacBook-Pro.system";
       nixcheck = "darwin-rebuild check --flake ~/.dotfiles#Stefans-MacBook-Pro";
     } else {
