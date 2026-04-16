@@ -8,6 +8,18 @@
     meld
   ];
 
+  programs.delta = {
+    enable = true;
+    enableGitIntegration = true;
+    options = {
+      navigate = true;
+      light = false;
+      side-by-side = true;
+      line-numbers = true;
+      syntax-theme = "OneHalfDark";
+    };
+  };
+
   programs.git = {
     enable = true;
     signing.format = null;
@@ -22,17 +34,6 @@
       core = {
         autocrlf = "input";
         editor = "nvim";
-        pager = "delta";  # Use delta for beautiful diffs
-      };
-      interactive = {
-        diffFilter = "delta --color-only";  # Use delta in interactive mode
-      };
-      delta = {
-        navigate = true;           # Use n and N to move between diff sections
-        light = false;             # Dark theme (set to true for light backgrounds)
-        side-by-side = false;      # Line-by-line diff (set to true for side-by-side)
-        line-numbers = true;       # Show line numbers
-        syntax-theme = "OneHalfDark";  # Syntax highlighting theme
       };
       difftool = {
         prompt = true;
