@@ -11,5 +11,6 @@
     ./rofi.nix
     ./apps.nix
     ./dotnet.nix
+    ./ollama.nix
   ];
 }
