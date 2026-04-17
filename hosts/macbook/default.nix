@@ -90,13 +90,13 @@
       "handbrake-app"
       "alt-tab"
       "dbeaver-community"
-      "jordanbaird-ice"
+      "thaw"
       "discord"
       "fork"
-      "zen-browser"
+      "zen"
       "font-monaspice-nerd-font"
       "font-noto-sans-symbols-2"
-      "ollama"
+      "ollama-app"
     ];
     brews = [ "uv" ];
   };

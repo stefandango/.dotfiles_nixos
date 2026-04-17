@@ -14,6 +14,7 @@
     gh
     codex
     tokei
+    tealdeer
     #opencode
   ];
 
@@ -245,6 +246,22 @@
       # Quick clipboard functions
       cpwd() { pwd | clip && echo "📋 Copied current directory to clipboard"; }
       ccat() { cat "$1" | clip && echo "📋 Copied $1 to clipboard"; }
+
+      # Ollama command reference
+      ollama-help() {
+        cat <<'EOF'
+        ollama commands
+        ───────────────
+        ollama pull <model>     download a model
+        ollama list             installed models
+        ollama ps               loaded in memory
+        ollama run <model>      interactive chat
+        ollama stop <model>     unload from memory
+        ollama rm <model>       delete a model
+        ollama show <model>     model info / params
+        ollama-status           daemon + loaded + installed
+EOF
+      }
 
       # Ollama status: daemon state, loaded models, installed models
       ollama-status() {
