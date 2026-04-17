@@ -52,8 +52,18 @@
     curl
     btop
     gum           # Glamorous shell scripts
+
+    # Ollama tooling (daemon runs via services.ollama on NixOS / homebrew cask on macOS)
+    gollama       # TUI model manager
+    oterm         # TUI chat client
   ];
 
   # Enable home-manager
   programs.home-manager.enable = true;
+
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+    enableZshIntegration = true;
+  };
 }

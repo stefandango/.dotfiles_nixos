@@ -14,6 +14,7 @@
     gh
     codex
     tokei
+    tealdeer
     #opencode
   ];
 
@@ -245,6 +246,38 @@
       # Quick clipboard functions
       cpwd() { pwd | clip && echo "📋 Copied current directory to clipboard"; }
       ccat() { cat "$1" | clip && echo "📋 Copied $1 to clipboard"; }
+
+      # Ollama command reference
+      ollama-help() {
+        cat <<'EOF'
+        ollama commands
+        ───────────────
+        ollama pull <model>     download a model
+        ollama list             installed models
+        ollama ps               loaded in memory
+        ollama run <model>      interactive chat
+        ollama stop <model>     unload from memory
+        ollama rm <model>       delete a model
+        ollama show <model>     model info / params
+        ollama-status           daemon + loaded + installed
+EOF
+      }
+
+      # Ollama status: daemon state, loaded models, installed models
+      ollama-status() {
+        echo "── daemon ──"
+        if command -v systemctl >/dev/null 2>&1; then
+          systemctl is-active ollama 2>/dev/null || echo "not running (systemd)"
+        elif pgrep -xq ollama; then
+          echo "running"
+        else
+          echo "not running"
+        fi
+        echo "── loaded ──"
+        ollama ps 2>/dev/null || echo "daemon unreachable"
+        echo "── installed ──"
+        ollama list 2>/dev/null || echo "daemon unreachable"
+      }
 
       eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)"
 
