@@ -93,6 +93,7 @@ in
 					#clock,
 					#custom-weather,
 					#custom-docker,
+					#custom-ollama,
 					#custom-clipboard,
 					#custom-razerviperbattery,
 					#custom-focusmode,
@@ -118,6 +119,7 @@ in
 					#clock:hover,
 					#custom-weather:hover,
 					#custom-docker:hover,
+					#custom-ollama:hover,
 					#custom-clipboard:hover,
 					#custom-razerviperbattery:hover,
 					#custom-focusmode:hover,
@@ -192,6 +194,18 @@ in
 
 					#custom-docker {
 						color: #${hex.green};
+					}
+
+					#custom-ollama {
+						color: #${hex.orange};
+					}
+
+					#custom-ollama.active {
+						color: #${hex.green};
+					}
+
+					#custom-ollama.idle {
+						color: #${hex.gray};
 					}
 
 					#custom-clipboard {

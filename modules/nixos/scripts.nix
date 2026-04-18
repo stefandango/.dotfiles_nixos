@@ -27,6 +27,11 @@ in
 				recursive = true;
 				executable = true;
 			};
+			"Scripts/waybar-ollama.sh" = {
+				source = ../scripts/waybar-ollama.sh;
+				recursive = true;
+				executable = true;
+			};
 				
 			"Scripts/waybar-clipboard.sh" = {
 				source = ../scripts/waybar-clipboard.sh;

@@ -9,6 +9,7 @@
 	"modules-left": [
 		"hyprland/workspaces",
 		"custom/docker",
+		"custom/ollama",
 		"custom/devserver",
 		"custom/clipboard"
 	],
@@ -71,6 +72,13 @@
 		"exec": "~/Scripts/waybar-docker.sh",
 		"interval": 10,
 		"on-click": "pypr toggle lazydocker"
+	},
+	"custom/ollama": {
+		"format": "🦙 {}",
+		"return-type": "json",
+		"exec": "~/Scripts/waybar-ollama.sh",
+		"interval": 10,
+		"tooltip": true
 	},
 	"custom/devserver": {
 		"format": "󰿟 {}",
