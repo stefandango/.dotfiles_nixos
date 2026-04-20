@@ -8,31 +8,35 @@
 	"height": 36,
 	"modules-left": [
 		"hyprland/workspaces",
-		"custom/docker",
-		"custom/ollama",
-		"custom/devserver",
-		"custom/clipboard"
+		"group/services"
 	],
 	"modules-center": [
 		"custom/submap",
+		"custom/focusmode",
+		"custom/gamemode",
 		"custom/weather"
 	],
 	"modules-right": [
-		"custom/focusmode",
-		"custom/gamemode",
-		"custom/tmux",
-		"custom/razerviperbattery",
-		"custom/disks",
-		"custom/memory",
-		"custom/cpu",
-		"custom/temperature",
-		"pulseaudio",
-		"network",
-		"tray",
-		"clock",
-		"custom/notification",
-		"custom/logout"
+		"group/hardware",
+		"group/media-net",
+		"group/status"
 	],
+	"group/services": {
+		"orientation": "inherit",
+		"modules": ["custom/docker", "custom/ollama", "custom/devserver", "custom/clipboard", "custom/tmux"]
+	},
+	"group/hardware": {
+		"orientation": "inherit",
+		"modules": ["custom/disks", "custom/memory", "custom/cpu", "custom/temperature"]
+	},
+	"group/media-net": {
+		"orientation": "inherit",
+		"modules": ["pulseaudio", "network", "custom/razerviperbattery"]
+	},
+	"group/status": {
+		"orientation": "inherit",
+		"modules": ["tray", "clock", "custom/notification", "custom/logout"]
+	},
 	"clock": {
 		"format": "󰅐 {:%H:%M   󰨲 %a %d %b}",
 		"tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",

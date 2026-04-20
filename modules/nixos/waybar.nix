@@ -54,7 +54,7 @@ in
 
 					#workspaces {
 						padding: 2px 6px;
-						margin: 2px 6px;
+						margin: 2px 16px 2px 6px;
 						background: transparent;
 						border: none;
 						border-radius: 8px;
@@ -107,8 +107,8 @@ in
 					#tray,
 					#custom-notification,
 					#custom-logout {
-						padding: 4px 8px;
-						margin: 2px 3px;
+						padding: 4px 10px;
+						margin: 2px 4px;
 						color: #${hex.fg};
 						background: transparent;
 						border: none;
@@ -205,7 +205,9 @@ in
 					}
 
 					#custom-ollama.idle {
-						color: #${hex.gray};
+						padding: 0;
+						margin: 0;
+						min-width: 0;
 					}
 
 					#custom-clipboard {
@@ -216,15 +218,55 @@ in
 						color: #${hex.orange};
 					}
 
+					#custom-memory.normal {
+						padding: 0;
+						margin: 0;
+						min-width: 0;
+					}
+
+					#custom-memory.warning {
+						color: #${hex.orange};
+					}
+
+					#custom-memory.critical {
+						color: #${hex.red};
+						background: rgba(${rgb.red}, 0.2);
+					}
+
 					#custom-cpu {
 						color: #${hex.yellow};
+					}
+
+					#custom-cpu.normal {
+						padding: 0;
+						margin: 0;
+						min-width: 0;
+					}
+
+					#custom-cpu.warning {
+						color: #${hex.orange};
+					}
+
+					#custom-cpu.critical {
+						color: #${hex.red};
+						background: rgba(${rgb.red}, 0.2);
 					}
 
 					#custom-temperature {
 						color: #${hex.red};
 					}
 
-					#temperature.critical {
+					#custom-temperature.normal {
+						padding: 0;
+						margin: 0;
+						min-width: 0;
+					}
+
+					#custom-temperature.warning {
+						color: #${hex.orange};
+					}
+
+					#custom-temperature.critical {
 						color: #${hex.red};
 						background: rgba(${rgb.red}, 0.2);
 					}
@@ -268,6 +310,12 @@ in
 						color: #${hex.cyan};
 					}
 
+					#custom-devserver.inactive {
+						padding: 0;
+						margin: 0;
+						min-width: 0;
+					}
+
 					#custom-focusmode {
 						color: #${hex.cyan};
 						font-weight: bold;
@@ -308,11 +356,46 @@ in
 						color: #${hex.text};
 					}
 
+					#custom-tmux.inactive {
+						padding: 0;
+						margin: 0;
+						min-width: 0;
+					}
+
 					#tray {
 						padding: 4px 8px;
-						background: rgba(${rgb.bg}, 0.8);
-						border: 1px solid rgba(${rgb.active}, 0.5);
+						background: transparent;
+						border: none;
 						border-radius: 6px;
+					}
+
+					/* ── Group containers ── */
+					#services,
+					#hardware,
+					#media-net,
+					#status {
+						background: rgba(${rgb.black}, 0.5);
+						border: 1px solid rgba(${rgb.inactive}, 0.3);
+						border-radius: 8px;
+						padding: 0 4px;
+						margin: 4px 8px;
+					}
+
+					#services {
+						background: rgba(${rgb.green}, 0.08);
+						border-left: 3px solid rgba(${rgb.green}, 0.8);
+					}
+
+					#hardware {
+						border-left: 2px solid rgba(${rgb.yellow}, 0.4);
+					}
+
+					#media-net {
+						border-left: 2px solid rgba(${rgb.blue}, 0.4);
+					}
+
+					#status {
+						border-left: 2px solid rgba(${rgb.red}, 0.4);
 					}
 
 					#tray > .passive {

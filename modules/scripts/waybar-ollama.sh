@@ -10,7 +10,7 @@ fi
 MODELS=$(ollama ps 2>/dev/null | tail -n +2)
 
 if [ -z "$MODELS" ]; then
-	printf '{"text": "idle", "tooltip": "Ollama running — no active models", "class": "idle"}\n'
+	printf '{"text": "", "tooltip": "Ollama running — no active models", "class": "idle"}\n'
 else
 	COUNT=$(echo "$MODELS" | wc -l | tr -d ' ')
 	NAMES=$(echo "$MODELS" | awk '{print $1}' | paste -sd ', ' -)

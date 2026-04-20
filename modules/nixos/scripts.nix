@@ -104,6 +104,31 @@ in
 				recursive = true;
 				executable = true;
 			};
+			"Scripts/waybar-tmux.sh" = {
+				source = ../scripts/waybar-tmux.sh;
+				recursive = true;
+				executable = true;
+			};
+			"Scripts/waybar-cpu.sh" = {
+				source = ../scripts/waybar-cpu.sh;
+				recursive = true;
+				executable = true;
+			};
+			"Scripts/waybar-temperature.sh" = {
+				source = ../scripts/waybar-temperature.sh;
+				recursive = true;
+				executable = true;
+			};
+			"Scripts/waybar-memory.sh" = {
+				source = ../scripts/waybar-memory.sh;
+				recursive = true;
+				executable = true;
+			};
+			"Scripts/waybar-devserver.sh" = {
+				source = ../scripts/waybar-devserver.sh;
+				recursive = true;
+				executable = true;
+			};
 			"Scripts/ao-launch.sh" = {
 				source = ../scripts/ao-launch.sh;
 				recursive = true;

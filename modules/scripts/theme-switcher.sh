@@ -30,6 +30,7 @@ GREEN=$(get green)
 CYAN=$(get cyan)
 BLUE=$(get blue)
 PURPLE=$(get purple)
+ORANGE=$(get orange)
 WHITE=$(get white)
 BLACK=$(get black)
 GRAY=$(get gray)
@@ -54,6 +55,10 @@ RGB_BLUE=$(hex2rgb "$BLUE")
 RGB_GREEN=$(hex2rgb "$GREEN")
 RGB_CYAN=$(hex2rgb "$CYAN")
 RGB_ACTIVE=$(hex2rgb "$ACTIVE")
+RGB_BLACK=$(hex2rgb "$BLACK")
+RGB_INACTIVE=$(hex2rgb "$INACTIVE")
+RGB_PURPLE=$(hex2rgb "$PURPLE")
+RGB_ORANGE=$(hex2rgb "$ORANGE")
 
 # ─── 1. Hyprland ───────────────────────────────────────────────────────────────
 
@@ -98,7 +103,7 @@ tooltip {
 
 #workspaces {
     padding: 2px 6px;
-    margin: 2px 6px;
+    margin: 2px 16px 2px 6px;
     background: transparent;
     border: none;
     border-radius: 8px;
@@ -137,6 +142,7 @@ tooltip {
 #clock,
 #custom-weather,
 #custom-docker,
+#custom-ollama,
 #custom-clipboard,
 #custom-razerviperbattery,
 #custom-focusmode,
@@ -150,8 +156,8 @@ tooltip {
 #tray,
 #custom-notification,
 #custom-logout {
-    padding: 4px 8px;
-    margin: 2px 3px;
+    padding: 4px 10px;
+    margin: 2px 4px;
     color: #${FG};
     background: transparent;
     border: none;
@@ -162,6 +168,7 @@ tooltip {
 #clock:hover,
 #custom-weather:hover,
 #custom-docker:hover,
+#custom-ollama:hover,
 #custom-clipboard:hover,
 #custom-razerviperbattery:hover,
 #custom-focusmode:hover,
@@ -191,6 +198,20 @@ tooltip {
     color: #${GREEN};
 }
 
+#custom-ollama {
+    color: #${ORANGE};
+}
+
+#custom-ollama.active {
+    color: #${GREEN};
+}
+
+#custom-ollama.idle {
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+}
+
 #custom-clipboard {
     color: #${PURPLE};
 }
@@ -199,15 +220,55 @@ tooltip {
     color: #${ORANGE};
 }
 
+#custom-memory.normal {
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+}
+
+#custom-memory.warning {
+    color: #${ORANGE};
+}
+
+#custom-memory.critical {
+    color: #${RED};
+    background: rgba(${RGB_RED}, 0.2);
+}
+
 #custom-cpu {
     color: #${YELLOW};
+}
+
+#custom-cpu.normal {
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+}
+
+#custom-cpu.warning {
+    color: #${ORANGE};
+}
+
+#custom-cpu.critical {
+    color: #${RED};
+    background: rgba(${RGB_RED}, 0.2);
 }
 
 #custom-temperature {
     color: #${RED};
 }
 
-#temperature.critical {
+#custom-temperature.normal {
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+}
+
+#custom-temperature.warning {
+    color: #${ORANGE};
+}
+
+#custom-temperature.critical {
     color: #${RED};
     background: rgba(${RGB_RED}, 0.2);
 }
@@ -250,6 +311,12 @@ tooltip {
     color: #${CYAN};
 }
 
+#custom-devserver.inactive {
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+}
+
 #custom-focusmode {
     color: #${CYAN};
     font-weight: bold;
@@ -290,10 +357,16 @@ tooltip {
     color: #${TEXT};
 }
 
+#custom-tmux.inactive {
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+}
+
 #tray {
     padding: 4px 8px;
-    background: rgba(${RGB_BG}, 0.8);
-    border: 1px solid rgba(${RGB_ACTIVE}, 0.5);
+    background: transparent;
+    border: none;
     border-radius: 6px;
 }
 
@@ -351,6 +424,35 @@ tooltip {
 #custom-submap.empty {
     padding: 0;
     margin: 0;
+}
+
+/* ── Group containers ── */
+#services,
+#hardware,
+#media-net,
+#status {
+    background: rgba(${RGB_BLACK}, 0.5);
+    border: 1px solid rgba(${RGB_INACTIVE}, 0.3);
+    border-radius: 8px;
+    padding: 0 4px;
+    margin: 4px 8px;
+}
+
+#services {
+    background: rgba(${RGB_GREEN}, 0.08);
+    border-left: 3px solid rgba(${RGB_GREEN}, 0.8);
+}
+
+#hardware {
+    border-left: 2px solid rgba(${RGB_YELLOW}, 0.4);
+}
+
+#media-net {
+    border-left: 2px solid rgba(${RGB_BLUE}, 0.4);
+}
+
+#status {
+    border-left: 2px solid rgba(${RGB_RED}, 0.4);
 }
 WAYBAR_EOF
 
