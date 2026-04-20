@@ -35,7 +35,7 @@ in
 					}
 
 					window#waybar {
-						background: rgba(${rgb.bg}, 0.85);
+						background: transparent;
 						color: #${hex.fg};
 						transition-property: background-color;
 						transition-duration: 0.3s;
@@ -54,9 +54,10 @@ in
 
 					#workspaces {
 						padding: 2px 6px;
-						margin: 2px 16px 2px 6px;
-						background: transparent;
+						margin: 4px 8px;
+						background: rgba(${rgb.bg}, 0.85);
 						border: none;
+						border-left: 3px solid rgba(${rgb.purple}, 0.8);
 						border-radius: 8px;
 					}
 
@@ -76,7 +77,7 @@ in
 						color: #${hex.fg};
 						background: rgba(${rgb.active}, 0.6);
 						border: none;
-						box-shadow: 0 2px 8px rgba(${rgb.active}, 0.2);
+						box-shadow: 0 2px 12px rgba(${rgb.blue}, 0.4);
 					}
 
 					#workspaces button:hover {
@@ -183,13 +184,18 @@ in
 					}
 
 					#clock {
-						color: #${hex.fg};
+						color: #${hex.cyan};
 						font-weight: bold;
 						min-width: 200px;
 					}
 
 					#custom-weather {
 						color: #${hex.blue};
+						background: rgba(${rgb.bg}, 0.85);
+						border: none;
+						border-left: 3px solid rgba(${rgb.cyan}, 0.8);
+						border-radius: 8px;
+						margin: 4px 8px;
 					}
 
 					#custom-docker {
@@ -374,28 +380,35 @@ in
 					#hardware,
 					#media-net,
 					#status {
-						background: rgba(${rgb.black}, 0.5);
-						border: 1px solid rgba(${rgb.inactive}, 0.3);
+						background: rgba(${rgb.bg}, 0.85);
+						border: none;
 						border-radius: 8px;
 						padding: 0 4px;
 						margin: 4px 8px;
+						transition: all 0.2s ease;
+					}
+
+					#services:hover,
+					#hardware:hover,
+					#media-net:hover,
+					#status:hover {
+						background: rgba(${rgb.bg}, 0.95);
 					}
 
 					#services {
-						background: rgba(${rgb.green}, 0.08);
 						border-left: 3px solid rgba(${rgb.green}, 0.8);
 					}
 
 					#hardware {
-						border-left: 2px solid rgba(${rgb.yellow}, 0.4);
+						border-left: 3px solid rgba(${rgb.yellow}, 0.8);
 					}
 
 					#media-net {
-						border-left: 2px solid rgba(${rgb.blue}, 0.4);
+						border-left: 3px solid rgba(${rgb.blue}, 0.8);
 					}
 
 					#status {
-						border-left: 2px solid rgba(${rgb.red}, 0.4);
+						border-left: 3px solid rgba(${rgb.red}, 0.8);
 					}
 
 					#tray > .passive {

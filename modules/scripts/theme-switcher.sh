@@ -56,6 +56,7 @@ RGB_GREEN=$(hex2rgb "$GREEN")
 RGB_CYAN=$(hex2rgb "$CYAN")
 RGB_ACTIVE=$(hex2rgb "$ACTIVE")
 RGB_BLACK=$(hex2rgb "$BLACK")
+RGB_GRAY=$(hex2rgb "$GRAY")
 RGB_INACTIVE=$(hex2rgb "$INACTIVE")
 RGB_PURPLE=$(hex2rgb "$PURPLE")
 RGB_ORANGE=$(hex2rgb "$ORANGE")
@@ -84,7 +85,7 @@ cat > "$HOME/.config/waybar/style.css" << WAYBAR_EOF
 }
 
 window#waybar {
-    background: rgba(${RGB_BG}, 0.85);
+    background: transparent;
     color: #${FG};
     transition-property: background-color;
     transition-duration: 0.3s;
@@ -103,9 +104,10 @@ tooltip {
 
 #workspaces {
     padding: 2px 6px;
-    margin: 2px 16px 2px 6px;
-    background: transparent;
+    margin: 4px 8px;
+    background: rgba(${RGB_BG}, 0.85);
     border: none;
+    border-left: 3px solid rgba(${RGB_PURPLE}, 0.8);
     border-radius: 8px;
 }
 
@@ -125,7 +127,7 @@ tooltip {
     color: #${FG};
     background: rgba(${RGB_ACTIVE}, 0.6);
     border: none;
-    box-shadow: 0 2px 8px rgba(${RGB_ACTIVE}, 0.2);
+    box-shadow: 0 2px 12px rgba(${RGB_BLUE}, 0.4);
 }
 
 #workspaces button:hover {
@@ -185,13 +187,18 @@ tooltip {
 }
 
 #clock {
-    color: #${FG};
+    color: #${CYAN};
     font-weight: bold;
     min-width: 80px;
 }
 
 #custom-weather {
     color: #${BLUE};
+    background: rgba(${RGB_BG}, 0.85);
+    border: none;
+    border-left: 3px solid rgba(${RGB_CYAN}, 0.8);
+    border-radius: 8px;
+    margin: 4px 8px;
 }
 
 #custom-docker {
@@ -431,33 +438,40 @@ tooltip {
 #hardware,
 #media-net,
 #status {
-    background: rgba(${RGB_BLACK}, 0.5);
-    border: 1px solid rgba(${RGB_INACTIVE}, 0.3);
+    background: rgba(${RGB_BG}, 0.85);
+    border: none;
     border-radius: 8px;
     padding: 0 4px;
     margin: 4px 8px;
+    transition: all 0.2s ease;
+}
+
+#services:hover,
+#hardware:hover,
+#media-net:hover,
+#status:hover {
+    background: rgba(${RGB_BG}, 0.95);
 }
 
 #services {
-    background: rgba(${RGB_GREEN}, 0.08);
     border-left: 3px solid rgba(${RGB_GREEN}, 0.8);
 }
 
 #hardware {
-    border-left: 2px solid rgba(${RGB_YELLOW}, 0.4);
+    border-left: 3px solid rgba(${RGB_YELLOW}, 0.8);
 }
 
 #media-net {
-    border-left: 2px solid rgba(${RGB_BLUE}, 0.4);
+    border-left: 3px solid rgba(${RGB_BLUE}, 0.8);
 }
 
 #status {
-    border-left: 2px solid rgba(${RGB_RED}, 0.4);
+    border-left: 3px solid rgba(${RGB_RED}, 0.8);
 }
 WAYBAR_EOF
 
 # Reload waybar
-pkill waybar 2>/dev/null; sleep 0.5; waybar &disown
+pkill waybar 2>/dev/null || true; sleep 0.5; waybar &disown
 
 # ─── 3. Rofi ───────────────────────────────────────────────────────────────────
 
@@ -543,7 +557,7 @@ cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
 .notification-content {
   background: @cc-bg;
   padding: 16px;
-  border-radius: 12px;
+  border-radius: 8px;
   border: 2px solid #${BLUE};
   box-shadow: 0 4px 20px rgba(${RGB_BLUE}, 0.25), 0 2px 8px rgba(0, 0, 0, 0.4);
   margin: 0;
@@ -562,7 +576,7 @@ cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
 .notification-default-action {
   margin: 0;
   padding: 0;
-  border-radius: 12px;
+  border-radius: 8px;
 }
 
 .close-button {
@@ -595,7 +609,7 @@ cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
 }
 
 .notification-default-action {
-  border-radius: 12px;
+  border-radius: 8px;
   margin: 0px;
 }
 
@@ -878,13 +892,13 @@ highlight{
 .widget-buttons-grid{
   padding: 8px;
   margin: 8px;
-  border-radius: 12px;
+  border-radius: 8px;
   background-color: @noti-bg;
 }
 
 .widget-buttons-grid>flowbox>flowboxchild>button{
   background: @noti-bg;
-  border-radius: 12px;
+  border-radius: 8px;
 }
 
 .widget-buttons-grid>flowbox>flowboxchild>button:hover {
@@ -895,7 +909,7 @@ highlight{
   background-color: @noti-bg;
   padding: 8px;
   margin: 8px;
-  border-radius: 12px;
+  border-radius: 8px;
 }
 
 .powermode-buttons>button {
