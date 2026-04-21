@@ -27,6 +27,11 @@ in
 				recursive = true;
 				executable = true;
 			};
+			"Scripts/waybar-ollama.sh" = {
+				source = ../scripts/waybar-ollama.sh;
+				recursive = true;
+				executable = true;
+			};
 				
 			"Scripts/waybar-clipboard.sh" = {
 				source = ../scripts/waybar-clipboard.sh;
@@ -96,6 +101,31 @@ in
 			};
 			"Scripts/waybar-focusmode.sh" = {
 				source = ../scripts/waybar-focusmode.sh;
+				recursive = true;
+				executable = true;
+			};
+			"Scripts/waybar-tmux.sh" = {
+				source = ../scripts/waybar-tmux.sh;
+				recursive = true;
+				executable = true;
+			};
+			"Scripts/waybar-cpu.sh" = {
+				source = ../scripts/waybar-cpu.sh;
+				recursive = true;
+				executable = true;
+			};
+			"Scripts/waybar-temperature.sh" = {
+				source = ../scripts/waybar-temperature.sh;
+				recursive = true;
+				executable = true;
+			};
+			"Scripts/waybar-memory.sh" = {
+				source = ../scripts/waybar-memory.sh;
+				recursive = true;
+				executable = true;
+			};
+			"Scripts/waybar-devserver.sh" = {
+				source = ../scripts/waybar-devserver.sh;
 				recursive = true;
 				executable = true;
 			};
