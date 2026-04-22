@@ -96,6 +96,7 @@ in
 					#custom-docker,
 					#custom-ollama,
 					#custom-clipboard,
+					#custom-tmux,
 					#custom-razerviperbattery,
 					#custom-focusmode,
 				#custom-gamemode,
@@ -122,6 +123,7 @@ in
 					#custom-docker:hover,
 					#custom-ollama:hover,
 					#custom-clipboard:hover,
+					#custom-tmux:hover,
 					#custom-razerviperbattery:hover,
 					#custom-focusmode:hover,
 				#custom-gamemode:hover,
@@ -202,6 +204,13 @@ in
 						color: #${hex.green};
 					}
 
+					#custom-docker.inactive {
+						padding: 0;
+						margin: 0;
+						min-width: 0;
+						border: none;
+					}
+
 					#custom-ollama {
 						color: #${hex.orange};
 					}
@@ -211,9 +220,7 @@ in
 					}
 
 					#custom-ollama.idle {
-						padding: 0;
-						margin: 0;
-						min-width: 0;
+						color: #${hex.gray};
 					}
 
 					#custom-clipboard {
@@ -228,6 +235,7 @@ in
 						padding: 0;
 						margin: 0;
 						min-width: 0;
+						border: none;
 					}
 
 					#custom-memory.warning {
@@ -247,6 +255,7 @@ in
 						padding: 0;
 						margin: 0;
 						min-width: 0;
+						border: none;
 					}
 
 					#custom-cpu.warning {
@@ -266,6 +275,7 @@ in
 						padding: 0;
 						margin: 0;
 						min-width: 0;
+						border: none;
 					}
 
 					#custom-temperature.warning {
@@ -320,6 +330,7 @@ in
 						padding: 0;
 						margin: 0;
 						min-width: 0;
+						border: none;
 					}
 
 					#custom-focusmode {
@@ -338,6 +349,7 @@ in
 						padding: 0;
 						margin: 0;
 						min-width: 0;
+						border: none;
 					}
 
 					#custom-gamemode {
@@ -356,6 +368,7 @@ in
 						padding: 0;
 						margin: 0;
 						min-width: 0;
+						border: none;
 					}
 
 					#custom-tmux {
@@ -366,6 +379,7 @@ in
 						padding: 0;
 						margin: 0;
 						min-width: 0;
+						border: none;
 					}
 
 					#tray {
