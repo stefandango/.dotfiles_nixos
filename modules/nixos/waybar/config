@@ -6,6 +6,7 @@
 	"passthrough": false,
 	"gtk-layer-shell": true,
 	"height": 36,
+	"separator": "",
 	"modules-left": [
 		"hyprland/workspaces",
 		"group/services"
@@ -78,7 +79,7 @@
 		"on-click": "pypr toggle lazydocker"
 	},
 	"custom/ollama": {
-		"format": "🦙 {}",
+		"format": "{}",
 		"return-type": "json",
 		"exec": "~/Scripts/waybar-ollama.sh",
 		"interval": 10,
@@ -185,7 +186,7 @@
 	"network": {
 		"format": "{icon}",
 		"format-wifi": "{icon}  {essid}",
-		"format-ethernet": "{icon}  Connected",
+		"format-ethernet": "{icon}  {ipaddr}",
 		"format-disconnected": "󰤭  Disconnected",
 		"format-icons": {
 			"wifi": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],

@@ -146,6 +146,7 @@ tooltip {
 #custom-docker,
 #custom-ollama,
 #custom-clipboard,
+#custom-tmux,
 #custom-razerviperbattery,
 #custom-focusmode,
 #custom-gamemode,
@@ -172,6 +173,7 @@ tooltip {
 #custom-docker:hover,
 #custom-ollama:hover,
 #custom-clipboard:hover,
+#custom-tmux:hover,
 #custom-razerviperbattery:hover,
 #custom-focusmode:hover,
 #custom-gamemode:hover,
@@ -205,6 +207,13 @@ tooltip {
     color: #${GREEN};
 }
 
+#custom-docker.inactive {
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+    border: none;
+}
+
 #custom-ollama {
     color: #${ORANGE};
 }
@@ -214,9 +223,7 @@ tooltip {
 }
 
 #custom-ollama.idle {
-    padding: 0;
-    margin: 0;
-    min-width: 0;
+    color: #${GRAY};
 }
 
 #custom-clipboard {
@@ -231,6 +238,7 @@ tooltip {
     padding: 0;
     margin: 0;
     min-width: 0;
+    border: none;
 }
 
 #custom-memory.warning {
@@ -250,6 +258,7 @@ tooltip {
     padding: 0;
     margin: 0;
     min-width: 0;
+    border: none;
 }
 
 #custom-cpu.warning {
@@ -269,6 +278,7 @@ tooltip {
     padding: 0;
     margin: 0;
     min-width: 0;
+    border: none;
 }
 
 #custom-temperature.warning {
@@ -322,6 +332,7 @@ tooltip {
     padding: 0;
     margin: 0;
     min-width: 0;
+    border: none;
 }
 
 #custom-focusmode {
@@ -340,6 +351,7 @@ tooltip {
     padding: 0;
     margin: 0;
     min-width: 0;
+    border: none;
 }
 
 #custom-gamemode {
@@ -358,6 +370,7 @@ tooltip {
     padding: 0;
     margin: 0;
     min-width: 0;
+    border: none;
 }
 
 #custom-tmux {
@@ -368,6 +381,7 @@ tooltip {
     padding: 0;
     margin: 0;
     min-width: 0;
+    border: none;
 }
 
 #tray {

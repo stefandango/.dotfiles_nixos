@@ -13,7 +13,7 @@ for port in $ports; do
 done
 
 if [ "$count" -eq 0 ]; then
-	printf '{"text": "", "tooltip": "", "class": "inactive"}\n'
+	printf ''
 else
 	printf '{"text": "%s", "tooltip": "Dev servers running:\\n%s", "class": "active"}\n' "$count" "$active"
 fi
