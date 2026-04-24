@@ -24,7 +24,7 @@
 	],
 	"group/services": {
 		"orientation": "inherit",
-		"modules": ["custom/docker", "custom/ollama", "custom/devserver", "custom/clipboard", "custom/tmux"]
+		"modules": ["custom/updates", "custom/docker", "custom/ollama", "custom/devserver", "custom/clipboard", "custom/tmux"]
 	},
 	"group/hardware": {
 		"orientation": "inherit",
@@ -218,5 +218,14 @@
 		"exec": "~/Scripts/waybar-gamemode.sh",
 		"interval": 5,
 		"on-click": "~/Scripts/gamemode-toggle.sh"
+	},
+	"custom/updates": {
+		"format": "{}",
+		"return-type": "json",
+		"exec": "~/Scripts/waybar-updates.sh",
+		"interval": 600,
+		"on-click": "pypr toggle nixupdates",
+		"signal": 8,
+		"tooltip": true
 	}
 }

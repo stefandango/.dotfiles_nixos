@@ -38,10 +38,10 @@ in
 				"transition-time": 200,
 				"hide-on-clear": true,
 				"hide-on-action": true,
-				"script-fail-notify": true,
+				"script-fail-notify": false,
 				"scripts": {
 					"2fa-copy": {
-						"exec": "bash -c 'echo \"$SWAYNC_BODY\" | grep -oP \"\\b[0-9]{4,8}\\b\" | head -1 | tr -d \"\\n\" | ${pkgs.wl-clipboard}/bin/wl-copy && ${pkgs.libnotify}/bin/notify-send -a swaync -u low \"Code Copied\" \"Verification code copied to clipboard\"'",
+						"exec": "bash -c 'CODE=$(echo \"$SWAYNC_BODY\" | grep -oP \"\\b[0-9]{4,8}\\b\" | head -1 | tr -d \"\\n\"); [ -n \"$CODE\" ] && echo -n \"$CODE\" | ${pkgs.wl-clipboard}/bin/wl-copy && ${pkgs.libnotify}/bin/notify-send -a swaync -u low \"Code Copied\" \"Verification code copied to clipboard\" || true'",
 						"run-on": "receive",
 						"body": ".*(code|Code|OTP|otp|verify|Verify|verification|pin|PIN|token).*[0-9]{4,}.*|.*[0-9]{4,}.*(code|Code|OTP|otp|verify|Verify|verification|pin|PIN|token).*"
 					}

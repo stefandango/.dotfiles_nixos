@@ -95,6 +95,7 @@ in
 					#custom-weather,
 					#custom-docker,
 					#custom-ollama,
+					#custom-updates,
 					#custom-clipboard,
 					#custom-tmux,
 					#custom-razerviperbattery,
@@ -122,6 +123,7 @@ in
 					#custom-weather:hover,
 					#custom-docker:hover,
 					#custom-ollama:hover,
+					#custom-updates:hover,
 					#custom-clipboard:hover,
 					#custom-tmux:hover,
 					#custom-razerviperbattery:hover,
@@ -220,6 +222,36 @@ in
 					}
 
 					#custom-ollama.idle {
+						color: #${hex.gray};
+					}
+
+					@keyframes updates-glow {
+						0%   { box-shadow: 0 0 4px rgba(${rgb.yellow}, 0.3); }
+						50%  { box-shadow: 0 0 10px rgba(${rgb.yellow}, 0.6); }
+						100% { box-shadow: 0 0 4px rgba(${rgb.yellow}, 0.3); }
+					}
+
+					#custom-updates {
+						color: #${hex.cyan};
+					}
+
+					#custom-updates.current {
+						padding: 0;
+						margin: 0;
+						min-width: 0;
+						border: none;
+					}
+
+					#custom-updates.updates {
+						color: #${hex.yellow};
+						background: rgba(${rgb.yellow}, 0.1);
+						border: 1px solid rgba(${rgb.yellow}, 0.4);
+						border-radius: 10px;
+						padding: 2px 14px 2px 18px;
+						animation: updates-glow 3s ease-in-out infinite;
+					}
+
+					#custom-updates.checking {
 						color: #${hex.gray};
 					}
 
