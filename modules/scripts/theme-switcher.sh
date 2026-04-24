@@ -226,6 +226,36 @@ tooltip {
     color: #${GRAY};
 }
 
+@keyframes updates-glow {
+    0%   { box-shadow: 0 0 4px rgba(${RGB_YELLOW}, 0.3); }
+    50%  { box-shadow: 0 0 10px rgba(${RGB_YELLOW}, 0.6); }
+    100% { box-shadow: 0 0 4px rgba(${RGB_YELLOW}, 0.3); }
+}
+
+#custom-updates {
+    color: #${CYAN};
+}
+
+#custom-updates.current {
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+    border: none;
+}
+
+#custom-updates.updates {
+    color: #${YELLOW};
+    background: rgba(${RGB_YELLOW}, 0.1);
+    border: 1px solid rgba(${RGB_YELLOW}, 0.4);
+    border-radius: 10px;
+    padding: 2px 14px 2px 18px;
+    animation: updates-glow 3s ease-in-out infinite;
+}
+
+#custom-updates.checking {
+    color: #${GRAY};
+}
+
 #custom-clipboard {
     color: #${PURPLE};
 }

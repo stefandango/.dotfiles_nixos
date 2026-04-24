@@ -574,7 +574,6 @@ in
 
 		exec-once=${pkgs.awww}/bin/awww-daemon
 		exec-once=${pkgs.waybar}/bin/waybar
-		exec-once=${pkgs.swaynotificationcenter}/bin/swaync
 		exec-once=${pkgs.openrazer-daemon}/bin/openrazer-daemon
 		exec-once=${pkgs.networkmanagerapplet}/bin/nm-applet --indicator
 		exec-once=${pkgs.hyprland-autoname-workspaces}/bin/hyprland-autoname-workspaces
