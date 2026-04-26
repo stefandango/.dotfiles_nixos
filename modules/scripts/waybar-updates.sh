@@ -28,12 +28,16 @@ check_updates() {
     touch "$LOCK_FILE"
     trap 'rm -f "$LOCK_FILE"' EXIT
 
-    current_rev=$(jq -r '.nodes.nixpkgs.locked.rev' "$FLAKE_DIR/flake.lock" 2>/dev/null)
+    # Resolve the actual top-level nixpkgs node — `.nodes.nixpkgs` may be a
+    # transitive dep (e.g. an input that doesn't `follows`); root.inputs.nixpkgs
+    # is the authoritative pointer.
+    nixpkgs_node=$(jq -r '.nodes.root.inputs.nixpkgs // "nixpkgs"' "$FLAKE_DIR/flake.lock" 2>/dev/null)
+    current_rev=$(jq -r --arg n "$nixpkgs_node" '.nodes[$n].locked.rev' "$FLAKE_DIR/flake.lock" 2>/dev/null)
     if [ -z "$current_rev" ] || [ "$current_rev" = "null" ]; then
         return
     fi
 
-    branch=$(jq -r '.nodes.nixpkgs.original.ref // "nixos-unstable"' "$FLAKE_DIR/flake.lock" 2>/dev/null)
+    branch=$(jq -r --arg n "$nixpkgs_node" '.nodes[$n].original.ref // "nixos-unstable"' "$FLAKE_DIR/flake.lock" 2>/dev/null)
 
     latest_info=$(curl -sf -H "Accept: application/vnd.github.v3+json" \
         "https://api.github.com/repos/NixOS/nixpkgs/commits/$branch" 2>/dev/null)
@@ -45,7 +49,7 @@ check_updates() {
     latest_rev=$(echo "$latest_info" | jq -r '.sha')
     latest_date=$(echo "$latest_info" | jq -r '.commit.committer.date')
 
-    current_epoch=$(jq -r '.nodes.nixpkgs.locked.lastModified' "$FLAKE_DIR/flake.lock" 2>/dev/null)
+    current_epoch=$(jq -r --arg n "$nixpkgs_node" '.nodes[$n].locked.lastModified' "$FLAKE_DIR/flake.lock" 2>/dev/null)
     current_date_fmt=$(date -d "@$current_epoch" '+%Y-%m-%d' 2>/dev/null || echo "unknown")
     latest_date_fmt=$(date -d "$latest_date" '+%Y-%m-%d' 2>/dev/null || echo "$latest_date")
 
@@ -75,7 +79,8 @@ build_diff() {
     touch "$DIFF_LOCK"
     trap 'rm -f "$DIFF_LOCK"' EXIT
 
-    branch=$(jq -r '.nodes.nixpkgs.original.ref // "nixos-unstable"' "$FLAKE_DIR/flake.lock" 2>/dev/null)
+    nixpkgs_node=$(jq -r '.nodes.root.inputs.nixpkgs // "nixpkgs"' "$FLAKE_DIR/flake.lock" 2>/dev/null)
+    branch=$(jq -r --arg n "$nixpkgs_node" '.nodes[$n].original.ref // "nixos-unstable"' "$FLAKE_DIR/flake.lock" 2>/dev/null)
     latest_rev=$(jq -r '.latest_rev // ""' "$CACHE_FILE" 2>/dev/null)
 
     dry_output=$(nix build "$FLAKE_DIR#nixosConfigurations.$HOSTNAME.config.system.build.toplevel" \
@@ -222,7 +227,9 @@ else
     current_date=$(jq -r '.current_date' "$CACHE_FILE")
     latest_date=$(jq -r '.latest_date' "$CACHE_FILE")
 
-    if [ -f "$DIFF_FILE" ]; then
+    cached_latest_rev=$(jq -r '.latest_rev // ""' "$CACHE_FILE")
+    diff_rev=$(head -1 "$DIFF_FILE" 2>/dev/null)
+    if [ -f "$DIFF_FILE" ] && [ "$diff_rev" = "$cached_latest_rev" ]; then
         pkg_count=$(( $(tail -n +2 "$DIFF_FILE" | wc -l) ))
         printf '{"text": "󰏔 %s", "tooltip": "%s package(s) to update (%s days behind)\\nLocked: %s → Latest: %s\\nClick for details", "class": "updates"}\n' \
             "$pkg_count" "$pkg_count" "$days" "$current_date" "$latest_date"

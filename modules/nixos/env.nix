@@ -3,18 +3,21 @@
 {
   environment.sessionVariables = {
     # XDG Base Directory specification
-    XDG_CONFIG_HOME = "$HOME/.config";
-    XDG_DATA_HOME = "$HOME/.local/share";
-    XDG_STATE_HOME = "$HOME/.local/state";
-    XDG_CACHE_HOME = "$HOME/.cache";
+    XDG_CONFIG_HOME = "\${HOME}/.config";
+    XDG_DATA_HOME = "\${HOME}/.local/share";
+    XDG_STATE_HOME = "\${HOME}/.local/state";
+    XDG_CACHE_HOME = "\${HOME}/.cache";
 
-    # NixOS-specific application paths
-    ZSH = "$XDG_DATA_HOME/oh-my-zsh";
-    ZDOTDIR = "$XDG_CONFIG_HOME/zsh";
-    GTK2_RC_FILES = "$XDG_CONFIG_HOME/gtk-2.0/gtkrc";
+    # NixOS-specific application paths.
+    # ${VAR} (not $VAR) so pam_env stops spamming "Expandable variables must
+    # be wrapped in {}" warnings on every login. Both bash and pam_env accept
+    # the braced form.
+    ZSH = "\${XDG_DATA_HOME}/oh-my-zsh";
+    ZDOTDIR = "\${XDG_CONFIG_HOME}/zsh";
+    GTK2_RC_FILES = "\${XDG_CONFIG_HOME}/gtk-2.0/gtkrc";
 
     # Custom
-    PROJECTS = "$HOME/Dev";
+    PROJECTS = "\${HOME}/Dev";
 
     # Firefox 67+ auto-spawns a fresh profile when the install path changes
     # (nix-store hash bumps on every Firefox update). Legacy mode disables

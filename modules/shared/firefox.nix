@@ -13,6 +13,10 @@ lib.mkIf (!pkgs.stdenv.isDarwin) {
     enable = true;
     package = pkgs.firefox;
 
+    # Use the XDG-compliant path. home-manager 26.05 made this the new default;
+    # we set it explicitly to pin across stateVersion/upgrade boundaries.
+    configPath = ".config/mozilla/firefox";
+
     # Enterprise policies — stronger than prefs (locked, can't be re-enabled by accident).
     # https://mozilla.github.io/policy-templates/
     policies = {
