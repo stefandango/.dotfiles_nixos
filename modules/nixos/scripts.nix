@@ -134,6 +134,11 @@ in
 				recursive = true;
 				executable = true;
 			};
+			"Scripts/waybar-updates.sh" = {
+				source = ../scripts/waybar-updates.sh;
+				recursive = true;
+				executable = true;
+			};
 			# Theme JSON files
 			".config/theme/themes/onedark.json".source = ../../theme/themes/onedark.json;
 			".config/theme/themes/doom.json".source = ../../theme/themes/doom.json;

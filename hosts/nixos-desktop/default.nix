@@ -64,9 +64,12 @@
   i18n.defaultLocale = "en_US.UTF-8";
 
   # Console configuration
+  # earlySetup bundles the font into initrd so setfont doesn't fail on the
+  # first vconsole-setup attempt before the store is fully available.
   console = {
     font = "Lat2-Terminus16";
     keyMap = "dk";
+    earlySetup = true;
   };
 
   # Security

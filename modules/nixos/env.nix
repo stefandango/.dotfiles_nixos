@@ -15,5 +15,10 @@
 
     # Custom
     PROJECTS = "$HOME/Dev";
+
+    # Firefox 67+ auto-spawns a fresh profile when the install path changes
+    # (nix-store hash bumps on every Firefox update). Legacy mode disables
+    # per-install profile tracking so profiles.ini stays stable.
+    MOZ_LEGACY_PROFILES = "1";
   };
 }
