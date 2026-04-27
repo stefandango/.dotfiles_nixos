@@ -27,9 +27,23 @@
     };
     kernelPackages = pkgs.linuxPackages_latest;
     initrd.kernelModules = [ "amdgpu" ];
+    # systemd-based initrd: required for plymouth to survive the simpledrm →
+    # amdgpu DRM handover. Without this, plymouth renders to the EFI framebuffer,
+    # then amdgpu seizes the display at ~4s and the splash goes invisible on the
+    # ultrawide before the monitor re-syncs.
+    initrd.systemd.enable = true;
+    # Graphical boot splash — hides raw systemd/kernel output behind a clean
+    # NixOS logo so transient early-boot messages don't flash on the TTY.
+    plymouth = {
+      enable = true;
+      theme = "nixos-bgrt";
+      themePackages = [ pkgs.nixos-bgrt-plymouth ];
+    };
     kernelParams = [
       "amdgpu.dcdebugmask=0x610"                       # Disable PSR + PSR-SU + Panel Replay to prevent flickering
       "amdgpu.gpu_recovery=1"                           # Enable GPU reset on hang instead of crashing
+      "quiet"                                           # Suppress kernel log output on console — needed for plymouth
+      "splash"                                          # Tell plymouth to show the splash screen
     ];
     kernel.sysctl = {
       "vm.max_map_count" = 1048576;
@@ -47,6 +61,10 @@
       enable = true;
       batteryNotifier.enable = true;
     };
+    # Required for Bluetooth controller firmware (otherwise hci0 FW download
+    # fails with -19 on boot). Also enables AMD microcode updates via the
+    # default in hardware-configuration.nix.
+    enableRedistributableFirmware = true;
   };
 
   # PulseAudio (disabled in favor of PipeWire)
@@ -225,9 +243,11 @@
     };
   };
 
-  # I/O scheduler: none for NVMe (lowest overhead)
+  # I/O scheduler: none for NVMe (lowest overhead).
+  # Match only namespace block devices (nvme0n1) — controllers (nvme0) and
+  # partitions (nvme0n1p1) have no queue/scheduler and trigger udev errors.
   services.udev.extraRules = ''
-    ACTION=="add|change", KERNEL=="nvme[0-9]*", ATTR{queue/scheduler}="none"
+    ACTION=="add|change", KERNEL=="nvme[0-9]n[0-9]", ATTR{queue/scheduler}="none"
   '';
 
   # Process priority optimization for gaming
