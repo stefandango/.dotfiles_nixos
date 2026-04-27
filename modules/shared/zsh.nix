@@ -149,6 +149,11 @@
       executable = true;
     };
 
+    "Scripts/tailscale-up" = {
+      source = ../scripts/tailscale-up;
+      executable = true;
+    };
+
     ".config/oh-my-posh/ohmyposhv3-v2.json" = {
       source = ../config/ohmyposhv3-v2.json;
     };

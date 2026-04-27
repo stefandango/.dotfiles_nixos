@@ -12,5 +12,6 @@
     ./apps.nix
     ./dotnet.nix
     ./ollama.nix
+    ./tailscale.nix
   ];
 }
