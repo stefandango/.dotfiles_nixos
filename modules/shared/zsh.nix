@@ -308,7 +308,7 @@ EOF
     baseIndex = 1;
     keyMode = "vi";
     mouse = true;
-    shell = "${pkgs.zsh}/bin/zsh";
+    shell = if pkgs.stdenv.isDarwin then "/bin/zsh" else "${pkgs.zsh}/bin/zsh";
     terminal = "screen-256color";
     extraConfig = ''
       # Enable 24-bit color and proper terminal support

@@ -55,15 +55,9 @@
 
     # Ollama tooling (daemon runs via services.ollama on NixOS / homebrew cask on macOS)
     gollama       # TUI model manager
-    oterm         # TUI chat client
+    # oterm       # TUI chat client — disabled: textual-image sixel snapshot test fails upstream
   ];
 
   # Enable home-manager
   programs.home-manager.enable = true;
-
-  programs.direnv = {
-    enable = true;
-    nix-direnv.enable = true;
-    enableZshIntegration = true;
-  };
 }
