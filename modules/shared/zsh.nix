@@ -149,6 +149,11 @@
       executable = true;
     };
 
+    "Scripts/tailscale-up" = {
+      source = ../scripts/tailscale-up;
+      executable = true;
+    };
+
     ".config/oh-my-posh/ohmyposhv3-v2.json" = {
       source = ../config/ohmyposhv3-v2.json;
     };
@@ -303,7 +308,7 @@ EOF
     baseIndex = 1;
     keyMode = "vi";
     mouse = true;
-    shell = "${pkgs.zsh}/bin/zsh";
+    shell = if pkgs.stdenv.isDarwin then "/bin/zsh" else "${pkgs.zsh}/bin/zsh";
     terminal = "screen-256color";
     extraConfig = ''
       # Enable 24-bit color and proper terminal support

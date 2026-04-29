@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# tailscale-up — register this machine against a Headscale server.
+# Reads the login URL from ~/.config/headscale-url, or prompts and offers to save it.
+# Optional argument: a Headscale pre-auth key (passed as --authkey).
+
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
+URL_FILE="$CONFIG_DIR/headscale-url"
+
+if command -v tailscale >/dev/null 2>&1; then
+  TS=tailscale
+elif [[ -x /Applications/Tailscale.app/Contents/MacOS/Tailscale ]]; then
+  TS=/Applications/Tailscale.app/Contents/MacOS/Tailscale
+else
+  echo "error: tailscale CLI not found. Install via NixOS services.tailscale or the Homebrew tailscale cask." >&2
+  exit 1
+fi
+
+if [[ -f "$URL_FILE" ]]; then
+  URL=$(tr -d '[:space:]' < "$URL_FILE")
+else
+  read -rp "Headscale URL (e.g. https://headscale.example.com): " URL
+  URL=${URL//[[:space:]]/}
+  if [[ -z "$URL" ]]; then
+    echo "error: empty URL" >&2
+    exit 1
+  fi
+  read -rp "Save to $URL_FILE for next time? [y/N] " save
+  if [[ "$save" =~ ^[Yy]$ ]]; then
+    mkdir -p "$CONFIG_DIR"
+    printf '%s\n' "$URL" > "$URL_FILE"
+    chmod 600 "$URL_FILE"
+  fi
+fi
+
+ARGS=(--login-server="$URL")
+if [[ $# -ge 1 && -n "${1:-}" ]]; then
+  ARGS+=(--authkey="$1")
+fi
+
+echo "Running: sudo $TS up ${ARGS[*]}"
+exec sudo "$TS" up "${ARGS[@]}"

@@ -97,6 +97,7 @@
       "font-monaspice-nerd-font"
       "font-noto-sans-symbols-2"
       "ollama-app"
+      "tailscale-app"
     ];
     brews = [ "uv" ];
   };
