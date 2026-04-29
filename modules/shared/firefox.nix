@@ -9,9 +9,18 @@
 # `policies = { ... }` block below would be silently ignored on Darwin anyway.
 # → Manage Firefox declaratively on Linux only; leave macOS alone.
 lib.mkIf (!pkgs.stdenv.isDarwin) {
+  # firefoxpwa CLI on PATH so omarchy-webapp-* scripts can call `firefoxpwa site install`.
+  home.packages = [ pkgs.firefoxpwa ];
+
   programs.firefox = {
     enable = true;
     package = pkgs.firefox;
+
+    # Register the firefoxpwa native messaging host. Without this the
+    # PWAsForFirefox extension can't talk to the firefoxpwa binary and PWA
+    # install/launch silently no-ops. Requires the source-built firefox
+    # package above (not firefox-bin).
+    nativeMessagingHosts = [ pkgs.firefoxpwa ];
 
     # Use the XDG-compliant path. home-manager 26.05 made this the new default;
     # we set it explicitly to pin across stateVersion/upgrade boundaries.
@@ -70,6 +79,15 @@ lib.mkIf (!pkgs.stdenv.isDarwin) {
         # uBlock Origin
         "uBlock0@raymondhill.net" = {
           install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
+          installation_mode = "force_installed";
+          private_browsing = true;
+        };
+
+        # PWAsForFirefox — companion to the firefoxpwa native binary.
+        # Adds "Install this site as PWA" UI; install/launch is dispatched to
+        # the firefoxpwa CLI via the native messaging host wired above.
+        "firefoxpwa@filips.si" = {
+          install_url = "https://addons.mozilla.org/firefox/downloads/latest/pwas-for-firefox/latest.xpi";
           installation_mode = "force_installed";
           private_browsing = true;
         };

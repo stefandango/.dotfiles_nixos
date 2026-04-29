@@ -337,6 +337,10 @@ in
 		bind=SUPERSHIFT,T,exec,pkill rofi || ~/Scripts/theme-rofi.sh
 		bind=SUPERSHIFT,F,exec,~/Scripts/focus-mode-toggle.sh
 		bind=SUPERSHIFT,plus,exec,pkill rofi || ~/Scripts/cheatsheet.sh
+		bind=SUPERALT,SPACE,exec,pkill rofi || ~/Scripts/omarchy-menu.sh
+		bind=SUPERSHIFT,A,exec,pypr toggle chatgpt
+		bind=SUPERSHIFT,M,exec,pypr toggle protonmail
+		bind=SUPERSHIFT,G,exec,pypr toggle github
 
         	binde=,XF86AudioLowerVolume,exec,${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ -5%
         	binde=,XF86AudioRaiseVolume,exec,${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ +5%
@@ -466,6 +470,14 @@ in
 
 
 		# Float common dialogs and popups
+		# Firefox PWAs: float + center + size to scratchpad-style modal.
+		# Pyprland scratchpads capture+move-to-special-workspace these, but with
+		# process_tracking=false it doesn't set floating/size — Hyprland rules
+		# fill that in here so they always render as a centered modal.
+		windowrule = float on, match:class ^(FFPWA-).*$
+		windowrule = size 75% 85%, match:class ^(FFPWA-).*$
+		windowrule = center on, match:class ^(FFPWA-).*$
+
 		windowrule = float on, match:title ^(Open File)(.*)$
 		windowrule = float on, match:title ^(Open Folder)(.*)$
 		windowrule = float on, match:title ^(Select a File)(.*)$
