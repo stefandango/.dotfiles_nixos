@@ -470,13 +470,12 @@ in
 
 
 		# Float common dialogs and popups
-		# Firefox PWAs: float + center + size to scratchpad-style modal.
-		# Pyprland scratchpads capture+move-to-special-workspace these, but with
-		# process_tracking=false it doesn't set floating/size — Hyprland rules
-		# fill that in here so they always render as a centered modal.
+		# Firefox PWAs: float + size only. Centering is left to pyprland —
+		# Hyprland's `center on` rule appears to fight pyprland's special-
+		# workspace positioning on ultrawide monitors, leaving the window
+		# clipped on one edge.
 		windowrule = float on, match:class ^(FFPWA-).*$
 		windowrule = size 75% 85%, match:class ^(FFPWA-).*$
-		windowrule = center on, match:class ^(FFPWA-).*$
 
 		windowrule = float on, match:title ^(Open File)(.*)$
 		windowrule = float on, match:title ^(Open Folder)(.*)$

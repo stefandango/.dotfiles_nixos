@@ -77,6 +77,17 @@
 				specialArgs = { inherit inputs vars; };
 				modules = [
 					{ nixpkgs.hostPlatform = "x86_64-linux"; }
+					# Disable openldap's flaky syncreplication test suite. The
+					# i686-linux build is pulled in transitively via lutris's
+					# 32-bit FHS env, and test017-syncreplication-refresh
+					# times out on busy machines (well-known nixpkgs issue).
+					{
+						nixpkgs.overlays = [
+							(final: prev: {
+								openldap = prev.openldap.overrideAttrs (_: { doCheck = false; });
+							})
+						];
+					}
 					./hosts/nixos-desktop
 					./modules/shared/system.nix
 					./modules/nixos
