@@ -6,5 +6,6 @@
     ./zsh.nix
     ./kitty.nix
     ./firefox.nix
+    ./syncthing.nix
   ];
 }
