@@ -27,46 +27,16 @@ pick() {
 main_menu() {
     local sel
     sel=$(pick "Omarchy" \
-        "󰏖  Install" \
-        "󰧧  Remove" \
         "󰟾  Style" \
         "󰄀  Capture" \
         "󰒓  System" \
         "󰐥  Power")
 
     case "$sel" in
-        *Install*) install_menu ;;
-        *Remove*)  remove_menu ;;
         *Style*)   style_menu ;;
         *Capture*) capture_menu ;;
         *System*)  system_menu ;;
         *Power*)   exec "$HOME/.config/rofi/powermenu.sh" ;;
-        *)         exit 0 ;;
-    esac
-}
-
-# ---- Install --------------------------------------------------------------
-install_menu() {
-    local sel
-    sel=$(pick "Install" \
-        "←  Back" \
-        "󰖟  Web App")
-    case "$sel" in
-        *Back*)    main_menu ;;
-        *Web*App*) exec "$SCRIPTS/omarchy-webapp-install.sh" ;;
-        *)         exit 0 ;;
-    esac
-}
-
-# ---- Remove ---------------------------------------------------------------
-remove_menu() {
-    local sel
-    sel=$(pick "Remove" \
-        "←  Back" \
-        "󰖟  Web App")
-    case "$sel" in
-        *Back*)    main_menu ;;
-        *Web*App*) exec "$SCRIPTS/omarchy-webapp-remove.sh" ;;
         *)         exit 0 ;;
     esac
 }

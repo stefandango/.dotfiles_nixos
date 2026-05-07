@@ -85,52 +85,6 @@ in
                     animation = "fromTop"
                     lazy = true
                     size = "60% 80%"
-
-                    # Firefox PWA scratchpads.
-                    # Match by initialClass — each install gets a unique
-                    # FFPWA-<ULID> class that's stable for the lifetime of the
-                    # install. (initialTitle matching turned out to be flaky in
-                    # pyprland 3.3.1 — the rule loaded but never fired.)
-                    # ULIDs come from `firefoxpwa profile list`. If you ever
-                    # uninstall+reinstall a PWA, update the corresponding ULID
-                    # below (or run: nix run nixpkgs#firefoxpwa -- profile list).
-                    # process_tracking = false because the launch chain forks
-                    # (bash → script → firefoxpwa → runtime) and bash exits
-                    # before the window opens.
-                    # lazy = false pre-launches at pyprland start so toggles
-                    # just show/hide an already-captured window (instant).
-                    [scratchpads.chatgpt]
-                    command = "firefoxpwa site launch 01KQCCP16HRQ7R2D4WC6M2J8N1"
-                    match_by = "initialClass"
-                    initialClass = "FFPWA-01KQCCP16HRQ7R2D4WC6M2J8N1"
-                    process_tracking = false
-                    lazy = false
-                    margin = 50
-                    unfocus = "hide"
-                    animation = "fromTop"
-                    size = "70% 85%"
-
-                    [scratchpads.protonmail]
-                    command = "firefoxpwa site launch 01KQC9BCAYC20ZB418F1ETGSZZ"
-                    match_by = "initialClass"
-                    initialClass = "FFPWA-01KQC9BCAYC20ZB418F1ETGSZZ"
-                    process_tracking = false
-                    lazy = false
-                    margin = 50
-                    unfocus = "hide"
-                    animation = "fromTop"
-                    size = "75% 85%"
-
-                    [scratchpads.github]
-                    command = "firefoxpwa site launch 01KQC9M4R9QRP04EVMA10GAXZZ"
-                    match_by = "initialClass"
-                    initialClass = "FFPWA-01KQC9M4R9QRP04EVMA10GAXZZ"
-                    process_tracking = false
-                    lazy = false
-                    margin = 50
-                    unfocus = "hide"
-                    animation = "fromTop"
-                    size = "75% 85%"
                 '';
             };
         };

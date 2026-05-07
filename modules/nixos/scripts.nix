@@ -139,23 +139,8 @@ in
 				recursive = true;
 				executable = true;
 			};
-			"Scripts/omarchy-webapp-install.sh" = {
-				source = ../scripts/omarchy-webapp-install.sh;
-				recursive = true;
-				executable = true;
-			};
-			"Scripts/omarchy-webapp-remove.sh" = {
-				source = ../scripts/omarchy-webapp-remove.sh;
-				recursive = true;
-				executable = true;
-			};
 			"Scripts/omarchy-menu.sh" = {
 				source = ../scripts/omarchy-menu.sh;
-				recursive = true;
-				executable = true;
-			};
-			"Scripts/omarchy-webapp-launch.sh" = {
-				source = ../scripts/omarchy-webapp-launch.sh;
 				recursive = true;
 				executable = true;
 			};
