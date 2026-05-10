@@ -159,7 +159,12 @@ lib.mkIf (!pkgs.stdenv.isDarwin) {
         "dom.security.https_only_mode_ever_enabled" = true;
 
         # ── DNS over HTTPS (mode 2 = TRR first, fallback) ────────────────────
+        # Excluded domains bypass DoH and use the system resolver so Tailscale
+        # split-DNS / MagicDNS can answer them (otherwise *.ts.net and tailnet
+        # overrides like stefandango.dev resolve wrong or NXDOMAIN → timeout).
         "network.trr.mode" = 2;
+        "network.trr.excluded-domains" = "stefandango.dev,ts.net,localhost,local";
+        "network.trr.builtin-excluded-domains" = "stefandango.dev,ts.net,localhost,local";
 
         # ── WebRTC off (prevents local IP leak; breaks in-browser video calls) ─
         "media.peerconnection.enabled" = false;

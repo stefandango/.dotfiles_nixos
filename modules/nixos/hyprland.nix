@@ -337,6 +337,7 @@ in
 		bind=SUPERSHIFT,T,exec,pkill rofi || ~/Scripts/theme-rofi.sh
 		bind=SUPERSHIFT,F,exec,~/Scripts/focus-mode-toggle.sh
 		bind=SUPERSHIFT,plus,exec,pkill rofi || ~/Scripts/cheatsheet.sh
+		bind=SUPERALT,SPACE,exec,pkill rofi || ~/Scripts/omarchy-menu.sh
 
         	binde=,XF86AudioLowerVolume,exec,${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ -5%
         	binde=,XF86AudioRaiseVolume,exec,${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ +5%
