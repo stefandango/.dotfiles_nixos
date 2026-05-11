@@ -61,6 +61,7 @@
     powershell
     vlc-bin
     pom  # Terminal-based Pomodoro timer with notifications
+    llama-cpp  # Metal acceleration auto-enabled on aarch64-darwin
   ];
 
   # Font management
@@ -96,7 +97,6 @@
       "zen"
       "font-monaspice-nerd-font"
       "font-noto-sans-symbols-2"
-      "ollama-app"
       "tailscale-app"
     ];
     brews = [ "uv" ];

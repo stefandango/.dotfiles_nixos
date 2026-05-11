@@ -11,7 +11,7 @@
     ./rofi.nix
     ./apps.nix
     ./dotnet.nix
-    ./ollama.nix
+    ./llama-cpp.nix
     ./tailscale.nix
   ];
 }

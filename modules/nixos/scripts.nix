@@ -27,8 +27,8 @@ in
 				recursive = true;
 				executable = true;
 			};
-			"Scripts/waybar-ollama.sh" = {
-				source = ../scripts/waybar-ollama.sh;
+			"Scripts/waybar-llama.sh" = {
+				source = ../scripts/waybar-llama.sh;
 				recursive = true;
 				executable = true;
 			};

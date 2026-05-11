@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# Download Qwen3.6-27B Q4_K_M GGUF + vision projector for llama.cpp.
+# - NixOS:  /var/lib/llama-cpp/models  (so services.llama-cpp can read it)
+# - macOS:  ~/Models                   (user-owned; you run llama-server manually)
+
+set -euo pipefail
+
+REPO="unsloth/Qwen3.6-27B-GGUF"
+MODEL_FILE="Qwen3.6-27B-Q4_K_M.gguf"
+MMPROJ_FILE="mmproj-F16.gguf"
+BASE="https://huggingface.co/${REPO}/resolve/main"
+
+if [[ "$(uname -s)" == "Darwin" ]]; then
+	DEST="${HOME}/Models"
+	SUDO=""
+else
+	DEST="/var/lib/llama-cpp/models"
+	SUDO="sudo"
+fi
+
+if [[ "${1-}" == "-h" || "${1-}" == "--help" ]]; then
+	cat <<EOF
+llama-fetch — download Qwen3.6-27B GGUF + vision projector
+
+Destination: ${DEST}
+Files:
+  ${MODEL_FILE}   ~16.8 GB
+  ${MMPROJ_FILE}  ~0.9 GB
+
+Usage: llama-fetch [--no-mmproj]
+
+On Linux, you'll be prompted for sudo to write to ${DEST}.
+After download, enable the service: sudo systemctl start llama-cpp
+EOF
+	exit 0
+fi
+
+want_mmproj=1
+[[ "${1-}" == "--no-mmproj" ]] && want_mmproj=0
+
+echo "Destination: ${DEST}"
+${SUDO} mkdir -p "${DEST}"
+
+fetch() {
+	local name="$1"
+	local out="${DEST}/${name}"
+	if [[ -f "${out}" ]]; then
+		echo "✓ ${name} already present"
+		return
+	fi
+	echo "→ Downloading ${name}"
+	# curl --create-dirs needs write perms; use sudo on Linux.
+	${SUDO} curl -fL --progress-bar -o "${out}" "${BASE}/${name}"
+}
+
+fetch "${MODEL_FILE}"
+[[ "${want_mmproj}" -eq 1 ]] && fetch "${MMPROJ_FILE}"
+
+echo
+echo "Done. To start the server:"
+if [[ "$(uname -s)" == "Darwin" ]]; then
+	echo "  llama-server -m ${DEST}/${MODEL_FILE} --mmproj ${DEST}/${MMPROJ_FILE} -ngl 999 -c 32768 --flash-attn on --host 127.0.0.1 --port 8080"
+else
+	echo "  sudo systemctl start llama-cpp"
+	echo "  # then: nixswitch     (so services.llama-cpp.enable picks up the new file)"
+fi

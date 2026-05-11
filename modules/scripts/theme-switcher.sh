@@ -144,7 +144,7 @@ tooltip {
 #clock,
 #custom-weather,
 #custom-docker,
-#custom-ollama,
+#custom-llama,
 #custom-clipboard,
 #custom-tmux,
 #custom-razerviperbattery,
@@ -171,7 +171,7 @@ tooltip {
 #clock:hover,
 #custom-weather:hover,
 #custom-docker:hover,
-#custom-ollama:hover,
+#custom-llama:hover,
 #custom-clipboard:hover,
 #custom-tmux:hover,
 #custom-razerviperbattery:hover,
@@ -214,15 +214,15 @@ tooltip {
     border: none;
 }
 
-#custom-ollama {
+#custom-llama {
     color: #${ORANGE};
 }
 
-#custom-ollama.active {
+#custom-llama.active {
     color: #${GREEN};
 }
 
-#custom-ollama.idle {
+#custom-llama.idle {
     color: #${GRAY};
 }
 

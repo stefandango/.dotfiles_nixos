@@ -94,7 +94,7 @@ in
 					#clock,
 					#custom-weather,
 					#custom-docker,
-					#custom-ollama,
+					#custom-llama,
 					#custom-updates,
 					#custom-clipboard,
 					#custom-tmux,
@@ -122,7 +122,7 @@ in
 					#clock:hover,
 					#custom-weather:hover,
 					#custom-docker:hover,
-					#custom-ollama:hover,
+					#custom-llama:hover,
 					#custom-updates:hover,
 					#custom-clipboard:hover,
 					#custom-tmux:hover,
@@ -213,15 +213,15 @@ in
 						border: none;
 					}
 
-					#custom-ollama {
+					#custom-llama {
 						color: #${hex.orange};
 					}
 
-					#custom-ollama.active {
+					#custom-llama.active {
 						color: #${hex.green};
 					}
 
-					#custom-ollama.idle {
+					#custom-llama.idle {
 						color: #${hex.gray};
 					}
 

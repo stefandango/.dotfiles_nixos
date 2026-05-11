@@ -24,7 +24,7 @@
 	],
 	"group/services": {
 		"orientation": "inherit",
-		"modules": ["custom/updates", "custom/docker", "custom/ollama", "custom/devserver", "custom/clipboard", "custom/tmux"]
+		"modules": ["custom/updates", "custom/docker", "custom/llama", "custom/devserver", "custom/clipboard", "custom/tmux"]
 	},
 	"group/hardware": {
 		"orientation": "inherit",
@@ -78,12 +78,15 @@
 		"interval": 10,
 		"on-click": "pypr toggle lazydocker"
 	},
-	"custom/ollama": {
+	"custom/llama": {
 		"format": "{}",
 		"return-type": "json",
-		"exec": "~/Scripts/waybar-ollama.sh",
+		"exec": "~/Scripts/waybar-llama.sh",
 		"interval": 10,
-		"tooltip": true
+		"tooltip": true,
+		"signal": 11,
+		"on-click": "~/Scripts/llama toggle",
+		"on-click-right": "kitty -e ~/Scripts/llama logs"
 	},
 	"custom/devserver": {
 		"format": "󰿟 {}",
