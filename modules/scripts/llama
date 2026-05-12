@@ -18,8 +18,8 @@ else
 	USE_SYSTEMD=1
 fi
 
-MODEL="${MODELS_DIR}/Qwen3.6-27B-Q4_K_M.gguf"
-MMPROJ="${MODELS_DIR}/mmproj-F16.gguf"
+MODEL="${MODELS_DIR}/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf"
+MMPROJ="${MODELS_DIR}/mmproj-F16.gguf"   # unused for text-only Qwen3-Coder; kept for future vision models
 
 is_running() {
 	if [[ "$USE_SYSTEMD" -eq 1 ]]; then

@@ -260,7 +260,10 @@
   virtualisation.docker.enable = true;
 
   # Linux-specific nix settings
-  nix.settings.auto-optimise-store = true;
+  nix.settings = {
+    auto-optimise-store = true;
+    use-xdg-base-directories = true;
+  };
   nix.gc.dates = "weekly";
 
   # User configuration

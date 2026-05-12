@@ -5,9 +5,9 @@
 
 set -euo pipefail
 
-REPO="unsloth/Qwen3.6-27B-GGUF"
-MODEL_FILE="Qwen3.6-27B-Q4_K_M.gguf"
-MMPROJ_FILE="mmproj-F16.gguf"
+REPO="unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF"
+MODEL_FILE="Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf"
+MMPROJ_FILE=""   # text-only model
 BASE="https://huggingface.co/${REPO}/resolve/main"
 
 if [[ "$(uname -s)" == "Darwin" ]]; then
@@ -20,23 +20,19 @@ fi
 
 if [[ "${1-}" == "-h" || "${1-}" == "--help" ]]; then
 	cat <<EOF
-llama-fetch — download Qwen3.6-27B GGUF + vision projector
+llama-fetch — download Qwen3-Coder-30B-A3B-Instruct GGUF
 
 Destination: ${DEST}
 Files:
-  ${MODEL_FILE}   ~16.8 GB
-  ${MMPROJ_FILE}  ~0.9 GB
+  ${MODEL_FILE}   ~18.6 GB
 
-Usage: llama-fetch [--no-mmproj]
+Usage: llama-fetch
 
 On Linux, you'll be prompted for sudo to write to ${DEST}.
 After download, enable the service: sudo systemctl start llama-cpp
 EOF
 	exit 0
 fi
-
-want_mmproj=1
-[[ "${1-}" == "--no-mmproj" ]] && want_mmproj=0
 
 echo "Destination: ${DEST}"
 ${SUDO} mkdir -p "${DEST}"
@@ -54,12 +50,12 @@ fetch() {
 }
 
 fetch "${MODEL_FILE}"
-[[ "${want_mmproj}" -eq 1 ]] && fetch "${MMPROJ_FILE}"
+[[ -n "${MMPROJ_FILE}" ]] && fetch "${MMPROJ_FILE}"
 
 echo
 echo "Done. To start the server:"
 if [[ "$(uname -s)" == "Darwin" ]]; then
-	echo "  llama-server -m ${DEST}/${MODEL_FILE} --mmproj ${DEST}/${MMPROJ_FILE} -ngl 999 -c 32768 --flash-attn on --host 127.0.0.1 --port 8080"
+	echo "  llama on    # uses ${DEST}/${MODEL_FILE}"
 else
 	echo "  sudo systemctl start llama-cpp"
 	echo "  # then: nixswitch     (so services.llama-cpp.enable picks up the new file)"

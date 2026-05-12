@@ -2,8 +2,8 @@
 
 let
   modelsDir = "/var/lib/llama-cpp/models";
-  modelFile = "${modelsDir}/Qwen3.6-27B-Q4_K_M.gguf";
-  mmprojFile = "${modelsDir}/mmproj-F16.gguf";
+  modelFile = "${modelsDir}/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf";
+  mmprojFile = "${modelsDir}/mmproj-F16.gguf";   # unused for text-only models; kept for future vision swaps
   modelExists = builtins.pathExists modelFile;
 in
 {
