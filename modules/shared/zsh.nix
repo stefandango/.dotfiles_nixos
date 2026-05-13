@@ -285,6 +285,12 @@
       set-option -ga terminal-overrides ",*256col*:Tc"
       set-option -g default-terminal "screen-256color"
 
+      # Extended keys: allow modified Enter (Shift/Ctrl+Enter) through to apps like Pi
+      set -g extended-keys on
+      set -g extended-keys-format csi-u
+      set -as terminal-features 'xterm*:extkeys'
+      set -as terminal-features 'kitty*:extkeys'
+
       # Increase tmux messages display duration from 750ms to 4s
       set -g display-time 4000
       set -s escape-time 0
