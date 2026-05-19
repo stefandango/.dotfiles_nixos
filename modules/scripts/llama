@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+# llama — toggle the local llama.cpp server
+# Subcommands: on | off | toggle | status | logs | help
+set -euo pipefail
+
+HOST=127.0.0.1
+PORT=8080
+ENDPOINT="http://${HOST}:${PORT}"
+
+if [[ "$(uname -s)" == "Darwin" ]]; then
+	MODELS_DIR="${HOME}/Models"
+	STATE_DIR="${XDG_STATE_HOME:-${HOME}/.local/state}/llama-cpp"
+	PIDFILE="${STATE_DIR}/server.pid"
+	LOGFILE="${STATE_DIR}/server.log"
+	USE_SYSTEMD=0
+else
+	MODELS_DIR="/var/lib/llama-cpp/models"
+	USE_SYSTEMD=1
+fi
+
+MODEL="${MODELS_DIR}/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf"
+MMPROJ="${MODELS_DIR}/mmproj-F16.gguf"   # unused for text-only Qwen3-Coder; kept for future vision models
+
+is_running() {
+	if [[ "$USE_SYSTEMD" -eq 1 ]]; then
+		systemctl is-active --quiet llama-cpp
+	else
+		pgrep -x llama-server >/dev/null 2>&1
+	fi
+}
+
+waybar_refresh() {
+	# Signal 11 corresponds to "signal": 11 on custom/llama (RTMIN+11).
+	command -v pkill >/dev/null 2>&1 && pkill -RTMIN+11 waybar 2>/dev/null || true
+}
+
+start_it() {
+	if is_running; then
+		echo "llama-server already running"; return
+	fi
+	if [[ ! -f "$MODEL" ]]; then
+		echo "model not found at $MODEL — run llama-fetch first" >&2
+		return 1
+	fi
+	if [[ "$USE_SYSTEMD" -eq 1 ]]; then
+		sudo systemctl start llama-cpp
+	else
+		mkdir -p "$STATE_DIR"
+		local args=(-m "$MODEL" -ngl 999 -c 32768 --flash-attn on --host "$HOST" --port "$PORT")
+		[[ -f "$MMPROJ" ]] && args+=(--mmproj "$MMPROJ")
+		nohup llama-server "${args[@]}" >"$LOGFILE" 2>&1 &
+		echo $! >"$PIDFILE"
+		disown
+	fi
+	echo "started"
+	waybar_refresh
+}
+
+stop_it() {
+	if ! is_running; then
+		echo "llama-server not running"; return
+	fi
+	if [[ "$USE_SYSTEMD" -eq 1 ]]; then
+		sudo systemctl stop llama-cpp
+	else
+		pkill -x llama-server || true
+		rm -f "$PIDFILE"
+	fi
+	echo "stopped"
+	waybar_refresh
+}
+
+case "${1:-status}" in
+	on|start)   start_it ;;
+	off|stop)   stop_it ;;
+	toggle)
+		if is_running; then stop_it; else start_it; fi
+		;;
+	status)
+		echo "── service ──"
+		if is_running; then echo "running"; else echo "not running"; fi
+		echo "── endpoint ──"
+		echo "${ENDPOINT}/v1"
+		if is_running; then
+			echo "── loaded model ──"
+			curl -fsS "${ENDPOINT}/v1/models" 2>/dev/null \
+				| sed -n 's/.*"id":"\([^"]*\)".*/\1/p' \
+				| head -n1 \
+				|| echo "(server still loading)"
+		fi
+		;;
+	logs)
+		if [[ "$USE_SYSTEMD" -eq 1 ]]; then
+			journalctl -u llama-cpp -f -n 200
+		else
+			[[ -f "$LOGFILE" ]] || { echo "no log yet at $LOGFILE"; exit 1; }
+			tail -F -n 200 "$LOGFILE"
+		fi
+		;;
+	help|--help|-h)
+		cat <<EOF
+llama — toggle the local llama.cpp server
+
+  llama on        start the server
+  llama off       stop the server
+  llama toggle    flip current state
+  llama status    running state + currently loaded model
+  llama logs      tail server output (journalctl or log file)
+  llama help      this message
+
+endpoint: ${ENDPOINT}/v1
+model:    ${MODEL}
+EOF
+		;;
+	*)
+		echo "unknown subcommand: ${1}" >&2
+		echo "try: llama help" >&2
+		exit 2
+		;;
+esac

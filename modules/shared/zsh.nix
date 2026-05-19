@@ -252,37 +252,7 @@
       cpwd() { pwd | clip && echo "📋 Copied current directory to clipboard"; }
       ccat() { cat "$1" | clip && echo "📋 Copied $1 to clipboard"; }
 
-      # Ollama command reference
-      ollama-help() {
-        cat <<'EOF'
-        ollama commands
-        ───────────────
-        ollama pull <model>     download a model
-        ollama list             installed models
-        ollama ps               loaded in memory
-        ollama run <model>      interactive chat
-        ollama stop <model>     unload from memory
-        ollama rm <model>       delete a model
-        ollama show <model>     model info / params
-        ollama-status           daemon + loaded + installed
-EOF
-      }
-
-      # Ollama status: daemon state, loaded models, installed models
-      ollama-status() {
-        echo "── daemon ──"
-        if command -v systemctl >/dev/null 2>&1; then
-          systemctl is-active ollama 2>/dev/null || echo "not running (systemd)"
-        elif pgrep -xq ollama; then
-          echo "running"
-        else
-          echo "not running"
-        fi
-        echo "── loaded ──"
-        ollama ps 2>/dev/null || echo "daemon unreachable"
-        echo "── installed ──"
-        ollama list 2>/dev/null || echo "daemon unreachable"
-      }
+      # llama.cpp control lives in ~/Scripts/llama (subcommands: on/off/toggle/status/logs/help)
 
       eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/ohmyposhv3-v2.json)"
 
@@ -314,6 +284,12 @@ EOF
       # Enable 24-bit color and proper terminal support
       set-option -ga terminal-overrides ",*256col*:Tc"
       set-option -g default-terminal "screen-256color"
+
+      # Extended keys: allow modified Enter (Shift/Ctrl+Enter) through to apps like Pi
+      set -g extended-keys on
+      set -g extended-keys-format csi-u
+      set -as terminal-features 'xterm*:extkeys'
+      set -as terminal-features 'kitty*:extkeys'
 
       # Increase tmux messages display duration from 750ms to 4s
       set -g display-time 4000

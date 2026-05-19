@@ -53,10 +53,17 @@
     btop
     gum           # Glamorous shell scripts
 
-    # Ollama tooling (daemon runs via services.ollama on NixOS / homebrew cask on macOS)
-    gollama       # TUI model manager
-    # oterm       # TUI chat client — disabled: textual-image sixel snapshot test fails upstream
   ];
+
+  # Cross-platform scripts in ~/Scripts (NixOS-only scripts live in modules/nixos/scripts.nix)
+  home.file."Scripts/llama-fetch" = {
+    source = ../modules/scripts/llama-fetch;
+    executable = true;
+  };
+  home.file."Scripts/llama" = {
+    source = ../modules/scripts/llama;
+    executable = true;
+  };
 
   # Enable home-manager
   programs.home-manager.enable = true;
