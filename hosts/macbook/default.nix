@@ -10,6 +10,10 @@
       finder = {
         _FXShowPosixPathInTitle = true;
         AppleShowAllExtensions = true;
+        FXPreferredViewStyle = "Nlsv";   # list view for new windows
+        ShowPathbar = true;              # breadcrumb path bar
+        ShowStatusBar = true;            # item count / free space
+        _FXSortFoldersFirst = true;      # folders grouped above files
       };
       CustomUserPreferences = {
         "com.apple.desktopservices" = {
@@ -42,6 +46,13 @@
         tilesize = 50;
         magnification = true;
         largesize = 80;
+      };
+      screencapture = {
+        # Absolute path so it works regardless of ~ expansion; dir is
+        # created by home-manager (see home/default.nix) so macOS doesn't
+        # silently fall back to the Desktop.
+        location = "/Users/${vars.user}/Pictures/screenshots";
+        type = "png";
       };
     };
   };
@@ -102,8 +113,9 @@
     brews = [ "uv" ];
   };
 
-  # Touch ID for sudo
+  # Touch ID for sudo (reattach makes it work inside tmux too)
   security.pam.services.sudo_local.touchIdAuth = true;
+  security.pam.services.sudo_local.reattach = true;
 
   # User configuration
   users.users.${vars.user} = {
