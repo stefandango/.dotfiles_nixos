@@ -65,6 +65,14 @@
     executable = true;
   };
 
+  # Ensure the screenshot target dir exists (macOS silently falls back to
+  # the Desktop if it's missing). Matches screencapture.location on macOS.
+  home.activation = lib.mkIf pkgs.stdenv.isDarwin {
+    createScreenshotsDir = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      run mkdir -p "$HOME/Pictures/screenshots"
+    '';
+  };
+
   # Enable home-manager
   programs.home-manager.enable = true;
 }
