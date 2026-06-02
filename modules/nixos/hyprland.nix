@@ -232,6 +232,7 @@ in
 				rounding = 6
 				gaps_in = 3
 				gaps_out = 3
+				middle_click_close = true # 0.55: middle-click a tab to close that window
 			}
 		}
 
@@ -268,13 +269,17 @@ in
 		# Some default animations, see https://wiki.hyprland.org/Configuring/Animations/ for more
 
 				bezier = myBezier, 0.25, 1, 0.5, 1
+				# Spring-like overshoot curves. True spring curves are Lua-config only (0.55);
+				# these béziers overshoot past 1.0 to approximate the springy settle in hyprlang.
+				bezier = springy, 0.34, 1.56, 0.64, 1
+				bezier = overshot, 0.05, 0.9, 0.1, 1.05
 
-				animation = windows, 1, 7, myBezier
+				animation = windows, 1, 5, springy
 				animation = windowsOut, 1, 7, default, popin 80%
 				animation = border, 1, 10, default
 				animation = borderangle, 1, 8, default
 				animation = fade, 1, 7, default
-				animation = workspaces, 1, 6, default
+				animation = workspaces, 1, 5, overshot
 		}
 
 		dwindle {
@@ -375,6 +380,9 @@ in
 
 		# Toggle split direction
 		bind =,s,exec,hyprctl --batch "keyword general:col.active_border 'rgba(${cyan}ee) rgba(${green}ee) 45deg'; dispatch layoutmsg togglesplit; dispatch submap reset"
+
+		# Rotate split tree (0.55 dwindle layoutmsg) — repeatable, stays in submap
+		bind =,r,layoutmsg,rotatesplit
 
 		# Coarse resize for ultrawide (stay in submap, repeatable)
 		binde =,right,resizeactive,100 0
