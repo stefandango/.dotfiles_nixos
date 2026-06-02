@@ -279,7 +279,7 @@ in
 
 		dwindle {
 		# See https://wiki.hyprland.org/Configuring/Dwindle-Layout/ for more
-			pseudotile = yes # master switch for pseudotiling. Enabling is bound to mainMod + P in the keybinds section below
+			# pseudotile option removed in Hyprland 0.55 — pseudotiling is now per-window via the `pseudo` dispatcher (bound to mainMod + P below)
 				preserve_split = yes # you probably want this
 		}
 
@@ -290,7 +290,7 @@ in
 		misc {
 		# See https://wiki.hyprland.org/Configuring/Variables/ for more
 			force_default_wallpaper = 0
-			vfr = true
+			# vfr moved to debug: in Hyprland 0.55 (default is already true)
 			vrr = 2
 			disable_hyprland_logo = true
 			disable_splash_rendering = true
@@ -321,7 +321,7 @@ in
 		bind = SUPERSHIFT, SPACE, togglefloating
 		bind = $mainMod, D, exec, pkill rofi || rofi -show drun -theme ~/.config/rofi/launcher.rasi
 		bind = $mainMod, P, pseudo # dwindle
-		bind = $mainMod, J, togglesplit # dwindle
+		bind = $mainMod, J, layoutmsg, togglesplit # dwindle (0.54+: via layoutmsg)
 		bind=SUPERSHIFT,R,exec,${pkgs.hyprland}/bin/hyprctl reload
 		bind=SUPER,F,fullscreen
 		bind=SUPER,L,exec,${pkgs.hyprlock}/bin/hyprlock
@@ -374,7 +374,7 @@ in
 		bind =,e,exec,hyprctl --batch "keyword general:col.active_border 'rgba(${cyan}ee) rgba(${green}ee) 45deg'; dispatch splitratio exact 1.0; dispatch submap reset"
 
 		# Toggle split direction
-		bind =,s,exec,hyprctl --batch "keyword general:col.active_border 'rgba(${cyan}ee) rgba(${green}ee) 45deg'; dispatch togglesplit; dispatch submap reset"
+		bind =,s,exec,hyprctl --batch "keyword general:col.active_border 'rgba(${cyan}ee) rgba(${green}ee) 45deg'; dispatch layoutmsg togglesplit; dispatch submap reset"
 
 		# Coarse resize for ultrawide (stay in submap, repeatable)
 		binde =,right,resizeactive,100 0
@@ -575,7 +575,7 @@ in
 
 		exec-once=${pkgs.awww}/bin/awww-daemon
 		exec-once=${pkgs.waybar}/bin/waybar
-		exec-once=${pkgs.openrazer-daemon}/bin/openrazer-daemon
+		# exec-once=${pkgs.openrazer-daemon}/bin/openrazer-daemon  # Disabled: kernel 7.0.x build break
 		exec-once=${pkgs.networkmanagerapplet}/bin/nm-applet --indicator
 		exec-once=${pkgs.hyprland-autoname-workspaces}/bin/hyprland-autoname-workspaces
 		exec-once=pypr

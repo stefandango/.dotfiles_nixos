@@ -57,10 +57,13 @@
       enable = true;
       enable32Bit = true;
     };
-    openrazer = {
-      enable = true;
-      batteryNotifier.enable = true;
-    };
+    # Disabled: openrazer 3.12.2 driver fails to build against kernel 7.0.x
+    # (hid_report_raw_event signature changed to require 6 args). Re-enable
+    # once nixpkgs ships a patched openrazer.
+    # openrazer = {
+    #   enable = true;
+    #   batteryNotifier.enable = true;
+    # };
     # Required for Bluetooth controller firmware (otherwise hci0 FW download
     # fails with -19 on boot). Also enables AMD microcode updates via the
     # default in hardware-configuration.nix.
@@ -138,7 +141,7 @@
     # Python with packages
     (python3.withPackages (ps: with ps; [
       requests
-      openrazer
+      # openrazer  # Disabled with hardware.openrazer (kernel 7.0.x build break)
     ]))
     
     # Network filesystems
@@ -270,6 +273,6 @@
   users.users.${vars.user} = {
     isNormalUser = true;
     shell = pkgs.zsh;
-    extraGroups = [ "wheel" "video" "audio" "networkmanager" "lp" "input" "openrazer" "docker" "corectrl" "gamemode" ];
+    extraGroups = [ "wheel" "video" "audio" "networkmanager" "lp" "input" "docker" "corectrl" "gamemode" ];
   };
 }
