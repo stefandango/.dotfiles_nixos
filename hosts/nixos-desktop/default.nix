@@ -40,7 +40,9 @@
       themePackages = [ pkgs.nixos-bgrt-plymouth ];
     };
     kernelParams = [
-      "amdgpu.dcdebugmask=0x610"                       # Disable PSR + PSR-SU + Panel Replay to prevent flickering
+      # NOTE: amdgpu.dcdebugmask=0x610 (disable PSR/PSR-SU/Panel Replay) was a
+      # flicker workaround for the previous GPU. Removed after installing the
+      # RX 9070 XT (Navi 48, DCN 4.0.1) — re-add if flickering reappears.
       "amdgpu.gpu_recovery=1"                           # Enable GPU reset on hang instead of crashing
       "quiet"                                           # Suppress kernel log output on console — needed for plymouth
       "splash"                                          # Tell plymouth to show the splash screen
@@ -242,6 +244,11 @@
         libthai
         harfbuzz
         gamemode
+        # MangoHud inside Steam's FHS env so the Vulkan implicit layer is
+        # visible to Proton games running under pressure-vessel (the container
+        # can't see nix-store layer paths otherwise). Needed for the overlay
+        # to show up on Proton/Wine titles, not just native Linux games.
+        mangohud
       ];
     };
   };
