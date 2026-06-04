@@ -151,6 +151,8 @@
 
     # Hardware tools
     lshw
+    amdgpu_top   # AMD GPU TUI: usage, power draw, temps, VRAM, per-process
+    nvtopPackages.amd   # htop-style GPU monitor with live graphs (AMD build)
     protontricks
     winetricks
 
