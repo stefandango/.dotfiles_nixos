@@ -585,6 +585,9 @@ in
 		exec-once=${pkgs.waybar}/bin/waybar
 		# exec-once=${pkgs.openrazer-daemon}/bin/openrazer-daemon  # Disabled: kernel 7.0.x build break
 		exec-once=${pkgs.networkmanagerapplet}/bin/nm-applet --indicator
+		# Start CoreCtrl minimized so the saved GPU profile (undervolt / power
+		# limit) is auto-applied at login — values only apply while it's running.
+		exec-once=${pkgs.corectrl}/bin/corectrl --minimize-systray
 		exec-once=${pkgs.hyprland-autoname-workspaces}/bin/hyprland-autoname-workspaces
 		exec-once=pypr
 		exec-once = wl-clipboard-history -t

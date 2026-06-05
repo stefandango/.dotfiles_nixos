@@ -235,7 +235,14 @@
         };
       };
     };
-    corectrl.enable = true;
+    corectrl = {
+      enable = true;
+      # Unlocks the voltage/frequency/power controls in the corectrl GUI by
+      # setting amdgpu.ppfeaturemask=0xffffffff. Required to undervolt, tune
+      # power limits, or set a custom fan curve. The actual values are set in
+      # the corectrl app and re-applied automatically each boot.
+      gpuOverclock.enable = true;
+    };
   };
 
   # Steam package overrides
