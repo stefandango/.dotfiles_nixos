@@ -2,6 +2,10 @@
 
 let
   colors = import ../../theme/colors.nix;
+  # rofi leaves a stale pidfile at $XDG_RUNTIME_DIR/rofi.pid when killed via SIGTERM
+  # (pkill), which then blocks every later launch with "Rofi already running" and the
+  # menu dies instantly. Remove it before (re)launching so the toggle keybinds keep working.
+  rofiKill = "rm -f /run/user/$(id -u)/rofi.pid; pkill rofi";
 in
 {
 
@@ -324,25 +328,25 @@ in
 		bind =,catchall,submap,reset
 		submap=reset
 		bind = SUPERSHIFT, SPACE, togglefloating
-		bind = $mainMod, D, exec, pkill rofi || rofi -show drun -theme ~/.config/rofi/launcher.rasi
+		bind = $mainMod, D, exec, ${rofiKill} || rofi -show drun -theme ~/.config/rofi/launcher.rasi
 		bind = $mainMod, P, pseudo # dwindle
 		bind = $mainMod, J, layoutmsg, togglesplit # dwindle (0.54+: via layoutmsg)
 		bind=SUPERSHIFT,R,exec,${pkgs.hyprland}/bin/hyprctl reload
 		bind=SUPER,F,fullscreen
 		bind=SUPER,L,exec,${pkgs.hyprlock}/bin/hyprlock
 		bind=SUPER,N,exec,${pkgs.swaynotificationcenter}/bin/swaync-client -t
-		bind = SUPERSHIFT, E,exec, pkill rofi || .config/rofi/powermenu.sh
+		bind = SUPERSHIFT, E,exec, ${rofiKill} || $HOME/.config/rofi/powermenu.sh
         	bind=,print,exec,${pkgs.grimblast}/bin/grimblast --notify --freeze --wait 1 copysave area ~/Pictures/$(date +%Y-%m-%dT%H%M%S).png
-		bind=SUPER,Y,exec,pkill rofi || cliphist list | rofi -dmenu -theme $HOME/.config/rofi/clipboard.rasi | cliphist decode | wl-copy
-		bind=SUPER,T,exec,pkill rofi || ~/Scripts/waybar-tmux-manager.sh
+		bind=SUPER,Y,exec,${rofiKill} || cliphist list | rofi -dmenu -theme $HOME/.config/rofi/clipboard.rasi | cliphist decode | wl-copy
+		bind=SUPER,T,exec,${rofiKill} || ~/Scripts/waybar-tmux-manager.sh
 		bind=SUPER,code:49,exec,pypr toggle term
 		bind=SUPER,Z,exec, pypr zoom
 		bind=SUPER,E,exec,pypr toggle files
 		bind=SUPER,I,exec,~/Scripts/imv_launcher.sh
-		bind=SUPERSHIFT,T,exec,pkill rofi || ~/Scripts/theme-rofi.sh
+		bind=SUPERSHIFT,T,exec,${rofiKill} || ~/Scripts/theme-rofi.sh
 		bind=SUPERSHIFT,F,exec,~/Scripts/focus-mode-toggle.sh
-		bind=SUPERSHIFT,plus,exec,pkill rofi || ~/Scripts/cheatsheet.sh
-		bind=SUPERALT,SPACE,exec,pkill rofi || ~/Scripts/omarchy-menu.sh
+		bind=SUPERSHIFT,plus,exec,${rofiKill} || ~/Scripts/cheatsheet.sh
+		bind=SUPERALT,SPACE,exec,${rofiKill} || ~/Scripts/omarchy-menu.sh
 
         	binde=,XF86AudioLowerVolume,exec,${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ -5%
         	binde=,XF86AudioRaiseVolume,exec,${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ +5%
