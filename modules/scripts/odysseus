@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Control the Odysseus self-hosted AI workspace (docker compose stack).
+# Repo: https://github.com/pewdiepie-archdaemon/odysseus
+#
+# Subcommands: up | down | restart | logs | status | pull | update | shell | help
+# Override the clone location with ODYSSEUS_DIR (default: ~/Dev/odysseus).
+
+ODYSSEUS_DIR="${ODYSSEUS_DIR:-$HOME/Dev/odysseus}"
+ODYSSEUS_REPO="https://github.com/pewdiepie-archdaemon/odysseus"
+APP_URL="http://127.0.0.1:7000"
+
+# Resolve docker compose v2 ("docker compose") vs legacy v1 ("docker-compose").
+if docker compose version >/dev/null 2>&1; then
+  COMPOSE=(docker compose)
+elif command -v docker-compose >/dev/null 2>&1; then
+  COMPOSE=(docker-compose)
+else
+  echo "Error: neither 'docker compose' nor 'docker-compose' is available." >&2
+  echo "Make sure Docker is installed and running." >&2
+  exit 1
+fi
+
+die() { echo "Error: $*" >&2; exit 1; }
+
+ensure_repo() {
+  if [ ! -d "$ODYSSEUS_DIR/.git" ]; then
+    die "Odysseus not found at $ODYSSEUS_DIR
+  Clone it first:  git clone $ODYSSEUS_REPO \"$ODYSSEUS_DIR\"
+  Then copy env:   cp \"$ODYSSEUS_DIR/.env.example\" \"$ODYSSEUS_DIR/.env\" && \$EDITOR \"$ODYSSEUS_DIR/.env\""
+  fi
+  if [ ! -f "$ODYSSEUS_DIR/.env" ]; then
+    echo "Warning: $ODYSSEUS_DIR/.env is missing. Create it from .env.example before 'up'." >&2
+  fi
+}
+
+cmd="${1:-help}"
+[ $# -gt 0 ] && shift || true
+
+case "$cmd" in
+  up)
+    ensure_repo
+    cd "$ODYSSEUS_DIR"
+    "${COMPOSE[@]}" up -d --build "$@"
+    echo "Odysseus is starting → $APP_URL"
+    ;;
+  down)
+    ensure_repo
+    cd "$ODYSSEUS_DIR"
+    "${COMPOSE[@]}" down "$@"
+    ;;
+  restart)
+    ensure_repo
+    cd "$ODYSSEUS_DIR"
+    "${COMPOSE[@]}" restart "$@"
+    ;;
+  logs)
+    ensure_repo
+    cd "$ODYSSEUS_DIR"
+    # Follow logs by default; pass a service name to scope (e.g. odysseus logs odysseus).
+    "${COMPOSE[@]}" logs -f "$@"
+    ;;
+  status|ps)
+    ensure_repo
+    cd "$ODYSSEUS_DIR"
+    "${COMPOSE[@]}" ps "$@"
+    ;;
+  pull)
+    ensure_repo
+    cd "$ODYSSEUS_DIR"
+    "${COMPOSE[@]}" pull "$@"
+    ;;
+  update)
+    ensure_repo
+    cd "$ODYSSEUS_DIR"
+    echo "Pulling latest source..."
+    git pull --ff-only
+    echo "Pulling images and rebuilding..."
+    "${COMPOSE[@]}" pull
+    "${COMPOSE[@]}" up -d --build
+    echo "Updated → $APP_URL"
+    ;;
+  shell|exec)
+    ensure_repo
+    cd "$ODYSSEUS_DIR"
+    "${COMPOSE[@]}" exec odysseus /bin/sh
+    ;;
+  help|-h|--help)
+    cat <<EOF
+odysseus — control the Odysseus AI workspace docker stack
+
+Usage: odysseus <command> [args]
+
+  up         Build (if needed) and start the stack in the background
+  down       Stop and remove the stack
+  restart    Restart running services
+  logs       Follow logs (optionally pass a service name)
+  status     Show container status (alias: ps)
+  pull       Pull updated upstream images
+  update     git pull + image pull + rebuild + restart
+  shell      Open a shell in the odysseus container (alias: exec)
+  help       Show this help
+
+Location: $ODYSSEUS_DIR   (override with \$ODYSSEUS_DIR)
+URL:      $APP_URL
+EOF
+    ;;
+  *)
+    die "unknown command '$cmd' (try: odysseus help)"
+    ;;
+esac

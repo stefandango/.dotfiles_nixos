@@ -101,6 +101,32 @@ netinfo           # Comprehensive network information
 speedtest         # Run internet speed test
 ```
 
+### Odysseus AI Workspace
+[Odysseus](https://github.com/pewdiepie-archdaemon/odysseus) is a self-hosted, local-first AI workspace (chat, agents, research, memory). It ships as a 4-container `docker compose` stack (the FastAPI app plus `chromadb`, `searxng`, and `ntfy`), so it runs the same way on **both NixOS and macOS** via Docker — it is intentionally *not* packaged in the flake (heavy Rust/ONNX/C Python deps + supporting services make native Nix packaging impractical). Only the `odysseus` control script is declarative; the cloned repo and `.env` are stateful app data kept outside the flake.
+
+```bash
+# One-time setup (per machine)
+git clone https://github.com/pewdiepie-archdaemon/odysseus ~/Dev/odysseus
+cp ~/Dev/odysseus/.env.example ~/Dev/odysseus/.env   # then edit keys/settings
+nixswitch                                            # installs the odysseus script
+
+# Daily use (~/Scripts/odysseus dispatcher — auto-detects docker compose v2/v1)
+odysseus up        # build (if needed) + start the stack → http://127.0.0.1:7000
+odysseus down      # stop + remove the stack
+odysseus restart   # restart running services
+odysseus logs      # follow logs (optionally: odysseus logs <service>)
+odysseus status    # show container status (alias: ps)
+odysseus pull      # pull updated upstream images
+odysseus update    # git pull + image pull + rebuild + restart
+odysseus shell     # open a shell in the odysseus container
+odysseus help      # show all subcommands
+
+# Override the clone location (default: ~/Dev/odysseus)
+ODYSSEUS_DIR=~/path/to/odysseus odysseus up
+```
+
+**macOS note:** any working Docker runtime (Docker Desktop, OrbStack, Colima) is fine — the script detects whichever `docker compose`/`docker-compose` is present. **NixOS** already enables Docker, so no extra setup is needed.
+
 ### Tmux Session Management
 ```bash
 # Enhanced tmux workflow
