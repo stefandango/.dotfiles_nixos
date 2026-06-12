@@ -100,6 +100,35 @@
     rtkit.enable = true;
     polkit.enable = true;
     sudo.wheelNeedsPassword = false;
+
+    # Let local users reboot/power-off without a polkit password prompt.
+    # The rofi power menu (Super+Shift+E) runs `systemctl reboot`/`poweroff`
+    # from a process spawned by Hyprland. Hyprland (started by greetd) lives
+    # in the root cgroup and is NOT tracked in any logind session
+    # (`GetSessionByPID` => "does not belong to any known session"), so its
+    # children appear to polkit as having NO session: subject.active and
+    # subject.local are both false. reboot/power-off then fall back to
+    # auth_admin (a challenge); with no polkit auth agent running the
+    # challenge fails silently and nothing happens. (Lock/Logout work because
+    # loginctl uses login1.manage, authorized by UID alone.)
+    #
+    # Gate on group membership only (UID-based, always resolvable) instead of
+    # the unreachable subject.active/local. Safe here: single-user desktop
+    # where wheel already has passwordless sudo, so `sudo reboot` is already
+    # unrestricted.
+    polkit.extraConfig = ''
+      polkit.addRule(function(action, subject) {
+        if ((action.id == "org.freedesktop.login1.reboot" ||
+             action.id == "org.freedesktop.login1.reboot-multiple-sessions" ||
+             action.id == "org.freedesktop.login1.power-off" ||
+             action.id == "org.freedesktop.login1.power-off-multiple-sessions" ||
+             action.id == "org.freedesktop.login1.halt" ||
+             action.id == "org.freedesktop.login1.halt-multiple-sessions") &&
+            subject.isInGroup("users")) {
+          return polkit.Result.YES;
+        }
+      });
+    '';
   };
 
   # Network drives
