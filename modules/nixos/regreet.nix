@@ -110,6 +110,11 @@ in
   # Ensure regreet can find wayland session .desktop files
   systemd.services.greetd.environment = {
     XDG_DATA_DIRS = "/run/current-system/sw/share";
+    # GTK4's default renderer (Vulkan/NGL) aborts regreet on launch with the
+    # post-2026-06 Mesa on this RDNA4 GPU, crash-looping the greeter and
+    # boot-looping the machine. Force the software (cairo) renderer — plenty
+    # fast for a static login screen and immune to the GPU renderer crash.
+    GSK_RENDERER = "cairo";
   };
 
   # Preserve systemd service settings for clean boot

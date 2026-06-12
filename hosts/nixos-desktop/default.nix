@@ -46,6 +46,16 @@
       "amdgpu.gpu_recovery=1"                           # Enable GPU reset on hang instead of crashing
       "quiet"                                           # Suppress kernel log output on console — needed for plymouth
       "splash"                                          # Tell plymouth to show the splash screen
+
+      # Recolour the Linux VT's 16-colour palette to the One Dark Pro scheme
+      # (theme/colors.nix). This is what makes the tuigreet login (a console
+      # app limited to the 16 named ANSI colours) look themed instead of using
+      # the garish default TTY palette. Order = palette slots 0..15
+      # (0-7 normal, 8-15 bright): black, red, green, yellow, blue, magenta,
+      # cyan, white, then the bright variants.
+      "vt.default_red=0x11,0xe0,0x98,0xe5,0x61,0xc6,0x56,0xab,0x5c,0xe0,0x98,0xe5,0x61,0xc6,0x56,0xff"
+      "vt.default_grn=0x11,0x6c,0xc3,0xc0,0xaf,0x78,0xb6,0xb2,0x63,0x6c,0xc3,0xc0,0xaf,0x78,0xb6,0xff"
+      "vt.default_blu=0x11,0x75,0x79,0x7b,0xef,0xdd,0xc2,0xbf,0x70,0x75,0x79,0x7b,0xef,0xdd,0xc2,0xff"
     ];
     kernel.sysctl = {
       "vm.max_map_count" = 1048576;
@@ -59,6 +69,12 @@
       enable = true;
       enable32Bit = true;
     };
+    # Unlocks the voltage/frequency/power controls in the corectrl GUI by
+    # setting amdgpu.ppfeaturemask=0xffffffff. Required to undervolt, tune
+    # power limits, or set a custom fan curve. The actual values are set in
+    # the corectrl app and re-applied automatically each boot.
+    # (Renamed from programs.corectrl.gpuOverclock.enable.)
+    amdgpu.overdrive.enable = true;
     # Disabled: openrazer 3.12.2 driver fails to build against kernel 7.0.x
     # (hid_report_raw_event signature changed to require 6 args). Re-enable
     # once nixpkgs ships a patched openrazer.
@@ -89,8 +105,12 @@
   # Console configuration
   # earlySetup bundles the font into initrd so setfont doesn't fail on the
   # first vconsole-setup attempt before the store is fully available.
+  # ter-v32n (Terminus 32px, the largest size) keeps the TTY — and the
+  # tuigreet login screen, which renders on the console — legible on the
+  # 5120x2160 display instead of microscopic 16px text.
   console = {
-    font = "Lat2-Terminus16";
+    packages = [ pkgs.terminus_font ];
+    font = "ter-v32n";
     keyMap = "dk";
     earlySetup = true;
   };
@@ -243,6 +263,7 @@
 
   # Programs
   programs = {
+    nix-ld.enable = true;
     zsh.enable = true;  # Enable zsh system-wide
     gnupg.agent = {
       enable = true;
@@ -266,11 +287,8 @@
     };
     corectrl = {
       enable = true;
-      # Unlocks the voltage/frequency/power controls in the corectrl GUI by
-      # setting amdgpu.ppfeaturemask=0xffffffff. Required to undervolt, tune
-      # power limits, or set a custom fan curve. The actual values are set in
-      # the corectrl app and re-applied automatically each boot.
-      gpuOverclock.enable = true;
+      # GPU overclock/undervolt unlock moved to hardware.amdgpu.overdrive.enable
+      # (the option was renamed away from programs.corectrl).
     };
   };
 
