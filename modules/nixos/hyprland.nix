@@ -300,7 +300,13 @@ in
 		# See https://wiki.hyprland.org/Configuring/Variables/ for more
 			force_default_wallpaper = 0
 			# vfr moved to debug: in Hyprland 0.55 (default is already true)
-			vrr = 2
+			# vrr=1 (always-on FreeSync) instead of vrr=2 (fullscreen-only): vrr=2
+			# flips VRR on/off every fullscreen enter/exit, and each flip reconfigures
+			# the DP link. At 5120x2160@165 (DSC, bandwidth-marginal) those re-trains
+			# intermittently fail -> "SST Update Payload: ACT still not handled /
+			# something is wrong with the branch" -> DP-2 drops -> Hyprland
+			# headless-fallback crash. vrr=1 keeps FreeSync but trains the link once.
+			vrr = 1
 			disable_hyprland_logo = true
 			disable_splash_rendering = true
 			mouse_move_enables_dpms = true

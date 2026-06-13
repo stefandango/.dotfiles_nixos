@@ -17,9 +17,9 @@ if [ -z "$temp" ]; then
 fi
 
 if [ "$temp" -ge 85 ]; then
-	printf '{"text": "󰔏 %s°C", "tooltip": "CPU temperature: %s°C", "class": "critical"}\n' "$temp" "$temp"
+	printf '{"text": "󰔏  %s°C", "tooltip": "CPU temperature: %s°C", "class": "critical"}\n' "$temp" "$temp"
 elif [ "$temp" -ge 70 ]; then
-	printf '{"text": "󰔏 %s°C", "tooltip": "CPU temperature: %s°C", "class": "warning"}\n' "$temp" "$temp"
+	printf '{"text": "󰔏  %s°C", "tooltip": "CPU temperature: %s°C", "class": "warning"}\n' "$temp" "$temp"
 else
 	printf '{"text": "", "tooltip": "CPU temperature: %s°C", "class": "normal"}\n' "$temp"
 fi

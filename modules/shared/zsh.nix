@@ -341,44 +341,44 @@
       # Smart quit using tmux-quit script
       bind-key X run-shell '~/Scripts/tmux-quit'
 
-      # Light & Transparent Tokyo Night Theme
+      # Graphite — neutral greys + a single steel-blue accent
       set -g status-position bottom
       set -g status-justify centre
-      set -g status-style bg=default,fg=#a9b1d6
+      set -g status-style bg=default,fg=#c6c6cd
       set -g status-left-length 80
       set -g status-right-length 80
 
       # Minimal left status: just session name
-      set -g status-left "#[fg=#7aa2f7,bold] #S #[fg=#565f89]│ "
+      set -g status-left "#[fg=#6f8fb3,bold] #S #[fg=#6a6a73]│ "
 
       # Right status: battery, path and time
-      set -g status-right "#(~/Scripts/tmux-battery) #[fg=#565f89]│ #[fg=#565f89]#{b:pane_current_path} #[fg=#565f89]│ #[fg=#7aa2f7]%H:%M"
+      set -g status-right "#(~/Scripts/tmux-battery) #[fg=#6a6a73]│ #[fg=#6a6a73]#{b:pane_current_path} #[fg=#6a6a73]│ #[fg=#6f8fb3]%H:%M"
 
       # Cleaner window status
-      set -g window-status-style fg=#565f89,bg=default
-      set -g window-status-current-style fg=#bb9af7,bg=default,bold
+      set -g window-status-style fg=#6a6a73,bg=default
+      set -g window-status-current-style fg=#6f8fb3,bg=default,bold
       set -g window-status-format " #I #W#{?window_zoomed_flag,󰊓,} "
       set -g window-status-current-format " #I #W#{?window_zoomed_flag,󰊓,} "
 
       # Light pane borders
-      set -g pane-border-style fg=#414868
-      set -g pane-active-border-style fg=#7aa2f7
+      set -g pane-border-style fg=#4a4a52
+      set -g pane-active-border-style fg=#6f8fb3
       set -g pane-border-status off
 
       # Subtle message styling
-      set -g message-style bg=#bb9af7,fg=#1a1b26,bold
-      set -g message-command-style bg=#7aa2f7,fg=#1a1b26,bold
+      set -g message-style bg=#6f8fb3,fg=#131316,bold
+      set -g message-command-style bg=#6f8fb3,fg=#131316,bold
 
       # Light copy mode
-      set -g mode-style bg=#bb9af7,fg=#1a1b26,bold
+      set -g mode-style bg=#6f8fb3,fg=#131316,bold
 
       # Clock styling
-      set -g clock-mode-colour #7aa2f7
+      set -g clock-mode-colour #6f8fb3
       set -g clock-mode-style 24
 
       # Pane indicators
-      set -g display-panes-active-colour #7aa2f7
-      set -g display-panes-colour #565f89
+      set -g display-panes-active-colour #6f8fb3
+      set -g display-panes-colour #6a6a73
       set -g display-panes-time 1500
     '';
   };

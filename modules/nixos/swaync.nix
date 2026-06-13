@@ -142,11 +142,11 @@ in
 
 			"swaync/style.default.css".text =  with colors.scheme.default; ''
 			      @define-color cc-bg rgba(${rgb.bg}, 0.95);
-          @define-color noti-border-color rgba(255, 255, 255, 0.15);
-          @define-color noti-bg rgb(17, 17, 27);
-          @define-color noti-bg-darker rgb(43, 43, 57);
-          @define-color noti-bg-hover rgb(27, 27, 43);
-          @define-color noti-bg-focus rgba(27, 27, 27, 0.6);
+          @define-color noti-border-color rgba(255, 255, 255, 0.10);
+          @define-color noti-bg rgb(${rgb.bg});
+          @define-color noti-bg-darker rgb(39, 39, 42);
+          @define-color noti-bg-hover rgb(29, 29, 32);
+          @define-color noti-bg-focus rgba(${rgb.bg}, 0.6);
           @define-color noti-close-bg rgba(255, 255, 255, 0.1);
           @define-color noti-close-bg-hover rgba(255, 255, 255, 0.15);
           @define-color text-color rgba(${rgb.fg}, 1);
@@ -182,18 +182,18 @@ in
             background: @cc-bg;
             padding: 16px;
             border-radius: 12px;
-            border: 2px solid #${hex.blue};
-            box-shadow: 0 4px 20px rgba(${rgb.blue}, 0.25), 0 2px 8px rgba(0, 0, 0, 0.4);
+            border: 1px solid @noti-border-color;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.4);
             margin: 0;
           }
 
           .critical .notification-content {
-            border: 2px solid #${hex.red};
-            box-shadow: 0 4px 24px rgba(${rgb.red}, 0.35), 0 2px 8px rgba(0, 0, 0, 0.5);
+            border: 1px solid #${hex.danger};
+            box-shadow: 0 4px 24px rgba(${rgb.danger}, 0.30), 0 2px 8px rgba(0, 0, 0, 0.5);
           }
 
           .low .notification-content {
-            border: 2px solid #${hex.gray};
+            border: 1px solid rgba(${rgb.gray}, 0.4);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
           }
 
@@ -204,8 +204,8 @@ in
           }
 
           .close-button {
-            background: #${hex.red};
-            color: @cc-bg;
+            background: @noti-close-bg;
+            color: @text-color;
             text-shadow: none;
             padding: 2px 8px;
             border-radius: 8px;
@@ -215,13 +215,13 @@ in
 
           .close-button:hover {
             box-shadow: none;
-            background: #${hex.red};
+            background: @noti-close-bg-hover;
             transition: all .15s ease-in-out;
             border: none;
           }
 
           .notification-action {
-            border: 2px solid #${hex.blue};
+            border: 1px solid @noti-border-color;
             border-top: none;
             border-radius: 8px;
           }
@@ -244,12 +244,12 @@ in
 
           .notification-action:first-child {
             border-bottom-left-radius: 12px;
-            background: #1b1b2b;
+            background: @noti-bg-hover;
           }
 
           .notification-action:last-child {
             border-bottom-right-radius: 12px;
-            background: #1b1b2b;
+            background: @noti-bg-hover;
           }
 
           .inline-reply {
@@ -315,7 +315,7 @@ in
 
           .control-center {
             background: @cc-bg;
-            border: 2px solid #${hex.blue};
+            border: 1px solid @noti-border-color;
             border-radius: 14px;
           }
 
@@ -354,7 +354,7 @@ in
           }
 
           .widget-title>button:hover {
-            background: #${hex.red};
+            background: #${hex.accent};
             color: @cc-bg;
           }
 
@@ -373,8 +373,8 @@ in
           }
 
           .widget-dnd>switch:checked {
-            background: #${hex.red};
-            border: 1px solid #${hex.red};
+            background: #${hex.accent};
+            border: 1px solid #${hex.accent};
           }
 
           .widget-dnd>switch slider {
