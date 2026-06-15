@@ -148,6 +148,26 @@
           return polkit.Result.YES;
         }
       });
+
+      // Let CoreCtrl start its privileged root helper without a prompt, so the
+      // GPU undervolt/power-cap profile is applied automatically at login.
+      // The helper actions default to allow_inactive=no / allow_active=
+      // auth_admin_keep (see org.corectrl.helper{,killer}.policy). CoreCtrl is
+      // autostarted by Hyprland (exec-once); like the reboot case above, those
+      // compositor-spawned processes appear to polkit as having NO active
+      // session, so allow_inactive=no denies the helper outright and CoreCtrl
+      // exits at boot with "Cannot start helper" (logged to
+      // ~/.cache/corectrl-boot.log), leaving the GPU at stock. No polkit auth
+      // agent runs in this Hyprland session, so there is nothing to satisfy the
+      // auth_admin challenge either. Grant the helper actions by group
+      // membership (UID-resolvable), matching the reboot rule above.
+      polkit.addRule(function(action, subject) {
+        if ((action.id == "org.corectrl.helper.init" ||
+             action.id == "org.corectrl.helperkiller.init") &&
+            subject.isInGroup("users")) {
+          return polkit.Result.YES;
+        }
+      });
     '';
   };
 

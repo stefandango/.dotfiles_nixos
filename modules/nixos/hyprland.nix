@@ -595,9 +595,16 @@ in
 		exec-once=${pkgs.waybar}/bin/waybar
 		# exec-once=${pkgs.openrazer-daemon}/bin/openrazer-daemon  # Disabled: kernel 7.0.x build break
 		exec-once=${pkgs.networkmanagerapplet}/bin/nm-applet --indicator
-		# Start CoreCtrl minimized so the saved GPU profile (undervolt / power
-		# limit) is auto-applied at login — values only apply while it's running.
-		exec-once=${pkgs.corectrl}/bin/corectrl --minimize-systray
+		# Start CoreCtrl minimized so its saved GPU profile (undervolt / power
+		# limit) is applied at login. The real fix for this is the polkit rule in
+		# hosts/nixos-desktop/default.nix that lets CoreCtrl start its root helper
+		# without an auth prompt — without it CoreCtrl exited at boot with
+		# "Cannot start helper". --minimize-systray gives it no window (tray icon
+		# only), so it also needs a settled system tray to minimize into: the
+		# theme-switcher (run at boot) does `pkill waybar; waybar`, so we wait
+		# until Waybar's org.kde.StatusNotifierWatcher has been present
+		# continuously for ~5s (the pkill resets the counter) before launching.
+		exec-once=bash -c 'stable=0; for i in $(seq 1 240); do if busctl --user status org.kde.StatusNotifierWatcher >/dev/null 2>&1; then stable=$((stable+1)); else stable=0; fi; [ "$stable" -ge 10 ] && break; sleep 0.5; done; exec ${pkgs.corectrl}/bin/corectrl --minimize-systray'
 		exec-once=${pkgs.hyprland-autoname-workspaces}/bin/hyprland-autoname-workspaces
 		exec-once=pypr
 		exec-once = wl-clipboard-history -t
