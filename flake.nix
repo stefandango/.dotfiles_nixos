@@ -27,6 +27,11 @@
 		nix-claude-code = {
 			url = "github:ryoppippi/nix-claude-code";
 		};
+
+		mcp-nixos = {
+			url = "github:utensils/mcp-nixos";
+			inputs.nixpkgs.follows = "nixpkgs";
+		};
 	};
 
 	outputs = inputs @ { self, nixpkgs, home-manager, nixvim, darwin, ... }:
