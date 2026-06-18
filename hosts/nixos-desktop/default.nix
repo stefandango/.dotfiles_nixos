@@ -70,9 +70,13 @@
       enable32Bit = true;
     };
     # Unlocks the voltage/frequency/power controls in the corectrl GUI by
-    # setting amdgpu.ppfeaturemask=0xffffffff. Required to undervolt, tune
-    # power limits, or set a custom fan curve. The actual values are set in
-    # the corectrl app and re-applied automatically each boot.
+    # enabling the amdgpu overdrive bit. This sets the default mask
+    # amdgpu.ppfeaturemask=0xfffd7fff (the "less likely to flicker" value, NOT
+    # 0xffffffff — set hardware.amdgpu.overdrive.ppfeaturemask = "0xffffffff"
+    # explicitly if you ever need the full feature set, at the risk of the
+    # flicker issues this GPU has had). The default mask is enough to undervolt
+    # and set a power cap; the actual values are set in the corectrl app and
+    # re-applied automatically each boot.
     # (Renamed from programs.corectrl.gpuOverclock.enable.)
     amdgpu.overdrive.enable = true;
     # Disabled: openrazer 3.12.2 driver fails to build against kernel 7.0.x
@@ -204,7 +208,8 @@
     pavucontrol
     
     # Development
-    docker
+    # docker CLI is provided by virtualisation.docker.enable; docker-compose is
+    # NOT (the module has no compose option), so it stays here.
     docker-compose
     lazydocker
     omnisharp-roslyn
@@ -223,7 +228,7 @@
     lshw
     amdgpu_top   # AMD GPU TUI: usage, power draw, temps, VRAM, per-process
     nvtopPackages.amd   # htop-style GPU monitor with live graphs (AMD build)
-    protontricks
+    # protontricks now provided by programs.steam.protontricks.enable (wrapped for the FHS env)
     winetricks
 
     # Gaming
@@ -269,6 +274,17 @@
     '';
   };
 
+  # Qt theming — make Qt apps (corectrl, etc.) follow a dark theme instead of
+  # the default light Fusion look. Uses the supported `qt` module rather than a
+  # hand-set QT_QPA_PLATFORMTHEME. platformTheme = "gnome" sources colors via
+  # qgnomeplatform; style = "adwaita-dark" forces the dark widget style so Qt
+  # apps stay dark even without GNOME gsettings configured under Hyprland.
+  qt = {
+    enable = true;
+    platformTheme = "gnome";
+    style = "adwaita-dark";
+  };
+
   # Services
   services = {
     pipewire = {
@@ -293,6 +309,21 @@
     steam = {
       enable = true;
       gamescopeSession.enable = true;
+      # Extra libraries + tools injected into Steam's FHS env (replaces the old
+      # nixpkgs.config.packageOverrides steam.override { extraPkgs = ...; }).
+      # MangoHud must live here so its Vulkan implicit layer is visible to
+      # Proton games running under pressure-vessel (the container can't see
+      # nix-store layer paths otherwise) — needed for the overlay on Proton/Wine
+      # titles, not just native Linux games.
+      extraPackages = with pkgs; [
+        pango
+        libthai
+        harfbuzz
+        gamemode
+        mangohud
+      ];
+      # Properly wrapped protontricks for Steam's FHS env (was in systemPackages).
+      protontricks.enable = true;
     };
     gamemode = {
       enable = true;
@@ -310,23 +341,6 @@
       enable = true;
       # GPU overclock/undervolt unlock moved to hardware.amdgpu.overdrive.enable
       # (the option was renamed away from programs.corectrl).
-    };
-  };
-
-  # Steam package overrides
-  nixpkgs.config.packageOverrides = pkgs: {
-    steam = pkgs.steam.override {
-      extraPkgs = pkgs: with pkgs; [
-        pango
-        libthai
-        harfbuzz
-        gamemode
-        # MangoHud inside Steam's FHS env so the Vulkan implicit layer is
-        # visible to Proton games running under pressure-vessel (the container
-        # can't see nix-store layer paths otherwise). Needed for the overlay
-        # to show up on Proton/Wine titles, not just native Linux games.
-        mangohud
-      ];
     };
   };
 

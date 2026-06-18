@@ -24,7 +24,9 @@
   environment.variables = {
     EDITOR = vars.editor;
     TERMINAL = vars.terminal;
-    QT_QPA_PLATFORMTHEME = "gtk2";
+    # Qt theming is handled declaratively via the NixOS `qt` module on Linux
+    # (hosts/nixos-desktop). The old hand-set QT_QPA_PLATFORMTHEME=gtk2 was a
+    # no-op here (qtstyleplugins wasn't installed) and irrelevant on macOS.
   };
 
   # Cross-platform core packages

@@ -6,7 +6,7 @@
     lsd
     oh-my-posh
     fzf
-    ripgrep
+    # ripgrep provided system-wide via modules/shared/system.nix
     lazygit
     neovim-unwrapped
     fd
@@ -242,7 +242,9 @@
         "docker"
         "docker-compose"
         "colored-man-pages"
-        "command-not-found"
+        # "command-not-found" removed: no-op on NixOS without
+        # programs.command-not-found or nix-index (the handler script it sources
+        # doesn't exist). Set up nix-index-database to get this feature properly.
         "history"
         "copypath"
       ];

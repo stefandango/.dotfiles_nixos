@@ -603,12 +603,21 @@ in
 		# limit) is applied at login. The real fix for this is the polkit rule in
 		# hosts/nixos-desktop/default.nix that lets CoreCtrl start its root helper
 		# without an auth prompt — without it CoreCtrl exited at boot with
-		# "Cannot start helper". --minimize-systray gives it no window (tray icon
-		# only), so it also needs a settled system tray to minimize into: the
-		# theme-switcher (run at boot) does `pkill waybar; waybar`, so we wait
+		# "Cannot start helper". --minimize-systray asks it to start with no
+		# window (minimized to the system tray), so it also needs a settled tray:
+		# the theme-switcher (run at boot) does `pkill waybar; waybar`, so we wait
 		# until Waybar's org.kde.StatusNotifierWatcher has been present
 		# continuously for ~5s (the pkill resets the counter) before launching.
-		exec-once=bash -c 'stable=0; for i in $(seq 1 240); do if busctl --user status org.kde.StatusNotifierWatcher >/dev/null 2>&1; then stable=$((stable+1)); else stable=0; fi; [ "$stable" -ge 10 ] && break; sleep 0.5; done; exec ${pkgs.corectrl}/bin/corectrl --minimize-systray'
+		#
+		# QT_QPA_PLATFORMTHEME/QT_STYLE_OVERRIDE are unset for corectrl only: with
+		# the system-wide qt.platformTheme = "gnome" (qgnomeplatform), Qt reports
+		# "no system tray available", so --minimize-systray can't minimize and
+		# corectrl pops its WINDOW at login instead of starting silently. corectrl
+		# ignores QT_STYLE_OVERRIDE and forces its own style anyway, so dropping
+		# both for this one process costs nothing and restores the silent launch.
+		# (corectrl never registers a visible SNI tray icon here regardless — a
+		# corectrl quirk on wlroots; Steam/insync/nm-applet tray icons work fine.)
+		exec-once=bash -c 'unset QT_QPA_PLATFORMTHEME QT_STYLE_OVERRIDE; stable=0; for i in $(seq 1 240); do if busctl --user status org.kde.StatusNotifierWatcher >/dev/null 2>&1; then stable=$((stable+1)); else stable=0; fi; [ "$stable" -ge 10 ] && break; sleep 0.5; done; exec ${pkgs.corectrl}/bin/corectrl --minimize-systray'
 		exec-once=${pkgs.hyprland-autoname-workspaces}/bin/hyprland-autoname-workspaces
 		exec-once=pypr
 		exec-once = wl-clipboard-history -t

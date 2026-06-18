@@ -51,11 +51,10 @@
 
     # Modern CLI tools
     zoxide        # Smarter cd command (learns your habits)
-    delta         # Beautiful git diffs
+    # delta installed via programs.delta.enable (modules/shared/git.nix)
 
     # System utilities
-    curl
-    btop
+    # curl + btop provided system-wide via modules/shared/system.nix
     gum           # Glamorous shell scripts
 
   ];
