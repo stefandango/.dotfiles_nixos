@@ -565,7 +565,7 @@ cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
 @define-color mpris-button-hover rgba(0, 0, 0, 0.50);
 
 * {
-  font-family: MonoLisa Nerd Font Semi-Bold;
+  font-family: MonoLisa Nerd Font SemiBold;
 }
 
 .control-center .notification-row:focus,
