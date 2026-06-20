@@ -257,9 +257,14 @@
       enable = true;
       style = "slight";
     };
+    # Grayscale antialiasing (NOT subpixel/LCD). The LG 45GX950A is a WOLED
+    # panel with a WRGB subpixel layout, so "rgb" subpixel rendering paints
+    # onto the wrong physical subpixels and leaves colored fringing on glyph
+    # edges — reads as fuzzy/"pixelated" text, worst in XWayland apps (rofi).
+    # "none" = grayscale AA, no fringing; lcdfilter is then ignored.
     subpixel = {
-      rgba = "rgb";
-      lcdfilter = "default";
+      rgba = "none";
+      lcdfilter = "none";
     };
     localConf = ''
       <?xml version="1.0"?>
