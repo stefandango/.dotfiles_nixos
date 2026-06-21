@@ -132,27 +132,6 @@ netinfo           # Comprehensive network information
 speedtest         # Run internet speed test
 ```
 
-### Odysseus AI Workspace
-
-[Odysseus](https://github.com/pewdiepie-archdaemon/odysseus) is a self-hosted, local-first AI workspace that runs as a `docker compose` stack (FastAPI app + `chromadb` + `searxng` + `ntfy`). It works identically on **NixOS and macOS** via Docker and is managed by the `odysseus` control script (installed to `~/Scripts`). The cloned repo and `.env` live outside the flake as stateful app data.
-
-```bash
-# One-time setup (per machine)
-git clone https://github.com/pewdiepie-archdaemon/odysseus ~/Dev/odysseus
-cp ~/Dev/odysseus/.env.example ~/Dev/odysseus/.env   # then edit keys/settings
-nixswitch                                            # installs the odysseus script
-
-# Daily use (auto-detects docker compose v2/v1)
-odysseus up        # build + start the stack → http://127.0.0.1:7000
-odysseus down      # stop + remove the stack
-odysseus logs      # follow logs (optionally: odysseus logs <service>)
-odysseus status    # show container status
-odysseus update    # git pull + image pull + rebuild + restart
-odysseus help      # show all subcommands
-```
-
-macOS works with any Docker runtime (Docker Desktop, OrbStack, Colima); NixOS already enables Docker. Override the clone path with `ODYSSEUS_DIR`.
-
 ### Tmux Session Management
 
 ```bash

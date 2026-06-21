@@ -154,11 +154,6 @@
       executable = true;
     };
 
-    "Scripts/odysseus" = {
-      source = ../scripts/odysseus;
-      executable = true;
-    };
-
     ".config/oh-my-posh/ohmyposhv3-v2.json" = {
       source = ../config/ohmyposhv3-v2.json;
     };
