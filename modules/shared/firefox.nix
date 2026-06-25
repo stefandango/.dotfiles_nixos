@@ -201,6 +201,18 @@ lib.mkIf (!pkgs.stdenv.isDarwin) {
         "browser.newtabpage.activity-stream.section.highlights.includeVisited" = false;
         "browser.newtabpage.activity-stream.improvesearch.topSiteSearchShortcuts" = false;
 
+        # ── Fonts ────────────────────────────────────────────────────────────
+        # These control WEB CONTENT only. The browser chrome (toolbar, tabs,
+        # menus) follows the GTK system font, not these prefs. Pages that set
+        # their own CSS fonts still override these — this is the fallback used
+        # when a page asks for a generic family or a font you don't have.
+        # Default generic flipped to sans-serif so unstyled pages render in
+        # Inter instead of a serif. (x-western = the Latin/Western charset.)
+        "font.default.x-western" = "sans-serif";
+        "font.name.sans-serif.x-western" = "Inter";
+        "font.name.serif.x-western" = "Noto Serif";
+        "font.name.monospace.x-western" = "MonoLisa Nerd Font";
+
         # ── Keep these ENABLED for security/usability (intentional) ──────────
         # SafeBrowsing — yes, sends URL hashes to Google but it's a real protection
         "browser.safebrowsing.malware.enabled" = true;

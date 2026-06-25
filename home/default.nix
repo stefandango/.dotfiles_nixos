@@ -8,6 +8,11 @@
       then "/Users/${vars.user}"
       else "/home/${vars.user}";
     stateVersion = "23.11";
+
+    # We intentionally run home-manager `master` with `nixos-unstable` (the correct
+    # pairing). master labels itself a release ahead of nixpkgs (e.g. 26.11 vs 26.05),
+    # which trips a benign version-mismatch warning. Silence it — it's expected skew.
+    enableNixpkgsReleaseCheck = false;
   };
 
   # Enable XDG base directories (cross-platform)
@@ -46,11 +51,10 @@
 
     # Modern CLI tools
     zoxide        # Smarter cd command (learns your habits)
-    delta         # Beautiful git diffs
+    # delta installed via programs.delta.enable (modules/shared/git.nix)
 
     # System utilities
-    curl
-    btop
+    # curl + btop provided system-wide via modules/shared/system.nix
     gum           # Glamorous shell scripts
 
   ];
@@ -71,6 +75,32 @@
     createScreenshotsDir = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       run mkdir -p "$HOME/Pictures/screenshots"
     '';
+  };
+
+  # MangoHud config (Linux only). Writes ~/.config/MangoHud/MangoHud.conf only —
+  # enableSessionWide is intentionally left off, so MANGOHUD=1 is NOT exported.
+  # Activate per-game in Steam with the `mangohud %command%` launch option.
+  programs.mangohud = lib.mkIf pkgs.stdenv.isLinux {
+    enable = true;
+    settings = {
+      # FPS cap, matched to the 165Hz monitor. 0 = uncapped.
+      # Toggle cycles 165 -> 60 -> uncapped.
+      fps_limit = "165,60,0";
+      toggle_fps_limit = "Shift_R+F1";
+
+      cpu_stats = true;
+      cpu_temp = true;
+      gpu_stats = true;
+      gpu_temp = true;
+      ram = true;
+      vram = true;
+      frametime = true;
+      frame_timing = true;
+      fps = true;
+      position = "top-left";
+      font_size = 20;
+      toggle_hud = "Shift_R+F12";
+    };
   };
 
   # Enable home-manager

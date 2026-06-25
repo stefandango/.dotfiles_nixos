@@ -2,7 +2,7 @@
 {
   imports = [
     ./env.nix
-    ./regreet.nix
+    ./greetd.nix
     ./scripts.nix
     ./waybar.nix
     ./pyprland.nix

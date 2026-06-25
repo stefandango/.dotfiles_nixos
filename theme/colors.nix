@@ -5,45 +5,69 @@
 
 {
   scheme = {
+    # ── Graphite ──────────────────────────────────────────────────────────────
+    # Professional near-greyscale dark canvas + a single steel-blue accent, with a
+    # disciplined semantic trio (success / warning / danger) used ONLY for state.
+    #
+    # The legacy slot names (red/green/blue/cyan/orange/yellow/purple…) are kept so
+    # every existing consumer keeps building, but their VALUES are remapped:
+    #   blue / cyan / active  → accent (steel blue)   purple → neutral slate (disappears)
+    #   green → success        yellow / highlight → warning   red → danger
+    # New semantic aliases (accent/accentDim/success/warning/danger) are provided for
+    # rewritten sections. NOTE: no hyphens in interpolated attr names → `accentDim`.
     default = {
-      scheme = "One Dark Pro";
+      scheme = "Graphite";
       hex = {
-        bg = "111111"; # 283c34
-        fg = "abb2bf";
-        red = "e06c75";
-        orange = "d19a66";
-        yellow = "e5c07b";
-        green = "98c379";
-        cyan = "56b6c2";
-        blue = "61afef";
-        purple = "c678dd";
-        white = "abb2bf";
-        black = "282c34";
-        gray = "5c6370";
-        highlight = "e2be7d";
-        comment = "7f848e";
-        active = "005577";
-        inactive = "333333";
-        text = "999999";
+        # neutral ramp (cool-neutral dark)
+        black     = "0c0c0e";
+        bg        = "131316";
+        inactive  = "2a2a30";
+        gray      = "4a4a52";
+        comment   = "6a6a73";
+        text      = "8b8b94";
+        fg        = "c6c6cd";
+        white     = "c6c6cd";
+        # accent (steel blue)
+        accent    = "6f8fb3";
+        accentDim = "47597a";
+        active    = "6f8fb3";
+        blue      = "6f8fb3";
+        cyan      = "6f8fb3";
+        # semantic trio (desaturated, state-only)
+        success   = "7d9a6b";
+        green     = "7d9a6b";
+        warning   = "c2a15c";
+        yellow    = "c2a15c";
+        highlight = "c2a15c";
+        orange    = "bd8b5e";
+        danger    = "b56b6b";
+        red       = "b56b6b";
+        # remapped to neutral slate so old decorative uses fade into the greys
+        purple    = "7b8190";
       };
       rgb = {
-        bg = "17, 17, 17";
-        fg = "171, 178, 191";
-        red = "224, 108, 118";
-        orange = "209, 154, 102";
-        yellow = "229, 192, 123";
-        green = "152, 195, 121";
-        cyan = "86, 181, 194";
-        blue = "97, 175, 223";
-        purple = "197, 120, 221";
-        white = "171, 178, 191";
-        black = "40, 44, 52";
-        gray = "92, 99, 112";
-        highlight = "226, 191, 125";
-        comment = "127, 132, 142";
-        active = "0, 85, 119";
-        inactive = "51, 51, 51";
-        text = "153, 153, 153";
+        black     = "12, 12, 14";
+        bg        = "19, 19, 22";
+        inactive  = "42, 42, 48";
+        gray      = "74, 74, 82";
+        comment   = "106, 106, 115";
+        text      = "139, 139, 148";
+        fg        = "198, 198, 205";
+        white     = "198, 198, 205";
+        accent    = "111, 143, 179";
+        accentDim = "71, 89, 122";
+        active    = "111, 143, 179";
+        blue      = "111, 143, 179";
+        cyan      = "111, 143, 179";
+        success   = "125, 154, 107";
+        green     = "125, 154, 107";
+        warning   = "194, 161, 92";
+        yellow    = "194, 161, 92";
+        highlight = "194, 161, 92";
+        orange    = "189, 139, 94";
+        danger    = "181, 107, 107";
+        red       = "181, 107, 107";
+        purple    = "123, 129, 144";
       };
     };
 

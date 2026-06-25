@@ -61,15 +61,27 @@ RGB_INACTIVE=$(hex2rgb "$INACTIVE")
 RGB_PURPLE=$(hex2rgb "$PURPLE")
 RGB_ORANGE=$(hex2rgb "$ORANGE")
 
+# Semantic aliases — the curated themes define these explicitly; fall back to the
+# legacy slots so the switcher still works on any older theme JSON.
+ACCENT=$(get accent);       [[ "$ACCENT" == "null" ]] && ACCENT="$ACTIVE"
+ACCENT_DIM=$(get accentDim); [[ "$ACCENT_DIM" == "null" ]] && ACCENT_DIM="$INACTIVE"
+SUCCESS=$(get success);     [[ "$SUCCESS" == "null" ]] && SUCCESS="$GREEN"
+WARNING=$(get warning);     [[ "$WARNING" == "null" ]] && WARNING="$YELLOW"
+DANGER=$(get danger);       [[ "$DANGER" == "null" ]] && DANGER="$RED"
+RGB_ACCENT=$(hex2rgb "$ACCENT")
+RGB_SUCCESS=$(hex2rgb "$SUCCESS")
+RGB_WARNING=$(hex2rgb "$WARNING")
+RGB_DANGER=$(hex2rgb "$DANGER")
+
 # ─── 1. Hyprland ───────────────────────────────────────────────────────────────
 
-hyprctl keyword general:col.active_border "rgba(${CYAN}ee) rgba(${GREEN}ee) 45deg"
+hyprctl keyword general:col.active_border "rgba(${ACCENT}ee)"
 hyprctl keyword general:col.inactive_border "rgba(${GRAY}aa)"
-hyprctl keyword group:col.border_active "rgba(${CYAN}ee)"
+hyprctl keyword group:col.border_active "rgba(${ACCENT}ee)"
 hyprctl keyword group:col.border_inactive "rgba(${GRAY}aa)"
-hyprctl keyword group:groupbar:col.active "rgb(${BLUE})"
+hyprctl keyword group:groupbar:col.active "rgb(${ACCENT})"
 hyprctl keyword group:groupbar:col.inactive "rgb(${GRAY})"
-hyprctl keyword group:groupbar:text_color "rgb(ffffff)"
+hyprctl keyword group:groupbar:text_color "rgb(${FG})"
 hyprctl keyword misc:background_color "0x${BG}"
 
 # ─── 2. Waybar ─────────────────────────────────────────────────────────────────
@@ -78,9 +90,16 @@ cat > "$HOME/.config/waybar/style.css" << WAYBAR_EOF
 * {
     border: none;
     border-radius: 0;
-    font-family: "MonoLisa Nerd Font", "JetBrainsMono Nerd Font", monospace;
-    font-weight: 500;
+    /* Inter for text (clean UI sans); MonoLisa Nerd Font fallback supplies the icon glyphs. */
+    font-family: "Inter", "MonoLisa Nerd Font", "JetBrainsMono Nerd Font", monospace;
+    font-weight: 600;
     font-size: 13px;
+    /* tabular figures — keeps the clock and %/value modules from width-jittering.
+       GTK3 wants the bare tag; "tnum" 1 is rejected ("Junk at end of value"). */
+    font-feature-settings: "tnum";
+    /* very subtle optical tracking; the real icon↔text gap is the double-space
+       separator baked into the module formats/scripts, not letter-spacing. */
+    letter-spacing: 0.3px;
     min-height: 0;
 }
 
@@ -107,7 +126,7 @@ tooltip {
     margin: 4px 8px;
     background: rgba(${RGB_BG}, 0.85);
     border: none;
-    border-left: 3px solid rgba(${RGB_PURPLE}, 0.8);
+    border-left: 3px solid rgba(${RGB_GRAY}, 0.5);
     border-radius: 8px;
 }
 
@@ -125,9 +144,8 @@ tooltip {
 
 #workspaces button.active {
     color: #${FG};
-    background: rgba(${RGB_ACTIVE}, 0.6);
+    background: rgba(${RGB_ACCENT}, 0.55);
     border: none;
-    box-shadow: 0 2px 12px rgba(${RGB_BLUE}, 0.4);
 }
 
 #workspaces button:hover {
@@ -189,22 +207,22 @@ tooltip {
 }
 
 #clock {
-    color: #${CYAN};
+    color: #${FG};
     font-weight: bold;
     min-width: 80px;
 }
 
 #custom-weather {
-    color: #${BLUE};
+    color: #${FG};
     background: rgba(${RGB_BG}, 0.85);
     border: none;
-    border-left: 3px solid rgba(${RGB_CYAN}, 0.8);
+    border-left: 3px solid rgba(${RGB_GRAY}, 0.5);
     border-radius: 8px;
     margin: 4px 8px;
 }
 
 #custom-docker {
-    color: #${GREEN};
+    color: #${FG};
 }
 
 #custom-docker.inactive {
@@ -215,25 +233,19 @@ tooltip {
 }
 
 #custom-llama {
-    color: #${ORANGE};
+    color: #${FG};
 }
 
 #custom-llama.active {
-    color: #${GREEN};
+    color: #${SUCCESS};
 }
 
 #custom-llama.idle {
     color: #${GRAY};
 }
 
-@keyframes updates-glow {
-    0%   { box-shadow: 0 0 4px rgba(${RGB_YELLOW}, 0.3); }
-    50%  { box-shadow: 0 0 10px rgba(${RGB_YELLOW}, 0.6); }
-    100% { box-shadow: 0 0 4px rgba(${RGB_YELLOW}, 0.3); }
-}
-
 #custom-updates {
-    color: #${CYAN};
+    color: #${FG};
 }
 
 #custom-updates.current {
@@ -244,12 +256,11 @@ tooltip {
 }
 
 #custom-updates.updates {
-    color: #${YELLOW};
-    background: rgba(${RGB_YELLOW}, 0.1);
-    border: 1px solid rgba(${RGB_YELLOW}, 0.4);
+    color: #${WARNING};
+    background: rgba(${RGB_WARNING}, 0.1);
+    border: 1px solid rgba(${RGB_WARNING}, 0.4);
     border-radius: 10px;
     padding: 2px 14px 2px 18px;
-    animation: updates-glow 3s ease-in-out infinite;
 }
 
 #custom-updates.checking {
@@ -257,11 +268,11 @@ tooltip {
 }
 
 #custom-clipboard {
-    color: #${PURPLE};
+    color: #${FG};
 }
 
 #custom-memory {
-    color: #${ORANGE};
+    color: #${FG};
 }
 
 #custom-memory.normal {
@@ -281,7 +292,7 @@ tooltip {
 }
 
 #custom-cpu {
-    color: #${YELLOW};
+    color: #${FG};
 }
 
 #custom-cpu.normal {
@@ -301,7 +312,7 @@ tooltip {
 }
 
 #custom-temperature {
-    color: #${RED};
+    color: #${FG};
 }
 
 #custom-temperature.normal {
@@ -321,7 +332,7 @@ tooltip {
 }
 
 #pulseaudio {
-    color: #${PURPLE};
+    color: #${FG};
 }
 
 #pulseaudio.muted {
@@ -329,7 +340,7 @@ tooltip {
 }
 
 #network {
-    color: #${GREEN};
+    color: #${FG};
 }
 
 #network.disconnected {
@@ -347,7 +358,7 @@ tooltip {
 }
 
 #custom-razerviperbattery {
-    color: #${YELLOW};
+    color: #${FG};
 }
 
 #custom-notification {
@@ -430,27 +441,6 @@ tooltip {
     background-color: #${RED};
 }
 
-@keyframes submap-pulse {
-    0%   { box-shadow: 0 0 4px rgba(${RGB_YELLOW}, 0.4); }
-    50%  { box-shadow: 0 0 12px rgba(${RGB_YELLOW}, 0.8); }
-    100% { box-shadow: 0 0 4px rgba(${RGB_YELLOW}, 0.4); }
-}
-
-@keyframes submap-kill-pulse {
-    0%   { box-shadow: 0 0 8px rgba(${RGB_RED}, 0.6); }
-    50%  { box-shadow: 0 0 20px rgba(${RGB_RED}, 1.0); }
-    100% { box-shadow: 0 0 8px rgba(${RGB_RED}, 0.6); }
-}
-
-@keyframes submap-shake {
-    0%   { margin-left: 6px; }
-    20%  { margin-left: 10px; }
-    40%  { margin-left: 2px; }
-    60%  { margin-left: 9px; }
-    80%  { margin-left: 3px; }
-    100% { margin-left: 6px; }
-}
-
 #custom-submap {
     color: #${BG};
     font-weight: bold;
@@ -461,15 +451,13 @@ tooltip {
 }
 
 #custom-submap.window {
-    background: linear-gradient(135deg, #${YELLOW}, #${ORANGE});
-    animation: submap-pulse 2s ease-in-out infinite;
+    background: #${WARNING};
 }
 
 #custom-submap.kill {
-    background: #${RED};
+    background: #${DANGER};
     padding: 4px 30px;
     margin: 2px 8px;
-    animation: submap-kill-pulse 0.8s ease-in-out infinite, submap-shake 0.4s ease-in-out infinite;
 }
 
 #custom-submap.empty {
@@ -498,19 +486,19 @@ tooltip {
 }
 
 #services {
-    border-left: 3px solid rgba(${RGB_GREEN}, 0.8);
+    border-left: 3px solid rgba(${RGB_GRAY}, 0.5);
 }
 
 #hardware {
-    border-left: 3px solid rgba(${RGB_YELLOW}, 0.8);
+    border-left: 3px solid rgba(${RGB_GRAY}, 0.5);
 }
 
 #media-net {
-    border-left: 3px solid rgba(${RGB_BLUE}, 0.8);
+    border-left: 3px solid rgba(${RGB_GRAY}, 0.5);
 }
 
 #status {
-    border-left: 3px solid rgba(${RGB_RED}, 0.8);
+    border-left: 3px solid rgba(${RGB_GRAY}, 0.5);
 }
 WAYBAR_EOF
 
@@ -563,7 +551,7 @@ HOVER_B=$(( BG_B + 10 > 255 ? 255 : BG_B + 10 ))
 
 cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
 @define-color cc-bg rgba(${RGB_BG}, 0.95);
-@define-color noti-border-color rgba(255, 255, 255, 0.15);
+@define-color noti-border-color rgba(255, 255, 255, 0.10);
 @define-color noti-bg rgb(${RGB_BG});
 @define-color noti-bg-darker rgb(${DARKER_R}, ${DARKER_G}, ${DARKER_B});
 @define-color noti-bg-hover rgb(${HOVER_R}, ${HOVER_G}, ${HOVER_B});
@@ -577,7 +565,7 @@ cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
 @define-color mpris-button-hover rgba(0, 0, 0, 0.50);
 
 * {
-  font-family: MonoLisa Nerd Font Semi-Bold;
+  font-family: MonoLisa Nerd Font SemiBold;
 }
 
 .control-center .notification-row:focus,
@@ -602,18 +590,18 @@ cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
   background: @cc-bg;
   padding: 16px;
   border-radius: 8px;
-  border: 2px solid #${BLUE};
-  box-shadow: 0 4px 20px rgba(${RGB_BLUE}, 0.25), 0 2px 8px rgba(0, 0, 0, 0.4);
+  border: 1px solid @noti-border-color;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.4);
   margin: 0;
 }
 
 .critical .notification-content {
-  border: 2px solid #${RED};
-  box-shadow: 0 4px 24px rgba(${RGB_RED}, 0.35), 0 2px 8px rgba(0, 0, 0, 0.5);
+  border: 1px solid #${DANGER};
+  box-shadow: 0 4px 24px rgba(${RGB_DANGER}, 0.30), 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .low .notification-content {
-  border: 2px solid #${GRAY};
+  border: 1px solid rgba(${RGB_GRAY}, 0.4);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
@@ -624,8 +612,8 @@ cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
 }
 
 .close-button {
-  background: #${RED};
-  color: @cc-bg;
+  background: @noti-close-bg;
+  color: @text-color;
   text-shadow: none;
   padding: 2px 8px;
   border-radius: 8px;
@@ -635,13 +623,13 @@ cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
 
 .close-button:hover {
   box-shadow: none;
-  background: #${RED};
+  background: @noti-close-bg-hover;
   transition: all .15s ease-in-out;
   border: none;
 }
 
 .notification-action {
-  border: 2px solid #${BLUE};
+  border: 1px solid @noti-border-color;
   border-top: none;
   border-radius: 8px;
 }
@@ -735,7 +723,7 @@ cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
 
 .control-center {
   background: @cc-bg;
-  border: 2px solid #${BLUE};
+  border: 1px solid @noti-border-color;
   border-radius: 14px;
 }
 
@@ -773,7 +761,7 @@ cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
 }
 
 .widget-title>button:hover {
-  background: #${RED};
+  background: #${ACCENT};
   color: @cc-bg;
 }
 
@@ -792,8 +780,8 @@ cat > "$HOME/.config/swaync/style.css" << SWAYNC_EOF
 }
 
 .widget-dnd>switch:checked {
-  background: #${RED};
-  border: 1px solid #${RED};
+  background: #${ACCENT};
+  border: 1px solid #${ACCENT};
 }
 
 .widget-dnd>switch slider {
@@ -966,8 +954,9 @@ highlight{
 }
 SWAYNC_EOF
 
-# Reload swaync
-pkill swaync 2>/dev/null; sleep 0.5; swaync &disown
+# Reload swaync — prefer a live CSS reload (no restart, avoids the relaunch race
+# where the old instance is still alive and the new one aborts "already running").
+swaync-client --reload-css 2>/dev/null || { pkill swaync 2>/dev/null; sleep 0.5; swaync & disown; }
 
 # ─── 5. Kitty ──────────────────────────────────────────────────────────────────
 

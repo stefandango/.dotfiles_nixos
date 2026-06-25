@@ -10,16 +10,18 @@ in
   services.llama-cpp = {
     enable = modelExists;
     package = pkgs.llama-cpp.override { vulkanSupport = true; };
-    model = modelFile;
-    host = "127.0.0.1";
-    port = 8080;
-    extraFlags = [
-      "-ngl" "999"
-      "-c" "32768"
-      "--flash-attn" "on"
-    ] ++ lib.optionals (builtins.pathExists mmprojFile) [
-      "--mmproj" mmprojFile
-    ];
+    # nixpkgs dropped extraFlags/model/host/port in favour of a single freeform
+    # `settings` attrset that llama-server consumes as CLI flags.
+    settings = {
+      model = modelFile;
+      host = "127.0.0.1";
+      port = 8080;
+      gpu-layers = 999;   # was -ngl 999
+      ctx-size = 32768;   # was -c 32768
+      flash-attn = "on";
+    } // lib.optionalAttrs (builtins.pathExists mmprojFile) {
+      mmproj = mmprojFile;
+    };
   };
 
   systemd.tmpfiles.rules = [

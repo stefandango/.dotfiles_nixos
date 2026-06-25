@@ -40,10 +40,22 @@
       themePackages = [ pkgs.nixos-bgrt-plymouth ];
     };
     kernelParams = [
-      "amdgpu.dcdebugmask=0x610"                       # Disable PSR + PSR-SU + Panel Replay to prevent flickering
+      # NOTE: amdgpu.dcdebugmask=0x610 (disable PSR/PSR-SU/Panel Replay) was a
+      # flicker workaround for the previous GPU. Removed after installing the
+      # RX 9070 XT (Navi 48, DCN 4.0.1) — re-add if flickering reappears.
       "amdgpu.gpu_recovery=1"                           # Enable GPU reset on hang instead of crashing
       "quiet"                                           # Suppress kernel log output on console — needed for plymouth
       "splash"                                          # Tell plymouth to show the splash screen
+
+      # Recolour the Linux VT's 16-colour palette to the One Dark Pro scheme
+      # (theme/colors.nix). This is what makes the tuigreet login (a console
+      # app limited to the 16 named ANSI colours) look themed instead of using
+      # the garish default TTY palette. Order = palette slots 0..15
+      # (0-7 normal, 8-15 bright): black, red, green, yellow, blue, magenta,
+      # cyan, white, then the bright variants.
+      "vt.default_red=0x11,0xe0,0x98,0xe5,0x61,0xc6,0x56,0xab,0x5c,0xe0,0x98,0xe5,0x61,0xc6,0x56,0xff"
+      "vt.default_grn=0x11,0x6c,0xc3,0xc0,0xaf,0x78,0xb6,0xb2,0x63,0x6c,0xc3,0xc0,0xaf,0x78,0xb6,0xff"
+      "vt.default_blu=0x11,0x75,0x79,0x7b,0xef,0xdd,0xc2,0xbf,0x70,0x75,0x79,0x7b,0xef,0xdd,0xc2,0xff"
     ];
     kernel.sysctl = {
       "vm.max_map_count" = 1048576;
@@ -57,10 +69,23 @@
       enable = true;
       enable32Bit = true;
     };
-    openrazer = {
-      enable = true;
-      batteryNotifier.enable = true;
-    };
+    # Unlocks the voltage/frequency/power controls in the corectrl GUI by
+    # enabling the amdgpu overdrive bit. This sets the default mask
+    # amdgpu.ppfeaturemask=0xfffd7fff (the "less likely to flicker" value, NOT
+    # 0xffffffff — set hardware.amdgpu.overdrive.ppfeaturemask = "0xffffffff"
+    # explicitly if you ever need the full feature set, at the risk of the
+    # flicker issues this GPU has had). The default mask is enough to undervolt
+    # and set a power cap; the actual values are set in the corectrl app and
+    # re-applied automatically each boot.
+    # (Renamed from programs.corectrl.gpuOverclock.enable.)
+    amdgpu.overdrive.enable = true;
+    # Disabled: openrazer 3.12.2 driver fails to build against kernel 7.0.x
+    # (hid_report_raw_event signature changed to require 6 args). Re-enable
+    # once nixpkgs ships a patched openrazer.
+    # openrazer = {
+    #   enable = true;
+    #   batteryNotifier.enable = true;
+    # };
     # Required for Bluetooth controller firmware (otherwise hci0 FW download
     # fails with -19 on boot). Also enables AMD microcode updates via the
     # default in hardware-configuration.nix.
@@ -84,8 +109,12 @@
   # Console configuration
   # earlySetup bundles the font into initrd so setfont doesn't fail on the
   # first vconsole-setup attempt before the store is fully available.
+  # ter-v32n (Terminus 32px, the largest size) keeps the TTY — and the
+  # tuigreet login screen, which renders on the console — legible on the
+  # 5120x2160 display instead of microscopic 16px text.
   console = {
-    font = "Lat2-Terminus16";
+    packages = [ pkgs.terminus_font ];
+    font = "ter-v32n";
     keyMap = "dk";
     earlySetup = true;
   };
@@ -95,6 +124,55 @@
     rtkit.enable = true;
     polkit.enable = true;
     sudo.wheelNeedsPassword = false;
+
+    # Let local users reboot/power-off without a polkit password prompt.
+    # The rofi power menu (Super+Shift+E) runs `systemctl reboot`/`poweroff`
+    # from a process spawned by Hyprland. Hyprland (started by greetd) lives
+    # in the root cgroup and is NOT tracked in any logind session
+    # (`GetSessionByPID` => "does not belong to any known session"), so its
+    # children appear to polkit as having NO session: subject.active and
+    # subject.local are both false. reboot/power-off then fall back to
+    # auth_admin (a challenge); with no polkit auth agent running the
+    # challenge fails silently and nothing happens. (Lock/Logout work because
+    # loginctl uses login1.manage, authorized by UID alone.)
+    #
+    # Gate on group membership only (UID-based, always resolvable) instead of
+    # the unreachable subject.active/local. Safe here: single-user desktop
+    # where wheel already has passwordless sudo, so `sudo reboot` is already
+    # unrestricted.
+    polkit.extraConfig = ''
+      polkit.addRule(function(action, subject) {
+        if ((action.id == "org.freedesktop.login1.reboot" ||
+             action.id == "org.freedesktop.login1.reboot-multiple-sessions" ||
+             action.id == "org.freedesktop.login1.power-off" ||
+             action.id == "org.freedesktop.login1.power-off-multiple-sessions" ||
+             action.id == "org.freedesktop.login1.halt" ||
+             action.id == "org.freedesktop.login1.halt-multiple-sessions") &&
+            subject.isInGroup("users")) {
+          return polkit.Result.YES;
+        }
+      });
+
+      // Let CoreCtrl start its privileged root helper without a prompt, so the
+      // GPU undervolt/power-cap profile is applied automatically at login.
+      // The helper actions default to allow_inactive=no / allow_active=
+      // auth_admin_keep (see org.corectrl.helper{,killer}.policy). CoreCtrl is
+      // autostarted by Hyprland (exec-once); like the reboot case above, those
+      // compositor-spawned processes appear to polkit as having NO active
+      // session, so allow_inactive=no denies the helper outright and CoreCtrl
+      // exits at boot with "Cannot start helper" (logged to
+      // ~/.cache/corectrl-boot.log), leaving the GPU at stock. No polkit auth
+      // agent runs in this Hyprland session, so there is nothing to satisfy the
+      // auth_admin challenge either. Grant the helper actions by group
+      // membership (UID-resolvable), matching the reboot rule above.
+      polkit.addRule(function(action, subject) {
+        if ((action.id == "org.corectrl.helper.init" ||
+             action.id == "org.corectrl.helperkiller.init") &&
+            subject.isInGroup("users")) {
+          return polkit.Result.YES;
+        }
+      });
+    '';
   };
 
   # Network drives
@@ -118,6 +196,7 @@
   # NixOS-specific packages
   environment.systemPackages = with pkgs; [
     inputs.nix-claude-code.packages.${pkgs.stdenv.hostPlatform.system}.default
+    inputs.mcp-nixos.packages.${pkgs.stdenv.hostPlatform.system}.default  # nixos/home-manager/darwin MCP server (used by .mcp.json)
     zsh  # Add zsh at system level
     # GUI Applications
     # firefox is now managed declaratively via modules/shared/firefox.nix (home-manager)
@@ -129,7 +208,8 @@
     pavucontrol
     
     # Development
-    docker
+    # docker CLI is provided by virtualisation.docker.enable; docker-compose is
+    # NOT (the module has no compose option), so it stays here.
     docker-compose
     lazydocker
     omnisharp-roslyn
@@ -138,7 +218,7 @@
     # Python with packages
     (python3.withPackages (ps: with ps; [
       requests
-      openrazer
+      # openrazer  # Disabled with hardware.openrazer (kernel 7.0.x build break)
     ]))
     
     # Network filesystems
@@ -146,7 +226,9 @@
 
     # Hardware tools
     lshw
-    protontricks
+    amdgpu_top   # AMD GPU TUI: usage, power draw, temps, VRAM, per-process
+    nvtopPackages.amd   # htop-style GPU monitor with live graphs (AMD build)
+    # protontricks now provided by programs.steam.protontricks.enable (wrapped for the FHS env)
     winetricks
 
     # Gaming
@@ -175,9 +257,14 @@
       enable = true;
       style = "slight";
     };
+    # Grayscale antialiasing (NOT subpixel/LCD). The LG 45GX950A is a WOLED
+    # panel with a WRGB subpixel layout, so "rgb" subpixel rendering paints
+    # onto the wrong physical subpixels and leaves colored fringing on glyph
+    # edges — reads as fuzzy/"pixelated" text, worst in XWayland apps (rofi).
+    # "none" = grayscale AA, no fringing; lcdfilter is then ignored.
     subpixel = {
-      rgba = "rgb";
-      lcdfilter = "default";
+      rgba = "none";
+      lcdfilter = "none";
     };
     localConf = ''
       <?xml version="1.0"?>
@@ -190,6 +277,17 @@
         </match>
       </fontconfig>
     '';
+  };
+
+  # Qt theming — make Qt apps (corectrl, etc.) follow a dark theme instead of
+  # the default light Fusion look. Uses the supported `qt` module rather than a
+  # hand-set QT_QPA_PLATFORMTHEME. platformTheme = "gnome" sources colors via
+  # qgnomeplatform; style = "adwaita-dark" forces the dark widget style so Qt
+  # apps stay dark even without GNOME gsettings configured under Hyprland.
+  qt = {
+    enable = true;
+    platformTheme = "gnome";
+    style = "adwaita-dark";
   };
 
   # Services
@@ -207,6 +305,7 @@
 
   # Programs
   programs = {
+    nix-ld.enable = true;
     zsh.enable = true;  # Enable zsh system-wide
     gnupg.agent = {
       enable = true;
@@ -215,6 +314,21 @@
     steam = {
       enable = true;
       gamescopeSession.enable = true;
+      # Extra libraries + tools injected into Steam's FHS env (replaces the old
+      # nixpkgs.config.packageOverrides steam.override { extraPkgs = ...; }).
+      # MangoHud must live here so its Vulkan implicit layer is visible to
+      # Proton games running under pressure-vessel (the container can't see
+      # nix-store layer paths otherwise) — needed for the overlay on Proton/Wine
+      # titles, not just native Linux games.
+      extraPackages = with pkgs; [
+        pango
+        libthai
+        harfbuzz
+        gamemode
+        mangohud
+      ];
+      # Properly wrapped protontricks for Steam's FHS env (was in systemPackages).
+      protontricks.enable = true;
     };
     gamemode = {
       enable = true;
@@ -228,18 +342,10 @@
         };
       };
     };
-    corectrl.enable = true;
-  };
-
-  # Steam package overrides
-  nixpkgs.config.packageOverrides = pkgs: {
-    steam = pkgs.steam.override {
-      extraPkgs = pkgs: with pkgs; [
-        pango
-        libthai
-        harfbuzz
-        gamemode
-      ];
+    corectrl = {
+      enable = true;
+      # GPU overclock/undervolt unlock moved to hardware.amdgpu.overdrive.enable
+      # (the option was renamed away from programs.corectrl).
     };
   };
 
@@ -270,6 +376,6 @@
   users.users.${vars.user} = {
     isNormalUser = true;
     shell = pkgs.zsh;
-    extraGroups = [ "wheel" "video" "audio" "networkmanager" "lp" "input" "openrazer" "docker" "corectrl" "gamemode" ];
+    extraGroups = [ "wheel" "video" "audio" "networkmanager" "lp" "input" "docker" "corectrl" "gamemode" ];
   };
 }

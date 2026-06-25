@@ -6,7 +6,7 @@ HEALTH=$(curl -fsS -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/health 2
 if [ "$HEALTH" != "200" ]; then
 	# Distinguish "service down" from "loading" so the bar can show progress.
 	if [ "$HEALTH" = "503" ]; then
-		printf '{"text": "🦙 …", "tooltip": "llama-server loading model", "class": "idle"}\n'
+		printf '{"text": "🦙  …", "tooltip": "llama-server loading model", "class": "idle"}\n'
 	else
 		printf ''
 	fi
@@ -21,5 +21,5 @@ if [ -z "$MODEL" ]; then
 	printf '{"text": "🦙", "tooltip": "llama-server running — no model info", "class": "idle"}\n'
 else
 	SHORT=$(basename "$MODEL" .gguf)
-	printf '{"text": "🦙 %s", "tooltip": "Loaded: %s\\nEndpoint: http://127.0.0.1:8080/v1", "class": "active"}\n' "$SHORT" "$MODEL"
+	printf '{"text": "🦙  %s", "tooltip": "Loaded: %s\\nEndpoint: http://127.0.0.1:8080/v1", "class": "active"}\n' "$SHORT" "$MODEL"
 fi

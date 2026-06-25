@@ -144,21 +144,13 @@ in
 				recursive = true;
 				executable = true;
 			};
-			# Theme JSON files
-			".config/theme/themes/onedark.json".source = ../../theme/themes/onedark.json;
-			".config/theme/themes/doom.json".source = ../../theme/themes/doom.json;
-			".config/theme/themes/dracula.json".source = ../../theme/themes/dracula.json;
-			".config/theme/themes/catppuccin-mocha.json".source = ../../theme/themes/catppuccin-mocha.json;
-			".config/theme/themes/catppuccin-latte.json".source = ../../theme/themes/catppuccin-latte.json;
-			".config/theme/themes/nord.json".source = ../../theme/themes/nord.json;
-			".config/theme/themes/gruvbox-dark.json".source = ../../theme/themes/gruvbox-dark.json;
-			".config/theme/themes/tokyo-night.json".source = ../../theme/themes/tokyo-night.json;
-			".config/theme/themes/rose-pine.json".source = ../../theme/themes/rose-pine.json;
-			".config/theme/themes/afterglow.json".source = ../../theme/themes/afterglow.json;
-			".config/theme/themes/github-light.json".source = ../../theme/themes/github-light.json;
-			".config/theme/themes/solarized-light.json".source = ../../theme/themes/solarized-light.json;
-			".config/theme/themes/rose-pine-dawn.json".source = ../../theme/themes/rose-pine-dawn.json;
-			".config/theme/themes/catppuccin-frappe.json".source = ../../theme/themes/catppuccin-frappe.json;
+			# Theme JSON files — curated "Graphite" family: one neutral dark base,
+			# only the accent (and neutral temperature) shifts between variants.
+			".config/theme/themes/graphite.json".source = ../../theme/themes/graphite.json;
+			".config/theme/themes/slate.json".source = ../../theme/themes/slate.json;
+			".config/theme/themes/umber.json".source = ../../theme/themes/umber.json;
+			".config/theme/themes/moss.json".source = ../../theme/themes/moss.json;
+			".config/theme/themes/mono.json".source = ../../theme/themes/mono.json;
 
 			};
 		};

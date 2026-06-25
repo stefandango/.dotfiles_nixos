@@ -22,6 +22,14 @@
   gtk = lib.mkIf pkgs.stdenv.isLinux {
     enable = true;
 
+    # Global UI font for GTK apps — this is what Firefox's chrome (toolbar,
+    # tabs, menus), the file manager, etc. follow. Electron apps (Obsidian,
+    # VS Code) do NOT read this; set their font in-app.
+    font = {
+      name = "Inter";
+      size = 11;
+    };
+
     theme = {
       name = "Adwaita-dark";
     };

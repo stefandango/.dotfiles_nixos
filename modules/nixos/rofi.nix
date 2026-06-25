@@ -48,11 +48,11 @@ in
 				".config/rofi/shared/fonts.rasi" = {
 					text = ''
 						* {
-							font: "MonoLisaSemiBold Nerd Font Semi-Bold 12";
-							font-large: "MonoLisaSemiBold Nerd Font Bold 14";
-							font-small: "MonoLisaSemiBold Nerd Font Medium 10";
-							font-icons: "MonoLisaSemiBold Nerd Font Semi-Bold 16";
-							font-icons-large: "MonoLisaSemiBold Nerd Font Semi-Bold 20";
+							font: "MonoLisa Nerd Font SemiBold 12";
+							font-large: "MonoLisa Nerd Font Bold 14";
+							font-small: "MonoLisa Nerd Font Medium 10";
+							font-icons: "MonoLisa Nerd Font SemiBold 16";
+							font-icons-large: "MonoLisa Nerd Font SemiBold 20";
 						}
 					'';
 				};

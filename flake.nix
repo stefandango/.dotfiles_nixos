@@ -26,6 +26,12 @@
 
 		nix-claude-code = {
 			url = "github:ryoppippi/nix-claude-code";
+			inputs.nixpkgs.follows = "nixpkgs";
+		};
+
+		mcp-nixos = {
+			url = "github:utensils/mcp-nixos";
+			inputs.nixpkgs.follows = "nixpkgs";
 		};
 	};
 

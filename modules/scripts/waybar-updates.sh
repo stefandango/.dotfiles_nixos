@@ -231,10 +231,10 @@ else
     diff_rev=$(head -1 "$DIFF_FILE" 2>/dev/null)
     if [ -f "$DIFF_FILE" ] && [ "$diff_rev" = "$cached_latest_rev" ]; then
         pkg_count=$(( $(tail -n +2 "$DIFF_FILE" | wc -l) ))
-        printf '{"text": "󰏔 %s", "tooltip": "%s package(s) to update (%s days behind)\\nLocked: %s → Latest: %s\\nClick for details", "class": "updates"}\n' \
+        printf '{"text": "󰏔  %s", "tooltip": "%s package(s) to update (%s days behind)\\nLocked: %s → Latest: %s\\nClick for details", "class": "updates"}\n' \
             "$pkg_count" "$pkg_count" "$days" "$current_date" "$latest_date"
     else
-        printf '{"text": "󰏔 %sd", "tooltip": "%s days behind nixpkgs\\nLocked: %s → Latest: %s\\nClick for details", "class": "updates"}\n' \
+        printf '{"text": "󰏔  %sd", "tooltip": "%s days behind nixpkgs\\nLocked: %s → Latest: %s\\nClick for details", "class": "updates"}\n' \
             "$days" "$days" "$current_date" "$latest_date"
     fi
 fi

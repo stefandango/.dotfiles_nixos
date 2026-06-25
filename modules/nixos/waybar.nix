@@ -28,9 +28,16 @@ in
 					* {
 						border: none;
 						border-radius: 0;
-						font-family: "MonoLisa Nerd Font", "JetBrainsMono Nerd Font", monospace;
-						font-weight: 500;
+						/* Inter for text (clean UI sans); MonoLisa Nerd Font fallback supplies the icon glyphs. */
+						font-family: "Inter", "MonoLisa Nerd Font", "JetBrainsMono Nerd Font", monospace;
+						font-weight: 600;
 						font-size: 13px;
+						/* tabular figures — keeps the clock and %/value modules from width-jittering.
+						   GTK3 wants the bare tag; "tnum" 1 is rejected ("Junk at end of value"). */
+						font-feature-settings: "tnum";
+						/* very subtle optical tracking; the real icon↔text gap is the double-space
+						   separator baked into the module formats/scripts, not letter-spacing. */
+						letter-spacing: 0.3px;
 						min-height: 0;
 					}
 
@@ -57,7 +64,7 @@ in
 						margin: 4px 8px;
 						background: rgba(${rgb.bg}, 0.85);
 						border: none;
-						border-left: 3px solid rgba(${rgb.purple}, 0.8);
+						border-left: 3px solid rgba(${rgb.gray}, 0.5);
 						border-radius: 8px;
 					}
 
@@ -75,9 +82,8 @@ in
 
 					#workspaces button.active {
 						color: #${hex.fg};
-						background: rgba(${rgb.active}, 0.6);
+						background: rgba(${rgb.accent}, 0.55);
 						border: none;
-						box-shadow: 0 2px 12px rgba(${rgb.blue}, 0.4);
 					}
 
 					#workspaces button:hover {
@@ -140,27 +146,6 @@ in
 						background: rgba(${rgb.active}, 0.2);
 					}
 
-					@keyframes submap-pulse {
-						0%   { box-shadow: 0 0 4px rgba(${rgb.yellow}, 0.4); }
-						50%  { box-shadow: 0 0 12px rgba(${rgb.yellow}, 0.8); }
-						100% { box-shadow: 0 0 4px rgba(${rgb.yellow}, 0.4); }
-					}
-
-					@keyframes submap-kill-pulse {
-						0%   { box-shadow: 0 0 8px rgba(${rgb.red}, 0.6); }
-						50%  { box-shadow: 0 0 20px rgba(${rgb.red}, 1.0); }
-						100% { box-shadow: 0 0 8px rgba(${rgb.red}, 0.6); }
-					}
-
-					@keyframes submap-shake {
-						0%   { margin-left: 6px; }
-						20%  { margin-left: 10px; }
-						40%  { margin-left: 2px; }
-						60%  { margin-left: 9px; }
-						80%  { margin-left: 3px; }
-						100% { margin-left: 6px; }
-					}
-
 					#custom-submap {
 						color: #${hex.bg};
 						font-weight: bold;
@@ -171,15 +156,13 @@ in
 					}
 
 					#custom-submap.window {
-						background: linear-gradient(135deg, #${hex.yellow}, #${hex.orange});
-						animation: submap-pulse 2s ease-in-out infinite;
+						background: #${hex.warning};
 					}
 
 					#custom-submap.kill {
-						background: #${hex.red};
+						background: #${hex.danger};
 						padding: 4px 30px;
 						margin: 2px 8px;
-						animation: submap-kill-pulse 0.8s ease-in-out infinite, submap-shake 0.4s ease-in-out infinite;
 					}
 
 					#custom-submap.empty {
@@ -188,22 +171,22 @@ in
 					}
 
 					#clock {
-						color: #${hex.cyan};
+						color: #${hex.fg};
 						font-weight: bold;
 						min-width: 200px;
 					}
 
 					#custom-weather {
-						color: #${hex.blue};
+						color: #${hex.fg};
 						background: rgba(${rgb.bg}, 0.85);
 						border: none;
-						border-left: 3px solid rgba(${rgb.cyan}, 0.8);
+						border-left: 3px solid rgba(${rgb.gray}, 0.5);
 						border-radius: 8px;
 						margin: 4px 8px;
 					}
 
 					#custom-docker {
-						color: #${hex.green};
+						color: #${hex.fg};
 					}
 
 					#custom-docker.inactive {
@@ -214,25 +197,19 @@ in
 					}
 
 					#custom-llama {
-						color: #${hex.orange};
+						color: #${hex.fg};
 					}
 
 					#custom-llama.active {
-						color: #${hex.green};
+						color: #${hex.success};
 					}
 
 					#custom-llama.idle {
 						color: #${hex.gray};
 					}
 
-					@keyframes updates-glow {
-						0%   { box-shadow: 0 0 4px rgba(${rgb.yellow}, 0.3); }
-						50%  { box-shadow: 0 0 10px rgba(${rgb.yellow}, 0.6); }
-						100% { box-shadow: 0 0 4px rgba(${rgb.yellow}, 0.3); }
-					}
-
 					#custom-updates {
-						color: #${hex.cyan};
+						color: #${hex.fg};
 					}
 
 					#custom-updates.current {
@@ -243,12 +220,11 @@ in
 					}
 
 					#custom-updates.updates {
-						color: #${hex.yellow};
-						background: rgba(${rgb.yellow}, 0.1);
-						border: 1px solid rgba(${rgb.yellow}, 0.4);
+						color: #${hex.warning};
+						background: rgba(${rgb.warning}, 0.1);
+						border: 1px solid rgba(${rgb.warning}, 0.4);
 						border-radius: 10px;
 						padding: 2px 14px 2px 18px;
-						animation: updates-glow 3s ease-in-out infinite;
 					}
 
 					#custom-updates.checking {
@@ -256,11 +232,11 @@ in
 					}
 
 					#custom-clipboard {
-						color: #${hex.purple};
+						color: #${hex.fg};
 					}
 
 					#custom-memory {
-						color: #${hex.orange};
+						color: #${hex.fg};
 					}
 
 					#custom-memory.normal {
@@ -280,7 +256,7 @@ in
 					}
 
 					#custom-cpu {
-						color: #${hex.yellow};
+						color: #${hex.fg};
 					}
 
 					#custom-cpu.normal {
@@ -300,7 +276,7 @@ in
 					}
 
 					#custom-temperature {
-						color: #${hex.red};
+						color: #${hex.fg};
 					}
 
 					#custom-temperature.normal {
@@ -321,7 +297,7 @@ in
 
 
 					#pulseaudio {
-						color: #${hex.purple};
+						color: #${hex.fg};
 					}
 
 					#pulseaudio.muted {
@@ -329,7 +305,7 @@ in
 					}
 
 					#network {
-						color: #${hex.green};
+						color: #${hex.fg};
 					}
 
 					#network.disconnected {
@@ -347,7 +323,7 @@ in
 					}
 
 					#custom-razerviperbattery {
-						color: #${hex.yellow};
+						color: #${hex.fg};
 					}
 
 					#custom-notification {
@@ -442,19 +418,19 @@ in
 					}
 
 					#services {
-						border-left: 3px solid rgba(${rgb.green}, 0.8);
+						border-left: 3px solid rgba(${rgb.gray}, 0.5);
 					}
 
 					#hardware {
-						border-left: 3px solid rgba(${rgb.yellow}, 0.8);
+						border-left: 3px solid rgba(${rgb.gray}, 0.5);
 					}
 
 					#media-net {
-						border-left: 3px solid rgba(${rgb.blue}, 0.8);
+						border-left: 3px solid rgba(${rgb.gray}, 0.5);
 					}
 
 					#status {
-						border-left: 3px solid rgba(${rgb.red}, 0.8);
+						border-left: 3px solid rgba(${rgb.gray}, 0.5);
 					}
 
 					#tray > .passive {
