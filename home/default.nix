@@ -51,11 +51,15 @@
 
     # Modern CLI tools
     zoxide        # Smarter cd command (learns your habits)
+    jq            # JSON processor (used by herdr-sessionizer to parse herdr's CLI output)
     # delta installed via programs.delta.enable (modules/shared/git.nix)
 
     # System utilities
     # curl + btop provided system-wide via modules/shared/system.nix
     gum           # Glamorous shell scripts
+
+    # herdr (agent multiplexer): macOS via Homebrew (hosts/macbook), NixOS via
+    # flake input (hosts/nixos-desktop) — upstream flake won't build on darwin.
 
   ];
 

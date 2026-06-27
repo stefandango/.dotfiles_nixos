@@ -1,0 +1,233 @@
+#!/usr/bin/env bash
+
+# herdr-sessionizer - Project session manager for herdr (the agent multiplexer)
+# Sibling of tmux-sessionizer: same fzf project picker, but builds a herdr
+# workspace (Terminal / Editor / AI tabs) instead of a tmux session.
+#
+# herdr is "tmux for agents" — it runs terminal AI agents (claude, etc.) in
+# panes/tabs and surfaces their working/blocked/done status at a glance.
+#
+# herdr model note: there is ONE persistent session (the default server), and
+# workspaces live inside it. So the analog of a per-project tmux session is a
+# per-project herdr *workspace*, which is what this script creates.
+
+set -uo pipefail
+
+# Configuration — mirrors tmux-sessionizer so both flows see the same projects
+SESSIONIZER_SEARCH_PATHS="${SESSIONIZER_SEARCH_PATHS:-$HOME/Dev $HOME/.dotfiles}"
+SESSIONIZER_MAX_DEPTH="${SESSIONIZER_MAX_DEPTH:-2}"
+
+# Function to find project directories (identical to tmux-sessionizer)
+find_projects() {
+    local paths=($SESSIONIZER_SEARCH_PATHS)
+
+    for path in "${paths[@]}"; do
+        [[ -d "$path" ]] || continue
+
+        # Include direct children so freshly created Dev folders appear even before `git init`
+        find "$path" -mindepth 1 -maxdepth 1 -type d \
+            -not -name ".git" \
+            -not -path "*/.git" \
+            -print 2>/dev/null
+
+        # Direct subdirectories that are Git repos
+        find "$path" -mindepth 1 -maxdepth "$SESSIONIZER_MAX_DEPTH" -name ".git" -type d 2>/dev/null |
+            while IFS= read -r gitdir; do
+                echo "${gitdir%/.git}"
+            done
+
+        # Also include the search path itself if it's a Git repo
+        if [[ -d "$path/.git" ]]; then
+            echo "$path"
+        fi
+    done
+}
+
+# Function to generate a clean workspace label (identical to tmux-sessionizer)
+generate_session_name() {
+    local path="$1"
+    local name
+
+    if [[ -d "$path/.git" ]]; then
+        local repo_name
+        repo_name=$(basename "$(git -C "$path" config --get remote.origin.url 2>/dev/null || echo "$path")")
+        repo_name="${repo_name%.git}"
+        name="$repo_name"
+    else
+        name=$(basename "$path")
+    fi
+
+    # Clean up name: replace problematic characters
+    name="${name//[.]/_}"
+    name="${name//[-]/_}"
+    name="${name//[ ]/_}"
+
+    echo "$name"
+}
+
+# Attach to the persistent herdr session. If we're already inside herdr the
+# newly created workspace is live in the running client, so just return.
+attach() {
+    if [[ -n "${HERDR_SESSION:-}${HERDR_PANE_ID:-}${HERDR:-}" ]]; then
+        return 0
+    fi
+    exec herdr
+}
+
+# Run a command in a pane, tolerating herdr quirks
+pane_run() {
+    local pane="$1" cmd="$2"
+    [[ -n "$pane" ]] || return 0
+    herdr pane run "$pane" "$cmd" >/dev/null 2>&1 || true
+}
+
+# Setup a full development workspace: Terminal / Editor / AI tabs
+setup_dev_workspace() {
+    local selected_path="$1"
+    local label="$2"
+
+    # Create the project workspace; capture the workspace id and its root pane.
+    # herdr prints JSON: .result.workspace.workspace_id and .result.root_pane.pane_id
+    local create ws term_pane
+    create=$(herdr workspace create --cwd "$selected_path" --label "$label" 2>/dev/null)
+    ws=$(printf '%s' "$create" | jq -r '.result.workspace.workspace_id // empty')
+    term_pane=$(printf '%s' "$create" | jq -r '.result.root_pane.pane_id // empty')
+
+    if [[ -z "$ws" || -z "$term_pane" ]]; then
+        echo "Error: herdr workspace create failed:" >&2
+        printf '%s\n' "$create" >&2
+        return 1
+    fi
+
+    # Tab 1 (root pane): Terminal — show project stats on startup
+    if command -v projstats >/dev/null 2>&1; then
+        pane_run "$term_pane" "projstats"
+    fi
+
+    # Tab 2: Editor — open nvim
+    if command -v nvim >/dev/null 2>&1; then
+        local edit_pane
+        edit_pane=$(herdr tab create --workspace "$ws" --cwd "$selected_path" --label "Editor" 2>/dev/null \
+            | jq -r '.result.root_pane.pane_id // empty')
+        pane_run "$edit_pane" "nvim ."
+    fi
+
+    # Tab 3: AI — open claude (the whole point of herdr)
+    local ai_pane
+    ai_pane=$(herdr tab create --workspace "$ws" --cwd "$selected_path" --label "AI" 2>/dev/null \
+        | jq -r '.result.root_pane.pane_id // empty')
+    if [[ -n "$ai_pane" ]]; then
+        if command -v claude >/dev/null 2>&1; then
+            pane_run "$ai_pane" "claude"
+        else
+            herdr pane send-text "$ai_pane" "# AI Assistant - run 'claude' to start Claude Code" >/dev/null 2>&1 || true
+        fi
+    fi
+
+    attach
+}
+
+# Standard single-workspace handling for non-Dev projects
+setup_plain_workspace() {
+    local selected_path="$1"
+    local label="$2"
+
+    herdr workspace create --cwd "$selected_path" --label "$label" >/dev/null 2>&1 || true
+    attach
+}
+
+manage_session() {
+    local selected_path="$1"
+    local label="$2"
+
+    if [[ "$selected_path" == "$HOME/Dev"* ]]; then
+        setup_dev_workspace "$selected_path" "$label"
+    else
+        setup_plain_workspace "$selected_path" "$label"
+    fi
+}
+
+# Main logic
+main() {
+    if ! command -v herdr >/dev/null 2>&1; then
+        echo "Error: herdr is not installed or not on PATH" >&2
+        exit 1
+    fi
+    if ! command -v jq >/dev/null 2>&1; then
+        echo "Error: jq is required to parse herdr output" >&2
+        exit 1
+    fi
+
+    local selected_path
+
+    if [[ $# -eq 1 ]]; then
+        selected_path="$1"
+        if [[ ! -d "$selected_path" ]]; then
+            echo "Error: Directory '$selected_path' does not exist" >&2
+            exit 1
+        fi
+    else
+        selected_path=$(
+            find_projects | sort -u | fzf \
+                --height=40% \
+                --border \
+                --preview 'echo "📁 {}" && echo "" && ls -1 {} | head -10' \
+                --preview-window=right:40% \
+                --prompt="🐑 Select project: " \
+                --header="Dev projects get a Terminal/Editor/AI workspace"
+        ) || true
+
+        if [[ -z "$selected_path" ]]; then
+            exit 0
+        fi
+    fi
+
+    local label
+    label=$(generate_session_name "$selected_path")
+
+    if [[ -z "$label" ]]; then
+        echo "Error: Could not generate workspace label" >&2
+        exit 1
+    fi
+
+    manage_session "$selected_path" "$label"
+}
+
+# Show usage information
+usage() {
+    cat <<EOF
+Usage: $(basename "$0") [directory]
+
+herdr session manager focused on development projects — the agent-multiplexer
+sibling of tmux-sessionizer.
+
+Options:
+  directory     Specific directory to create a workspace for
+
+Environment Variables:
+  SESSIONIZER_SEARCH_PATHS    Paths to search (default: \$HOME/Dev \$HOME/.dotfiles)
+  SESSIONIZER_MAX_DEPTH       Maximum search depth (default: 2)
+
+Examples:
+  $(basename "$0")                    # Interactive project selection
+  $(basename "$0") ~/Dev/my-project   # Create workspace for specific project
+
+Features:
+  - Same project search/fzf picker as tmux-sessionizer
+  - Dev folder projects get a multi-tab workspace inside the persistent session:
+    *   Terminal tab (runs projstats on startup)
+    *   Editor tab  (opens nvim automatically)
+    *   AI tab      (opens claude automatically)
+  - Non-Dev projects get a single plain workspace
+  - Requires: herdr, jq, fzf
+EOF
+}
+
+case "${1:-}" in
+-h | --help)
+    usage
+    exit 0
+    ;;
+esac
+
+main "$@"

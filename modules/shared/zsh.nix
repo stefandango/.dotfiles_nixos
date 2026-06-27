@@ -24,6 +24,11 @@
       executable = true;
     };
 
+    "Scripts/herdr-sessionizer" = {
+      source = ../scripts/herdr-sessionizer;
+      executable = true;
+    };
+
     "Scripts/projstats" = {
       source = ../scripts/projstats;
       executable = true;
@@ -191,6 +196,9 @@
       dots = "cd ~/.dotfiles";
       nas = "cd /mnt/piserver";
 
+      # herdr agent-multiplexer project picker (sibling of tmux-sessionizer)
+      herd = "herdr-sessionizer";
+
       # Zoxide shortcuts (smarter cd)
       z = "zoxide";
       zi = "zoxide query -i";  # Interactive selection
@@ -266,6 +274,14 @@
       }
       zle -N tmux-sessionizer-widget
       bindkey '^f' tmux-sessionizer-widget
+
+      # herdr (agent multiplexer) project picker — sibling of Ctrl+f
+      herdr-sessionizer-widget() {
+        ~/Scripts/herdr-sessionizer </dev/tty
+        zle reset-prompt
+      }
+      zle -N herdr-sessionizer-widget
+      bindkey '^g' herdr-sessionizer-widget
 
       # Enhanced clipboard bindings
       bindkey -s '^[c' 'clipshow\n'        # Alt+c to show clipboard

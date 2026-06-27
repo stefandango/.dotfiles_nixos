@@ -115,7 +115,7 @@
       "font-noto-sans-symbols-2"
       "tailscale-app"
     ];
-    brews = [ "uv" ];
+    brews = [ "uv" "herdr" ];
   };
 
   # Touch ID for sudo (reattach makes it work inside tmux too)
