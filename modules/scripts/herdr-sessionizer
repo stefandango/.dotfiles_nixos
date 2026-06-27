@@ -17,6 +17,13 @@ set -uo pipefail
 SESSIONIZER_SEARCH_PATHS="${SESSIONIZER_SEARCH_PATHS:-$HOME/Dev $HOME/.dotfiles}"
 SESSIONIZER_MAX_DEPTH="${SESSIONIZER_MAX_DEPTH:-2}"
 
+# Nerd Font tab icons (Monaspice / JetBrains Mono Nerd Font). Built from their
+# UTF-8 byte sequences so the glyphs survive editing and old shells. Override
+# with HERDR_ICON_* env vars (e.g. paste a literal glyph) if you prefer.
+ICON_TERMINAL="${HERDR_ICON_TERMINAL:-$(printf '\357\204\240')}"   # nf-fa-terminal (U+F120)
+ICON_EDITOR="${HERDR_ICON_EDITOR:-$(printf '\356\230\253')}"       # nf-custom-vim  (U+E62B)
+ICON_AI="${HERDR_ICON_AI:-$(printf '\357\225\204')}"               # nf-fa-robot    (U+F544)
+
 # Function to find project directories (identical to tmux-sessionizer)
 find_projects() {
     local paths=($SESSIONIZER_SEARCH_PATHS)
@@ -86,11 +93,12 @@ setup_dev_workspace() {
     local selected_path="$1"
     local label="$2"
 
-    # Create the project workspace; capture the workspace id and its root pane.
-    # herdr prints JSON: .result.workspace.workspace_id and .result.root_pane.pane_id
-    local create ws term_pane
-    create=$(herdr workspace create --cwd "$selected_path" --label "$label" 2>/dev/null)
+    # Create the project workspace (focused) and capture ids from the JSON:
+    #   .result.workspace.workspace_id  .result.tab.tab_id  .result.root_pane.pane_id
+    local create ws term_tab term_pane
+    create=$(herdr workspace create --cwd "$selected_path" --label "$label" --focus 2>/dev/null)
     ws=$(printf '%s' "$create" | jq -r '.result.workspace.workspace_id // empty')
+    term_tab=$(printf '%s' "$create" | jq -r '.result.tab.tab_id // empty')
     term_pane=$(printf '%s' "$create" | jq -r '.result.root_pane.pane_id // empty')
 
     if [[ -z "$ws" || -z "$term_pane" ]]; then
@@ -99,22 +107,25 @@ setup_dev_workspace() {
         return 1
     fi
 
-    # Tab 1 (root pane): Terminal — show project stats on startup
+    # Tab 1 (root pane): Terminal — rename the default tab, then show project stats
+    [[ -n "$term_tab" ]] && herdr tab rename "$term_tab" "$ICON_TERMINAL Terminal" >/dev/null 2>&1 || true
     if command -v projstats >/dev/null 2>&1; then
         pane_run "$term_pane" "projstats"
     fi
 
-    # Tab 2: Editor — open nvim
+    # Tab 2: Editor — open nvim (created unfocused so Terminal stays the active tab)
     if command -v nvim >/dev/null 2>&1; then
         local edit_pane
-        edit_pane=$(herdr tab create --workspace "$ws" --cwd "$selected_path" --label "Editor" 2>/dev/null \
+        edit_pane=$(herdr tab create --workspace "$ws" --cwd "$selected_path" \
+            --label "$ICON_EDITOR Editor" --no-focus 2>/dev/null \
             | jq -r '.result.root_pane.pane_id // empty')
         pane_run "$edit_pane" "nvim ."
     fi
 
     # Tab 3: AI — open claude (the whole point of herdr)
     local ai_pane
-    ai_pane=$(herdr tab create --workspace "$ws" --cwd "$selected_path" --label "AI" 2>/dev/null \
+    ai_pane=$(herdr tab create --workspace "$ws" --cwd "$selected_path" \
+        --label "$ICON_AI AI" --no-focus 2>/dev/null \
         | jq -r '.result.root_pane.pane_id // empty')
     if [[ -n "$ai_pane" ]]; then
         if command -v claude >/dev/null 2>&1; then
