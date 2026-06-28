@@ -87,7 +87,12 @@
   # Homebrew integration
   homebrew = {
     enable = true;
-    onActivation.cleanup = "uninstall";
+    # Homebrew 5.0.14 removed `brew bundle`'s `--force-cleanup` flag that
+    # nix-darwin still emits for cleanup = "uninstall" (breaks activation).
+    # Use cleanup = "none" + the new `--cleanup` flag to keep uninstalling
+    # packages that are no longer in the generated Brewfile.
+    onActivation.cleanup = "none";
+    onActivation.extraFlags = [ "--cleanup" ];
     onActivation.upgrade = true;
     caskArgs.appdir = "/Applications";
     caskArgs.no_quarantine = true;
@@ -110,7 +115,7 @@
       "font-noto-sans-symbols-2"
       "tailscale-app"
     ];
-    brews = [ "uv" ];
+    brews = [ "uv" "herdr" ];
   };
 
   # Touch ID for sudo (reattach makes it work inside tmux too)

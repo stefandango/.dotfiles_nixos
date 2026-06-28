@@ -197,6 +197,7 @@
   environment.systemPackages = with pkgs; [
     inputs.nix-claude-code.packages.${pkgs.stdenv.hostPlatform.system}.default
     inputs.mcp-nixos.packages.${pkgs.stdenv.hostPlatform.system}.default  # nixos/home-manager/darwin MCP server (used by .mcp.json)
+    inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default  # agent multiplexer (macOS uses Homebrew — upstream flake won't build on darwin)
     zsh  # Add zsh at system level
     # GUI Applications
     # firefox is now managed declaratively via modules/shared/firefox.nix (home-manager)
