@@ -14,6 +14,11 @@
       font_family = "MonoLisa Nerd Font SemiBold";
       font_size = if pkgs.stdenv.isDarwin then "16.0" else "14.0";
 
+      # macOS: make the LEFT Option key send Alt/Meta (so Alt+g, Alt+c/v/x
+      # bindings reach zsh as ^[…). The RIGHT Option still types special
+      # characters (é, ƒ, …). No-op on Linux.
+      macos_option_as_alt = "left";
+
       # ── Graphite palette — near-greyscale base, muted ANSI (legible, not garish) ──
       background = "#131316";
       foreground = "#c6c6cd";
