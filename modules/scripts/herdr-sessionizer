@@ -72,6 +72,40 @@ generate_session_name() {
     echo "$name"
 }
 
+# Ensure the persistent herdr server is running before we issue any socket-API
+# command (workspace/tab/pane create, etc.). On a fresh boot — before the TUI
+# was ever launched — no server exists and the API socket is absent, so
+# `herdr workspace create` fails with: Os { code: 2, kind: NotFound }. We start
+# a detached headless server and wait for its socket to appear. (`herdr status
+# server` exits 0 in both states, so we parse its "status:" line; the socket is
+# deleted on stop, so its presence is a reliable readiness signal.)
+ensure_server() {
+    # If we're already inside herdr the server is by definition running.
+    [[ -n "${HERDR_SESSION:-}${HERDR_PANE_ID:-}${HERDR:-}" ]] && return 0
+
+    local status sock
+    status=$(herdr status server 2>/dev/null)
+    if printf '%s\n' "$status" | grep -Eq 'status:[[:space:]]*running'; then
+        return 0
+    fi
+
+    # Resolve the API socket path from the status output (falls back to default).
+    sock=$(printf '%s\n' "$status" | sed -n 's/^[[:space:]]*socket:[[:space:]]*//p' | head -1)
+    sock="${sock:-${XDG_CONFIG_HOME:-$HOME/.config}/herdr/herdr.sock}"
+
+    # Detached, portable double-fork (no setsid — macOS lacks it). The subshell
+    # exits immediately so the server reparents to init and survives this script.
+    ( herdr server >/dev/null 2>&1 </dev/null & )
+
+    local i
+    for i in $(seq 1 50); do
+        [[ -S "$sock" ]] && return 0
+        sleep 0.1
+    done
+    echo "Error: herdr server failed to start (no socket at $sock)" >&2
+    return 1
+}
+
 # Attach to the persistent herdr session. If we're already inside herdr the
 # newly created workspace is live in the running client, so just return.
 attach() {
@@ -95,9 +129,10 @@ setup_dev_workspace() {
 
     # Create the project workspace and capture ids from the JSON:
     #   .result.workspace.workspace_id  .result.tab.tab_id  .result.root_pane.pane_id
-    # Capture stderr too so a real failure surfaces instead of an empty error.
+    # Capture stderr too: if create fails, the diagnostic block below surfaces
+    # herdr's real message instead of an empty line.
     local create ws term_tab term_pane
-    create=$(herdr workspace create --cwd "$selected_path" --label "$label" 2>&1)
+    create=$(herdr workspace create --cwd "$selected_path" --label "$label" --focus 2>&1)
     ws=$(printf '%s' "$create" | jq -r '.result.workspace.workspace_id // empty' 2>/dev/null)
     term_tab=$(printf '%s' "$create" | jq -r '.result.tab.tab_id // empty' 2>/dev/null)
     term_pane=$(printf '%s' "$create" | jq -r '.result.root_pane.pane_id // empty' 2>/dev/null)
@@ -205,6 +240,9 @@ main() {
         echo "Error: Could not generate workspace label" >&2
         exit 1
     fi
+
+    # workspace/tab/pane commands below need a live server on the API socket.
+    ensure_server || exit 1
 
     manage_session "$selected_path" "$label"
 }
