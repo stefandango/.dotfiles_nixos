@@ -13,5 +13,6 @@
     ./dotnet.nix
     ./llama-cpp.nix
     ./tailscale.nix
+    ./ntfy.nix
   ];
 }

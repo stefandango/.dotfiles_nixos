@@ -13,6 +13,7 @@ Cross-platform Nix configuration for NixOS and macOS using Nix flakes with enhan
 - **Seamless Clipboard Experience**: Universal system clipboard across terminal, tmux, and neovim
 - **Development Workflow Optimizations**: Port management, quick file serving, and network diagnostics
 - **Hyprland Desktop (NixOS)**: Wayland compositor with Waybar, Rofi, SwayNC, greetd, and pyprland
+- **Push Notifications (ntfy)**: Receive-only [ntfy](https://ntfy.sh) subscriber on both platforms — native desktop notifications from a self-hosted server
 - **Modern Audio Stack**: PipeWire with ALSA/JACK/PulseAudio compatibility (NixOS)
 - **Gaming Support (NixOS)**: Steam with gamescope session, GameMode, MangoHud, Lutris, CoreCtrl
 - **Development Environment**: Docker, .NET (via omnisharp/netcoredbg), Node.js, Python with intelligent tooling
@@ -132,6 +133,49 @@ netinfo           # Comprehensive network information
 speedtest         # Run internet speed test
 ```
 
+### Push Notifications (ntfy)
+
+Both machines are **receive-only** subscribers to a self-hosted [ntfy](https://ntfy.sh)
+server, showing native desktop notifications when a topic is published to. There
+is no native Mac App Store app or Homebrew cask for ntfy, so both platforms use
+the `ntfy` CLI as the subscriber:
+
+- **macOS**: `modules/darwin/ntfy.nix` runs a `launchd` user agent
+  (`ntfy-subscribe`) that fires native notifications via `terminal-notifier`.
+- **NixOS**: `modules/nixos/ntfy.nix` runs a `systemd --user` service
+  (`ntfy-subscribe`) that pipes messages to `notify-send`, rendered by SwayNC.
+
+Credentials are **never** stored in the Nix store or committed to git. On **both**
+platforms, create the same out-of-store credentials file once:
+
+```bash
+mkdir -p ~/.config/ntfy
+cat > ~/.config/ntfy/credentials <<'EOF'
+NTFY_USER=youruser
+NTFY_PASSWORD=yourpassword
+NTFY_SERVER=https://your-ntfy-server   # or Tailscale hostname/IP
+NTFY_TOPIC=yourtopic
+EOF
+chmod 600 ~/.config/ntfy/credentials
+```
+
+Then apply the config and verify:
+
+```bash
+nixswitch
+curl -u user:pass -d "hello" https://server/topic   # triggers a desktop notification
+
+# NixOS — inspect the subscriber service
+systemctl --user status ntfy-subscribe              # should be active (running)
+
+# macOS — inspect the launchd agent
+launchctl list | grep ntfy-subscribe
+tail -f /tmp/ntfy-subscribe.err.log                 # debug auth/connection issues
+```
+
+> On macOS the first notification may require granting `terminal-notifier`
+> permission to send notifications (System Settings → Notifications).
+
 ### Tmux Session Management
 
 ```bash
@@ -191,7 +235,7 @@ This configuration uses a hybrid approach:
 │   ├── shared/           # Cross-platform (git, zsh, kitty, firefox, system)
 │   ├── darwin/           # macOS-specific home-manager modules
 │   ├── nixos/            # NixOS-specific modules (hyprland, waybar, rofi,
-│   │                     #   swaync, greetd, pyprland, apps, dotnet, env)
+│   │                     #   swaync, ntfy, greetd, pyprland, apps, dotnet, env)
 │   ├── config/           # Dotfile assets (oh-my-posh, lsd, omnisharp)
 │   └── scripts/          # Shell scripts (nix helpers, clipboard, tmux, waybar)
 ├── nix/                  # Standalone nix configs (nvim.nix via nixvim)
@@ -336,6 +380,17 @@ Edit `/Users/stefan/.dotfiles/modules/config/ohmyposhv3-v2.json` to customize th
 - Tmux: Ensure `set-clipboard on` is enabled (should be automatic)
 - Terminal: Try `Alt+c` to verify clipboard shortcuts work
 - Cross-check: Copy in one app, run `cb` to verify it's in system clipboard
+
+**ntfy notifications not appearing:**
+- Confirm `~/.config/ntfy/credentials` exists with valid values (both platforms)
+- NixOS: check the subscriber with `systemctl --user status ntfy-subscribe` and
+  tail logs via `journalctl --user -u ntfy-subscribe -f`
+- NixOS: if it doesn't auto-start with the Hyprland session, switch the unit's
+  `WantedBy` from `graphical-session.target` to `default.target` in `modules/nixos/ntfy.nix`
+- macOS: check the agent with `launchctl list | grep ntfy-subscribe` and tail
+  `/tmp/ntfy-subscribe.err.log`
+- macOS: grant `terminal-notifier` notification permission in
+  System Settings → Notifications
 
 **nixswitch fails:**
 - Run `nixvalidate` first to check for common issues
