@@ -18,11 +18,32 @@
     prefix = "ctrl+a"
 
     [theme]
-    # Inherit Kitty's ANSI palette so herdr matches the terminal exactly.
+    # Inherit Kitty's ANSI palette so panes/chrome match the terminal exactly.
     name = "terminal"
 
+    # Overlay the "Graphite" design tokens (theme/colors.nix) so herdr's
+    # highlights and agent-status colors stay on-brand:
+    #   accent = steel-blue, green = done, yellow = needs-attention, red = error.
+    [theme.custom]
+    accent = "#6f8fb3"
+    green  = "#7d9a6b"
+    yellow = "#c2a15c"
+    red    = "#b56b6b"
+
     [ui]
+    # Steel-blue accent for highlights, focused borders, and navigation UI.
+    accent = "#6f8fb3"
+    sidebar_width = 28
     pane_borders = true
     pane_gaps = true
+    # Show the detected agent (e.g. claude) in a pane border when it's unnamed.
+    show_agent_labels_on_pane_borders = true
+
+    # In-app toast when a background agent changes state (done / needs input).
+    [ui.toast]
+    delivery = "herdr"
+
+    [ui.toast.herdr]
+    position = "bottom-right"
   '';
 }
