@@ -22,7 +22,7 @@ SESSIONIZER_MAX_DEPTH="${SESSIONIZER_MAX_DEPTH:-2}"
 # with HERDR_ICON_* env vars (e.g. paste a literal glyph) if you prefer.
 ICON_TERMINAL="${HERDR_ICON_TERMINAL:-$(printf '\357\204\240')}"   # nf-fa-terminal (U+F120)
 ICON_EDITOR="${HERDR_ICON_EDITOR:-$(printf '\356\230\253')}"       # nf-custom-vim  (U+E62B)
-ICON_AI="${HERDR_ICON_AI:-$(printf '\357\225\204')}"               # nf-fa-robot    (U+F544)
+ICON_AI="${HERDR_ICON_AI:-$(printf '\357\203\220')}"               # nf-fa-magic    (U+F0D0) sparkle
 
 # Function to find project directories (identical to tmux-sessionizer)
 find_projects() {
@@ -127,15 +127,15 @@ setup_dev_workspace() {
     local selected_path="$1"
     local label="$2"
 
-    # Create the project workspace (focused) and capture ids from the JSON:
+    # Create the project workspace and capture ids from the JSON:
     #   .result.workspace.workspace_id  .result.tab.tab_id  .result.root_pane.pane_id
     # Capture stderr too: if create fails, the diagnostic block below surfaces
     # herdr's real message instead of an empty line.
     local create ws term_tab term_pane
     create=$(herdr workspace create --cwd "$selected_path" --label "$label" --focus 2>&1)
-    ws=$(printf '%s' "$create" | jq -r '.result.workspace.workspace_id // empty')
-    term_tab=$(printf '%s' "$create" | jq -r '.result.tab.tab_id // empty')
-    term_pane=$(printf '%s' "$create" | jq -r '.result.root_pane.pane_id // empty')
+    ws=$(printf '%s' "$create" | jq -r '.result.workspace.workspace_id // empty' 2>/dev/null)
+    term_tab=$(printf '%s' "$create" | jq -r '.result.tab.tab_id // empty' 2>/dev/null)
+    term_pane=$(printf '%s' "$create" | jq -r '.result.root_pane.pane_id // empty' 2>/dev/null)
 
     if [[ -z "$ws" || -z "$term_pane" ]]; then
         echo "Error: herdr workspace create failed:" >&2
@@ -143,26 +143,27 @@ setup_dev_workspace() {
         return 1
     fi
 
-    # Tab 1 (root pane): Terminal — rename the default tab, then show project stats
+    # Tab 1 (root pane): Terminal — rename the default tab, then show project stats.
+    # rename is best-effort (no-ops if unsupported, leaving herdr's default label).
     [[ -n "$term_tab" ]] && herdr tab rename "$term_tab" "$ICON_TERMINAL Terminal" >/dev/null 2>&1 || true
     if command -v projstats >/dev/null 2>&1; then
         pane_run "$term_pane" "projstats"
     fi
 
-    # Tab 2: Editor — open nvim (created unfocused so Terminal stays the active tab)
+    # Tab 2: Editor — open nvim
     if command -v nvim >/dev/null 2>&1; then
         local edit_pane
         edit_pane=$(herdr tab create --workspace "$ws" --cwd "$selected_path" \
-            --label "$ICON_EDITOR Editor" --no-focus 2>/dev/null \
-            | jq -r '.result.root_pane.pane_id // empty')
+            --label "$ICON_EDITOR Editor" 2>/dev/null \
+            | jq -r '.result.root_pane.pane_id // empty' 2>/dev/null)
         pane_run "$edit_pane" "nvim ."
     fi
 
     # Tab 3: AI — open claude (the whole point of herdr)
     local ai_pane
     ai_pane=$(herdr tab create --workspace "$ws" --cwd "$selected_path" \
-        --label "$ICON_AI AI" --no-focus 2>/dev/null \
-        | jq -r '.result.root_pane.pane_id // empty')
+        --label "$ICON_AI AI" 2>/dev/null \
+        | jq -r '.result.root_pane.pane_id // empty' 2>/dev/null)
     if [[ -n "$ai_pane" ]]; then
         if command -v claude >/dev/null 2>&1; then
             pane_run "$ai_pane" "claude"
@@ -170,6 +171,9 @@ setup_dev_workspace() {
             herdr pane send-text "$ai_pane" "# AI Assistant - run 'claude' to start Claude Code" >/dev/null 2>&1 || true
         fi
     fi
+
+    # Leave the Terminal tab active and switch to the new workspace (best-effort).
+    [[ -n "$term_tab" ]] && herdr tab focus "$term_tab" >/dev/null 2>&1 || true
 
     attach
 }
