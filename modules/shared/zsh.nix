@@ -276,14 +276,15 @@
       bindkey '^f' tmux-sessionizer-widget
 
       # herdr (agent multiplexer) project picker — sibling of Ctrl+f.
-      # Bound to Alt+g (not Ctrl+g) so it doesn't shadow Ctrl+G inside TUIs
+      # Bound to Alt+f (not Ctrl+g) so it doesn't shadow Ctrl+G inside TUIs
       # like claude that own the terminal and use that chord themselves.
+      # Note: this overrides zsh's default Alt+f (forward-word) binding.
       herdr-sessionizer-widget() {
         ~/Scripts/herdr-sessionizer </dev/tty
         zle reset-prompt
       }
       zle -N herdr-sessionizer-widget
-      bindkey '^[g' herdr-sessionizer-widget
+      bindkey '^[f' herdr-sessionizer-widget
 
       # Enhanced clipboard bindings
       bindkey -s '^[c' 'clipshow\n'        # Alt+c to show clipboard
