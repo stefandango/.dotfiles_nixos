@@ -38,6 +38,11 @@
 			url = "github:ogulcancelik/herdr/v0.6.6";
 			inputs.nixpkgs.follows = "nixpkgs";
 		};
+
+		hunk = {
+			url = "github:modem-dev/hunk";
+			inputs.nixpkgs.follows = "nixpkgs";
+		};
 	};
 
 	outputs = inputs @ { self, nixpkgs, home-manager, nixvim, darwin, ... }:
@@ -76,7 +81,7 @@
 						home-manager.useGlobalPkgs = true;
 						home-manager.useUserPackages = true;
 						home-manager.backupFileExtension = "backup";
-						home-manager.extraSpecialArgs = { inherit vars; };
+						home-manager.extraSpecialArgs = { inherit inputs vars; };
 						home-manager.users.${vars.user} = import ./home;
 					}
 				];
@@ -106,7 +111,7 @@
 						home-manager.useGlobalPkgs = true;
 						home-manager.useUserPackages = true;
 						home-manager.backupFileExtension = "backup";
-						home-manager.extraSpecialArgs = { inherit vars; };
+						home-manager.extraSpecialArgs = { inherit inputs vars; };
 						home-manager.users.${vars.user} = import ./home;
 					}
 				];
