@@ -1,0 +1,566 @@
+#!/usr/bin/env bash
+
+# wt - git worktree workflow manager
+# Create a worktree per feature (optionally carrying uncommitted changes),
+# work on several in parallel, then finish with a PR / push / local merge and
+# automatic cleanup of the worktree, branch, and herdr/tmux workspace.
+#
+# Worktrees live in a hidden central dir: ~/Dev/.worktrees/<project>/<feature>
+# The sessionizers (Ctrl+f tmux, Alt+f herdr) know this layout and label their
+# sessions/workspaces "<project>__<feature>", which is how cleanup finds them.
+
+set -uo pipefail
+
+# Configuration
+WT_ROOT="${WT_ROOT:-$HOME/Dev/.worktrees}"
+WT_DEV_DIR="${WT_DEV_DIR:-$HOME/Dev}"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+have() { command -v "$1" >/dev/null 2>&1; }
+die() { printf "${RED}Error:${NC} %b\n" "$*" >&2; exit 1; }
+warn() { printf "${YELLOW}⚠${NC}  %b\n" "$*" >&2; }
+info() { printf "${CYAN}%b${NC}\n" "$*"; }
+ok() { printf "${GREEN}%b${NC}\n" "$*"; }
+
+# --- interactive primitives (gum when available, plain read fallbacks) ------
+
+confirm() {
+    # confirm "prompt" [yes|no]  — second arg is the default answer
+    local prompt="$1" default="${2:-no}"
+    if have gum; then
+        if [[ "$default" == "yes" ]]; then
+            gum confirm "$prompt"
+        else
+            gum confirm --default=false "$prompt"
+        fi
+    else
+        local yn suffix="[y/N]"
+        [[ "$default" == "yes" ]] && suffix="[Y/n]"
+        read -r -p "$prompt $suffix " yn
+        case "$yn" in
+        [Yy]*) return 0 ;;
+        [Nn]*) return 1 ;;
+        "") [[ "$default" == "yes" ]] ;;
+        *) return 1 ;;
+        esac
+    fi
+}
+
+choose() {
+    # choose "header" option...  — prints the selection (empty on cancel)
+    local header="$1"
+    shift
+    if have gum; then
+        gum choose --header "$header" "$@" || true
+    else
+        echo "$header" >&2
+        local opt
+        select opt in "$@"; do
+            [[ -n "$opt" ]] && { echo "$opt"; return 0; }
+            return 0
+        done
+    fi
+}
+
+input() {
+    # input "placeholder" — prints the entered value
+    if have gum; then
+        gum input --placeholder "$1" || true
+    else
+        local val
+        read -r -p "$1: " val
+        echo "$val"
+    fi
+}
+
+banner() {
+    if have gum; then
+        gum style --border rounded --padding "0 2" --margin "1 0" \
+            --border-foreground 2 "$@"
+    else
+        printf '%b\n' "$@"
+    fi
+}
+
+# --- git helpers -------------------------------------------------------------
+
+main_repo_for() {
+    # Primary checkout for the repo containing $1 (works from inside worktrees)
+    local common
+    common=$(git -C "$1" rev-parse --path-format=absolute --git-common-dir 2>/dev/null) || return 1
+    echo "${common%/.git}"
+}
+
+base_branch() {
+    local repo="$1" ref
+    ref=$(git -C "$repo" symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null) &&
+        { echo "${ref#origin/}"; return; }
+    git -C "$repo" show-ref --verify --quiet refs/heads/main && { echo main; return; }
+    git -C "$repo" show-ref --verify --quiet refs/heads/master && { echo master; return; }
+    git -C "$repo" branch --show-current 2>/dev/null || echo main
+}
+
+project_name() { basename "$1"; }
+
+sanitize_dir() { echo "${1//\//-}"; }  # branch keeps slashes, its dir does not
+
+label_for() {
+    # Keep in sync with generate_session_name() in {tmux,herdr}-sessionizer:
+    # worktree paths get the label <project>__<feature-dir> with . - space → _
+    local name="${1}__${2}"
+    name="${name//[.]/_}"
+    name="${name//[-]/_}"
+    name="${name//[ ]/_}"
+    echo "$name"
+}
+
+is_dirty() { [[ -n "$(git -C "$1" status --porcelain 2>/dev/null)" ]]; }
+
+has_origin() { git -C "$1" remote get-url origin >/dev/null 2>&1; }
+
+has_github_remote() {
+    have gh || return 1
+    git -C "$1" remote get-url origin 2>/dev/null | grep -qi github
+}
+
+list_worktrees() {
+    [[ -d "$WT_ROOT" ]] || return 0
+    find "$WT_ROOT" -mindepth 2 -maxdepth 2 -type d 2>/dev/null | while IFS= read -r d; do
+        [[ -f "$d/.git" ]] && echo "$d"
+    done
+}
+
+pick_worktree() {
+    local sel
+    sel=$(
+        list_worktrees | sort | fzf \
+            --height=50% --border --ansi \
+            --delimiter=/ --with-nth=-2,-1 \
+            --preview 'git -C {} status -sb --color=always; echo ""; git -C {} log --oneline -8 --color=always' \
+            --preview-window=right:55% \
+            --prompt="$1 "
+    ) || true
+    echo "$sel"
+}
+
+pick_repo() {
+    local sel
+    sel=$(
+        {
+            find "$WT_DEV_DIR" -mindepth 1 -maxdepth 2 -name ".git" -type d 2>/dev/null |
+                sed 's|/\.git$||'
+            [[ -d "$HOME/.dotfiles/.git" ]] && echo "$HOME/.dotfiles"
+        } | grep -v "^$WT_ROOT" | sort -u | fzf \
+            --height=40% --border --ansi \
+            --preview 'git -C {} log --oneline -5 --color=always' \
+            --preview-window=right:50% \
+            --prompt="🌿 New worktree for: "
+    ) || true
+    echo "$sel"
+}
+
+# --- session integration -----------------------------------------------------
+
+open_worktree() {
+    local path="$1"
+    local opts=()
+    if [[ -n "${TMUX:-}" ]] && have tmux-sessionizer; then
+        opts+=("🖥  tmux session")
+    fi
+    have herdr-sessionizer && opts+=("🐑 herdr workspace")
+    if [[ -z "${TMUX:-}" ]] && have tmux-sessionizer; then
+        opts+=("🖥  tmux session")
+    fi
+    opts+=("📂 Just print the path")
+    opts+=("Skip")
+
+    local action
+    action=$(choose "Open $(basename "$path")?" "${opts[@]}")
+    case "$action" in
+    *herdr*) exec herdr-sessionizer "$path" ;;
+    *tmux*) exec tmux-sessionizer "$path" ;;
+    *path*) echo "$path" ;;
+    *) : ;;
+    esac
+}
+
+close_workspace() {
+    # Best-effort: close the herdr workspace and/or tmux session for a label
+    local label="$1"
+    if have herdr && have jq; then
+        local ids id
+        ids=$(herdr workspace list 2>/dev/null |
+            jq -r --arg l "$label" '.result.workspaces[]? | select(.label==$l) | .workspace_id' 2>/dev/null)
+        for id in $ids; do
+            herdr workspace close "$id" >/dev/null 2>&1 || true
+        done
+    fi
+    if have tmux && tmux has-session -t="$label" 2>/dev/null; then
+        if [[ -n "${TMUX:-}" ]]; then
+            local cur
+            cur=$(tmux display-message -p '#S' 2>/dev/null || true)
+            if [[ "$cur" == "$label" ]]; then
+                tmux switch-client -n 2>/dev/null || true
+            fi
+        fi
+        tmux kill-session -t="$label" 2>/dev/null || true
+    fi
+}
+
+# --- resolve the worktree a command should act on ----------------------------
+
+resolve_worktree() {
+    # resolve_worktree "picker prompt" [path] — prints path, empty on cancel
+    local prompt="$1" arg="${2:-}" top
+    if [[ -n "$arg" ]]; then
+        [[ -d "$arg" ]] || die "Directory '$arg' does not exist"
+        top=$(git -C "$arg" rev-parse --show-toplevel 2>/dev/null) || die "'$arg' is not a git worktree"
+        [[ -f "$top/.git" ]] || die "'$top' is the main checkout, not a worktree"
+        echo "$top"
+        return
+    fi
+    top=$(git rev-parse --show-toplevel 2>/dev/null || true)
+    if [[ -n "$top" && -f "$top/.git" ]]; then
+        echo "$top"
+        return
+    fi
+    pick_worktree "$prompt"
+}
+
+# --- subcommands --------------------------------------------------------------
+
+cmd_new() {
+    local branch="" from="" carry="ask" open=1
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+        --from)
+            [[ $# -ge 2 ]] || die "--from needs a ref"
+            from="$2"
+            shift 2
+            ;;
+        --carry) carry="yes"; shift ;;
+        --no-carry) carry="no"; shift ;;
+        --no-open) open=0; shift ;;
+        -*) die "Unknown option: $1 (see wt --help)" ;;
+        *) branch="$1"; shift ;;
+        esac
+    done
+
+    # Resolve the repo: current one if inside git, otherwise pick from ~/Dev
+    local repo
+    if git rev-parse --git-dir >/dev/null 2>&1; then
+        repo=$(main_repo_for "$PWD") || die "Could not resolve the main checkout"
+    else
+        repo=$(pick_repo)
+        [[ -n "$repo" ]] || exit 0
+    fi
+
+    if [[ -z "$branch" ]]; then
+        branch=$(input "feature-branch-name")
+        [[ -n "$branch" ]] || exit 0
+    fi
+
+    local base
+    base="${from:-$(base_branch "$repo")}"
+
+    local project dir path
+    project=$(project_name "$repo")
+    dir=$(sanitize_dir "$branch")
+    path="$WT_ROOT/$project/$dir"
+
+    git -C "$repo" worktree prune >/dev/null 2>&1 || true
+
+    # Branch already checked out in a worktree? Just offer to open it.
+    local existing
+    existing=$(git -C "$repo" worktree list --porcelain 2>/dev/null |
+        awk -v b="refs/heads/$branch" '$1=="worktree"{wt=$2} $1=="branch"&&$2==b{print wt}')
+    if [[ -n "$existing" ]]; then
+        info "🌿 '$branch' already has a worktree: $existing"
+        [[ $open -eq 1 ]] && open_worktree "$existing"
+        return 0
+    fi
+
+    [[ -e "$path" ]] && die "Target already exists: $path\nRemove it with: wt rm $path"
+
+    mkdir -p "$WT_ROOT/$project"
+
+    local out
+    if git -C "$repo" show-ref --verify --quiet "refs/heads/$branch"; then
+        info "🌿 Checking out existing branch '$branch'"
+        out=$(git -C "$repo" worktree add "$path" "$branch" 2>&1) ||
+            die "git worktree add failed:\n$out"
+    else
+        out=$(git -C "$repo" worktree add -b "$branch" "$path" "$base" 2>&1) ||
+            die "git worktree add failed:\n$out"
+    fi
+
+    # Optionally carry uncommitted changes over from the main checkout
+    if [[ "$carry" != "no" ]] && is_dirty "$repo"; then
+        if [[ "$carry" == "yes" ]] ||
+            confirm "📦 Main checkout has uncommitted changes — bring them along?" no; then
+            if git -C "$repo" stash push -u -m "wt: carry → $branch" >/dev/null 2>&1; then
+                # The stash is shared via the common git dir, so pop from here works
+                if git -C "$path" stash pop >/dev/null 2>&1; then
+                    ok "📦 Uncommitted changes moved into the worktree"
+                else
+                    warn "stash pop hit conflicts — the stash is preserved; resolve in the worktree, then 'git stash drop'"
+                fi
+            else
+                warn "could not stash changes in the main checkout"
+            fi
+        fi
+    fi
+
+    banner "🌿 $branch" "📁 $path" "⬅  based on $base"
+
+    [[ $open -eq 1 ]] && open_worktree "$path"
+    return 0
+}
+
+cmd_list() {
+    local found=0 d branch repo base ahead state
+    while IFS= read -r d; do
+        found=1
+        branch=$(git -C "$d" branch --show-current 2>/dev/null)
+        [[ -n "$branch" ]] || branch="(detached)"
+        repo=$(main_repo_for "$d") || continue
+        base=$(base_branch "$repo")
+        ahead=$(git -C "$d" rev-list --count "$base..HEAD" 2>/dev/null || echo "?")
+        if is_dirty "$d"; then
+            state="${YELLOW}✗ dirty${NC}"
+        else
+            state="${GREEN}✓ clean${NC}"
+        fi
+        printf "🌿 %-32s ${CYAN}↑%-3s${NC} %b  %s\n" \
+            "$(basename "$(dirname "$d")")/$(basename "$d")" "$ahead" "$state" "${d/#$HOME/~}"
+    done < <(list_worktrees | sort)
+
+    if [[ $found -eq 0 ]]; then
+        info "No worktrees yet — try: wt new <branch>"
+    fi
+}
+
+cmd_open() {
+    # Always show the picker when no path is given — even from inside a
+    # worktree, "wt" means "take me to one of my worktrees".
+    local path
+    if [[ -n "${1:-}" ]]; then
+        path=$(resolve_worktree "🌿 Open worktree:" "$1")
+    else
+        path=$(pick_worktree "🌿 Open worktree:")
+    fi
+    [[ -n "$path" ]] || exit 0
+    open_worktree "$path"
+}
+
+cmd_done() {
+    local wtpath
+    wtpath=$(resolve_worktree "✅ Finish worktree:" "${1:-}")
+    [[ -n "$wtpath" ]] || exit 0
+
+    local repo branch base project feature
+    repo=$(main_repo_for "$wtpath") || die "Could not resolve the main checkout"
+    branch=$(git -C "$wtpath" branch --show-current 2>/dev/null)
+    [[ -n "$branch" ]] || die "Worktree is in detached HEAD state — check out a branch first"
+    base=$(base_branch "$repo")
+    project=$(project_name "$repo")
+    feature=$(basename "$wtpath")
+
+    # Status panel
+    local ahead
+    ahead=$(git -C "$wtpath" rev-list --count "$base..HEAD" 2>/dev/null || echo "?")
+    echo ""
+    info "🌿 $branch · ↑$ahead ahead of $base"
+    git -C "$wtpath" log --oneline --color=always "$base..HEAD" 2>/dev/null | head -8 || true
+    echo ""
+
+    # A dirty tree must be committed (or the whole thing aborted) before finishing
+    if is_dirty "$wtpath"; then
+        warn "uncommitted changes:"
+        git -C "$wtpath" status --short >&2
+        local dirty_action
+        dirty_action=$(choose "Worktree is dirty — what now?" \
+            "💾 Commit everything" "🚫 Abort")
+        case "$dirty_action" in
+        *Commit*)
+            local msg
+            msg=$(input "commit message")
+            [[ -n "$msg" ]] || die "Empty commit message — aborting"
+            git -C "$wtpath" add -A || die "git add failed"
+            git -C "$wtpath" commit -m "$msg" || die "git commit failed"
+            ;;
+        *) exit 0 ;;
+        esac
+    fi
+
+    # Action menu, filtered by what the repo supports
+    local opts=()
+    has_github_remote "$repo" && opts+=("🔀 Create PR")
+    has_origin "$repo" && opts+=("⬆️  Push branch only")
+    opts+=("🔗 Merge into $base locally")
+    opts+=("🗑  Abandon (delete everything)")
+    opts+=("Cancel")
+
+    local action
+    action=$(choose "Finish '$branch' — what should happen?" "${opts[@]}")
+
+    local delete_branch="" force=0 summary=""
+    case "$action" in
+    *"Create PR"*)
+        git -C "$wtpath" push -u origin "$branch" || die "push failed"
+        (cd "$wtpath" && gh pr create --head "$branch") ||
+            die "PR creation failed or was cancelled — worktree left in place"
+        summary="PR opened for $branch · branch kept until merge"
+        ;;
+    *"Push branch"*)
+        git -C "$wtpath" push -u origin "$branch" || die "push failed"
+        summary="$branch pushed to origin · branch kept"
+        ;;
+    *"Merge into"*)
+        is_dirty "$repo" &&
+            die "Main checkout has uncommitted changes — commit or stash there first"
+        git -C "$repo" switch "$base" || die "could not switch main checkout to $base"
+        if ! git -C "$repo" merge "$branch"; then
+            git -C "$repo" merge --abort >/dev/null 2>&1 || true
+            die "Merge conflict — nothing was cleaned up; resolve manually or rebase in the worktree"
+        fi
+        delete_branch="-d"
+        summary="$branch merged into $base"
+        ;;
+    *Abandon*)
+        confirm "🗑  Really delete worktree AND branch '$branch'?" no || exit 0
+        delete_branch="-D"
+        force=1
+        summary="$branch abandoned"
+        ;;
+    *) exit 0 ;;
+    esac
+
+    # Cleanup: worktree, branch (per action), and the herdr/tmux workspace
+    local was_inside=0
+    if [[ "$PWD" == "$wtpath"* ]]; then
+        was_inside=1
+        cd "$repo" || true
+    fi
+
+    if [[ $force -eq 1 ]]; then
+        git -C "$repo" worktree remove --force "$wtpath" || warn "could not remove $wtpath"
+    else
+        git -C "$repo" worktree remove "$wtpath" || warn "could not remove $wtpath"
+    fi
+    git -C "$repo" worktree prune >/dev/null 2>&1 || true
+
+    if [[ -n "$delete_branch" ]]; then
+        git -C "$repo" branch "$delete_branch" "$branch" >/dev/null 2>&1 ||
+            warn "could not delete branch '$branch'"
+    fi
+
+    close_workspace "$(label_for "$project" "$feature")"
+
+    ok "✅ $summary · worktree removed 🧹"
+    if [[ $was_inside -eq 1 ]]; then
+        info "💡 You were inside the removed worktree — cd \"$repo\""
+    fi
+}
+
+cmd_rm() {
+    local wtpath
+    wtpath=$(resolve_worktree "🗑  Remove worktree:" "${1:-}")
+    [[ -n "$wtpath" ]] || exit 0
+
+    local repo branch project feature
+    repo=$(main_repo_for "$wtpath") || die "Could not resolve the main checkout"
+    branch=$(git -C "$wtpath" branch --show-current 2>/dev/null || true)
+    project=$(project_name "$repo")
+    feature=$(basename "$wtpath")
+
+    local force=0
+    if is_dirty "$wtpath"; then
+        warn "worktree has uncommitted changes:"
+        git -C "$wtpath" status --short >&2
+        confirm "🗑  Remove '$feature' and LOSE these changes?" no || exit 0
+        force=1
+    else
+        confirm "🗑  Remove worktree '$feature'?" no || exit 0
+    fi
+
+    local was_inside=0
+    if [[ "$PWD" == "$wtpath"* ]]; then
+        was_inside=1
+        cd "$repo" || true
+    fi
+
+    if [[ $force -eq 1 ]]; then
+        git -C "$repo" worktree remove --force "$wtpath" || die "could not remove $wtpath"
+    else
+        git -C "$repo" worktree remove "$wtpath" || die "could not remove $wtpath"
+    fi
+    git -C "$repo" worktree prune >/dev/null 2>&1 || true
+
+    if [[ -n "$branch" ]] && confirm "Also delete branch '$branch'?" no; then
+        git -C "$repo" branch -D "$branch" >/dev/null 2>&1 ||
+            warn "could not delete branch '$branch'"
+    fi
+
+    close_workspace "$(label_for "$project" "$feature")"
+    ok "🧹 Worktree removed"
+    if [[ $was_inside -eq 1 ]]; then
+        info "💡 You were inside the removed worktree — cd \"$repo\""
+    fi
+}
+
+usage() {
+    cat <<EOF
+Usage: $(basename "$0") [command]
+
+Git worktree workflow manager — one worktree per feature, living under
+$WT_ROOT/<project>/<feature>, with herdr/tmux session integration.
+
+Commands:
+  new [branch] [options]   Create a worktree (+ branch) for a feature
+      --from <ref>           Base it on <ref> instead of the default branch
+      --carry / --no-carry   Bring uncommitted changes from the main checkout
+      --no-open              Don't offer to open a session afterwards
+  list, ls                 List all worktrees with ahead-count and dirty state
+  open, switch [path]      Open a worktree in herdr/tmux (default command)
+  done, finish [path]      Finish a feature: PR / push / merge / abandon, then clean up
+  rm, remove [path]        Remove a worktree (and optionally its branch)
+
+Environment Variables:
+  WT_ROOT      Where worktrees live (default: \$HOME/Dev/.worktrees)
+  WT_DEV_DIR   Where projects are searched (default: \$HOME/Dev)
+
+Examples:
+  wt new auth-fix          # New worktree + branch off the default branch
+  wt new fix --carry       # ...and move your uncommitted changes into it
+  wt                       # Fuzzy-pick a worktree and open it
+  wt done                  # Finish the worktree you're standing in
+
+Requires: git, fzf. Optional: gum (prettier prompts), gh (PRs), herdr/tmux.
+EOF
+}
+
+main() {
+    have git || die "git is required"
+
+    local cmd="${1:-}"
+    [[ $# -gt 0 ]] && shift
+
+    case "$cmd" in
+    -h | --help) usage ;;
+    new) cmd_new "$@" ;;
+    list | ls) cmd_list "$@" ;;
+    done | finish) cmd_done "$@" ;;
+    rm | remove) cmd_rm "$@" ;;
+    open | switch | "") cmd_open "$@" ;;
+    *) die "Unknown command: $cmd (see wt --help)" ;;
+    esac
+}
+
+main "$@"
