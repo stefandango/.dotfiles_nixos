@@ -56,6 +56,20 @@ dev               # Jump to ~/Dev directory
 dots              # Jump to ~/.dotfiles directory
 ```
 
+### Git Worktree Workflow (wt)
+```bash
+# One worktree per feature under ~/Dev/.worktrees/<project>/<feature>
+wt new auth-fix       # New worktree + branch off the default branch
+wt new fix --carry    # ...and bring uncommitted changes from the main checkout
+wt                    # Fuzzy-pick a worktree and open it (herdr/tmux)
+wt list               # All worktrees with ahead-count and dirty state
+wt done               # Finish: PR / push / merge locally / abandon, then cleanup
+wt rm                 # Remove a worktree (and optionally its branch)
+
+# Worktrees also show up in the Ctrl+f / Alt+f sessionizers, labeled
+# <project>__<feature>; wt done closes the matching workspace/session.
+```
+
 ### File Management Enhancements
 ```bash
 # Quick navigation
