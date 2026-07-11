@@ -2,6 +2,15 @@
 set -euo pipefail
 # Enhanced nixswitch with visual feedback (cross-platform)
 
+# Run this as your normal user, NOT with sudo: the build must run as the repo
+# owner (only the activation step below elevates). Running the whole script as
+# root makes the build fail on repo/HOME ownership.
+if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
+    echo "❌ Don't run nixswitch with sudo — run it as your user." >&2
+    echo "   It elevates only the activation step on its own." >&2
+    exit 1
+fi
+
 echo "🔨 Building configuration..."
 echo ""
 
@@ -9,7 +18,8 @@ build_start=$(date +%s)
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     BUILD_TARGET="$HOME/.dotfiles#darwinConfigurations.Stefans-MacBook-Pro.system"
-    SWITCH_CMD="darwin-rebuild switch --flake $HOME/.dotfiles#Stefans-MacBook-Pro"
+    # nix-darwin now requires system activation to run as root
+    SWITCH_CMD="sudo darwin-rebuild switch --flake $HOME/.dotfiles#Stefans-MacBook-Pro"
     GEN_CMD="darwin-rebuild --list-generations"
 else
     BUILD_TARGET="$HOME/.dotfiles#nixosConfigurations.stefan.config.system.build.toplevel"
@@ -26,6 +36,13 @@ if nom build "$BUILD_TARGET" "$@"; then
     echo ""
     echo "🔄 Activating configuration..."
     echo ""
+
+    # Activation runs as root, which evaluates the flake from this repo. git
+    # refuses to read a repo it doesn't own (libgit2 error 7), so make sure
+    # root trusts it once. Idempotent — only adds the entry if missing.
+    if ! sudo git config --global --get-all safe.directory 2>/dev/null | grep -qxF "$HOME/.dotfiles"; then
+        sudo git config --global --add safe.directory "$HOME/.dotfiles"
+    fi
 
     switch_start=$(date +%s)
 

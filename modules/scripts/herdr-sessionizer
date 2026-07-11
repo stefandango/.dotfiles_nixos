@@ -35,6 +35,7 @@ find_projects() {
         find "$path" -mindepth 1 -maxdepth 1 -type d \
             -not -name ".git" \
             -not -path "*/.git" \
+            -not -name ".worktrees" \
             -print 2>/dev/null
 
         # Direct subdirectories that are Git repos
@@ -48,6 +49,13 @@ find_projects() {
             echo "$path"
         fi
     done
+
+    # Include wt-managed worktrees (~/Dev/.worktrees/<project>/<feature>).
+    # Their .git is a file, so the .git-dir scan above can never find them.
+    local wt_root="${WT_ROOT:-$HOME/Dev/.worktrees}"
+    if [[ -d "$wt_root" ]]; then
+        find "$wt_root" -mindepth 2 -maxdepth 2 -type d -print 2>/dev/null
+    fi
 }
 
 # Function to generate a clean workspace label (identical to tmux-sessionizer)
@@ -55,7 +63,14 @@ generate_session_name() {
     local path="$1"
     local name
 
-    if [[ -d "$path/.git" ]]; then
+    # wt-managed worktrees get a <project>__<feature> label so multiple
+    # features of the same project stay distinguishable (and `wt done` can
+    # find the workspace to clean it up — keep in sync with label_for() in wt)
+    local wt_root="${WT_ROOT:-$HOME/Dev/.worktrees}"
+    if [[ "$path" == "$wt_root/"*/* ]]; then
+        local rel="${path#"$wt_root"/}"
+        name="${rel%%/*}__${rel#*/}"
+    elif [[ -d "$path/.git" ]]; then
         local repo_name
         repo_name=$(basename "$(git -C "$path" config --get remote.origin.url 2>/dev/null || echo "$path")")
         repo_name="${repo_name%.git}"

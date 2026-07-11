@@ -29,6 +29,11 @@
       executable = true;
     };
 
+    "Scripts/wt" = {
+      source = ../scripts/wt;
+      executable = true;
+    };
+
     "Scripts/projstats" = {
       source = ../scripts/projstats;
       executable = true;
