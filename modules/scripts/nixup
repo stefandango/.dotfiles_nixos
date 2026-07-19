@@ -2,6 +2,14 @@
 set -euo pipefail
 # Enhanced Nix update with progress tracking
 
+# Run as your normal user, NOT with sudo: the flake update and build must run as
+# the repo owner (nixswitch elevates only the activation step on its own).
+if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
+    echo "❌ Don't run nixup with sudo — run it as your user." >&2
+    echo "   It elevates only the activation step on its own." >&2
+    exit 1
+fi
+
 echo "❄️  Nix Update & Rebuild"
 echo "======================="
 echo ""
@@ -40,7 +48,11 @@ echo ""
 
 # Show what changed
 echo "📝 Changes in flake.lock:"
-git diff --no-index --color=always --word-diff=color /dev/null flake.lock 2>/dev/null | head -20 || echo "   (no changes)"
+if git diff --quiet -- flake.lock 2>/dev/null; then
+    echo "   (no changes)"
+else
+    git diff --color=always --stat -- flake.lock 2>/dev/null | sed 's/^/   /'
+fi
 echo ""
 
 # Build and switch

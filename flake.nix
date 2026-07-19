@@ -4,6 +4,15 @@
 	inputs = {
 		nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
+		# Last nixpkgs line that still supports x86_64-darwin (26.11 dropped it and
+		# now throws on import for that platform). Used for two things, both Darwin:
+		#   1. hunk's nixpkgs — its flake-parts systems list includes x86_64-darwin,
+		#      so following our unstable nixpkgs breaks eval of the whole Darwin config.
+		#   2. terminal-notifier — its build is broken on 26.11/aarch64-darwin (cctools
+		#      ld crashes) and it isn't in the cache, so we overlay it in from here.
+		# Both should go away once upstream catches up; see modules/darwin/ntfy.nix.
+		nixpkgs-darwin-stable.url = "github:NixOS/nixpkgs/nixpkgs-26.05-darwin";
+
 		home-manager = {
 			url = "github:nix-community/home-manager";
 			inputs.nixpkgs.follows = "nixpkgs";
@@ -39,9 +48,10 @@
 			inputs.nixpkgs.follows = "nixpkgs";
 		};
 
+		# Deliberately does NOT follow nixpkgs — see nixpkgs-darwin-stable above.
 		hunk = {
 			url = "github:modem-dev/hunk";
-			inputs.nixpkgs.follows = "nixpkgs";
+			inputs.nixpkgs.follows = "nixpkgs-darwin-stable";
 		};
 	};
 
@@ -74,6 +84,20 @@
 				specialArgs = { inherit inputs vars; };
 				modules = [
 					{ nixpkgs.hostPlatform = "aarch64-darwin"; }
+					# terminal-notifier (used by modules/darwin/ntfy.nix) fails to link on
+					# nixpkgs 26.11/aarch64-darwin — cctools ld dies with SIGTRAP — and it
+					# isn't in the binary cache, so the build is unavoidable. Take it from
+					# 26.05, where it's cached and working. Drop once 26.11 builds it.
+					{
+						nixpkgs.overlays = [
+							(final: prev: {
+								inherit (import inputs.nixpkgs-darwin-stable {
+									inherit (prev.stdenv.hostPlatform) system;
+									config.allowUnfree = true;
+								}) terminal-notifier;
+							})
+						];
+					}
 					./hosts/macbook
 					./modules/shared/system.nix
 					./modules/darwin
