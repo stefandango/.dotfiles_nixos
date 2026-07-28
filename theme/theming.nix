@@ -13,6 +13,7 @@
   ]);
 
   home.pointerCursor = lib.mkIf pkgs.stdenv.isLinux {
+    enable = true;
     name = "Bibata-Modern-Classic";
     package = pkgs.bibata-cursors;
     size = 28;
@@ -43,7 +44,7 @@
 
   qt = lib.mkIf pkgs.stdenv.isLinux {
     enable = true;
-    platformTheme.name = "gtk";
+    platformTheme.name = "gtk3";
   };
 
   # Font configuration for better rendering

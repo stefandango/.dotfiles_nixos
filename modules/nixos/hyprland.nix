@@ -597,7 +597,7 @@ in
 
 		exec-once=${pkgs.awww}/bin/awww-daemon
 		exec-once=${pkgs.waybar}/bin/waybar
-		# exec-once=${pkgs.openrazer-daemon}/bin/openrazer-daemon  # Disabled: kernel 7.0.x build break
+		exec-once=${pkgs.openrazer-daemon}/bin/openrazer-daemon
 		exec-once=${pkgs.networkmanagerapplet}/bin/nm-applet --indicator
 		# Start CoreCtrl minimized so its saved GPU profile (undervolt / power
 		# limit) is applied at login. The real fix for this is the polkit rule in

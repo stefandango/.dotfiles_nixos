@@ -79,13 +79,11 @@
     # re-applied automatically each boot.
     # (Renamed from programs.corectrl.gpuOverclock.enable.)
     amdgpu.overdrive.enable = true;
-    # Disabled: openrazer 3.12.2 driver fails to build against kernel 7.0.x
-    # (hid_report_raw_event signature changed to require 6 args). Re-enable
-    # once nixpkgs ships a patched openrazer.
-    # openrazer = {
-    #   enable = true;
-    #   batteryNotifier.enable = true;
-    # };
+    openrazer = {
+      enable = true;
+      batteryNotifier.enable = true;
+      users = [ vars.user ];
+    };
     # Required for Bluetooth controller firmware (otherwise hci0 FW download
     # fails with -19 on boot). Also enables AMD microcode updates via the
     # default in hardware-configuration.nix.
@@ -196,7 +194,14 @@
   # NixOS-specific packages
   environment.systemPackages = with pkgs; [
     inputs.nix-claude-code.packages.${pkgs.stdenv.hostPlatform.system}.default
-    inputs.mcp-nixos.packages.${pkgs.stdenv.hostPlatform.system}.default  # nixos/home-manager/darwin MCP server (used by .mcp.json)
+    # Build mcp-nixos against our own nixpkgs (native fastmcp 3.3.1) instead of
+    # inputs.mcp-nixos.packages.default, which force-pins fastmcp to 3.2.4 via its
+    # `fastmcp3` overlay. That pin now breaks: nixos-unstable split fastmcp into
+    # fastmcp + fastmcp-slim (3.3.1, monorepo `fastmcp_slim/` subdir), and the
+    # 3.2.4 src has no such subdir → "chmod: cannot access 'source/fastmcp_slim'".
+    # mkMcpNixos + pythonRelaxDeps builds cleanly on native fastmcp (needs >=3.2.0).
+    # Revert to packages.default once upstream drops the fastmcp3 overlay.
+    (inputs.mcp-nixos.lib.mkMcpNixos { inherit pkgs; })  # MCP server (used by .mcp.json)
     inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default  # agent multiplexer (macOS uses Homebrew — upstream flake won't build on darwin)
     zsh  # Add zsh at system level
     # GUI Applications
@@ -219,7 +224,7 @@
     # Python with packages
     (python3.withPackages (ps: with ps; [
       requests
-      # openrazer  # Disabled with hardware.openrazer (kernel 7.0.x build break)
+      openrazer
     ]))
     
     # Network filesystems
@@ -361,6 +366,7 @@
   services.ananicy = {
     enable = true;
     package = pkgs.ananicy-cpp;
+    rulesProvider = pkgs.ananicy-cpp;
   };
 
   # Docker
