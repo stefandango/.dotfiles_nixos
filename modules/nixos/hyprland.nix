@@ -533,6 +533,22 @@ in
 			fullscreen = on
 		}
 
+		# ...but NOT their launcher/splash windows. Those carry the same
+		# steam_app_* class, so the rule above would blow a 600x400 splash up to
+		# the full 5120x2160. Later rules win in Hyprland, so this one takes the
+		# fullscreen back off and floats them at their natural size.
+		# Regex is RE2: (?i) works, negative lookahead does NOT — so this is a
+		# positive list. Add whatever your games actually call their loader
+		# (find the exact title with the socket2 watcher, see note below).
+		windowrule {
+			name = steam-game-launcher
+			match:class = ^(steam_app_.*)$
+			match:title = (?i)^.*(launcher|launch|splash|loader|updater|patcher|setup|installer|configuration|config tool|settings|options|crash).*$
+			fullscreen = off
+			float = on
+			center = on
+		}
+
 		# Anarchy Online multiboxing
 		# Positioning handled by ao-launch.sh via hyprctl
 		windowrule {
