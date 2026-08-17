@@ -93,7 +93,7 @@ in
 							},
 							{
 								"label": "\tLogout",
-								"command": "${pkgs.hyprland}/bin/hyprctl dispatch exit"
+								"command": "/home/${vars.user}/Scripts/hypr-compat.sh exit"
 							},
 							{
 								"label": "⏻\tShut down",

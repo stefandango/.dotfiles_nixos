@@ -4,6 +4,11 @@
 
 STATE_FILE="/tmp/hypr-focus-mode"
 
+# `hyprctl keyword` does not work under the Lua config manager, and the 4-value
+# gaps_out form has no string spelling there either — it must be a css-gap table.
+# hypr_set_gaps handles both.
+. "$HOME/Scripts/hypr-compat.sh"
+
 apply_gaps() {
 	# Count tiled (non-floating) windows on the active workspace
 	active_ws=$(hyprctl activeworkspace -j | jq '.id')
@@ -16,7 +21,7 @@ apply_gaps() {
 		*)   gaps_out="20 20 20 20"; gaps_in=20 ;;
 	esac
 
-	hyprctl --batch "keyword general:gaps_out $gaps_out ; keyword general:gaps_in $gaps_in"
+	hypr_set_gaps "$gaps_out" "$gaps_in"
 }
 
 # --once mode: apply gaps once and exit (used by toggle script)

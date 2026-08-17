@@ -9,6 +9,8 @@
 #   ao-launch.sh 3         # Launch only instance 3 (Bureaucrat)
 #   ao-launch.sh setup     # Create wine prefixes and show setup instructions
 
+. "$HOME/Scripts/hypr-compat.sh"
+
 AO_BASE="$HOME/Games"
 AO_DIR="drive_c/Funcom/Anarchy Online"
 
@@ -107,8 +109,11 @@ launch_instance() {
 
     if [ -n "$addr" ]; then
         CLAIMED_ADDRS+=("$addr")
-        # Move to workspace, set size and position
-        hyprctl --batch "dispatch movetoworkspacesilent $ws,address:$addr; dispatch resizewindowpixel exact $size,address:$addr; dispatch movewindowpixel exact $pos,address:$addr" > /dev/null
+        # Move to workspace, set size and position.
+        # Via hypr_place_window: under the Lua config manager `hyprctl dispatch`
+        # parses its argument as Lua, so the legacy `dispatch movetoworkspacesilent
+        # 1,address:0x...` form is a syntax error and the windows never get placed.
+        hypr_place_window "$addr" "$ws" "$size" "$pos"
         echo "  Positioned: $name on workspace $ws [${size// /x}] at (${pos// /,})"
     else
         echo "  Warning: Could not find window for $name after ${attempts}s"

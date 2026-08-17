@@ -75,14 +75,19 @@ RGB_DANGER=$(hex2rgb "$DANGER")
 
 # ─── 1. Hyprland ───────────────────────────────────────────────────────────────
 
-hyprctl keyword general:col.active_border "rgba(${ACCENT}ee)"
-hyprctl keyword general:col.inactive_border "rgba(${GRAY}aa)"
-hyprctl keyword group:col.border_active "rgba(${ACCENT}ee)"
-hyprctl keyword group:col.border_inactive "rgba(${GRAY}aa)"
-hyprctl keyword group:groupbar:col.active "rgb(${ACCENT})"
-hyprctl keyword group:groupbar:col.inactive "rgb(${GRAY})"
-hyprctl keyword group:groupbar:text_color "rgb(${FG})"
-hyprctl keyword misc:background_color "0x${BG}"
+# via hypr_set, not `hyprctl keyword`: the latter is rejected outright under the
+# Lua config manager ("keyword can't work with non-legacy parsers. Use eval."),
+# which would leave every border/groupbar colour stuck at the Nix default.
+. "$HOME/Scripts/hypr-compat.sh"
+
+hypr_set general:col.active_border "rgba(${ACCENT}ee)"
+hypr_set general:col.inactive_border "rgba(${GRAY}aa)"
+hypr_set group:col.border_active "rgba(${ACCENT}ee)"
+hypr_set group:col.border_inactive "rgba(${GRAY}aa)"
+hypr_set group:groupbar:col.active "rgb(${ACCENT})"
+hypr_set group:groupbar:col.inactive "rgb(${GRAY})"
+hypr_set group:groupbar:text_color "rgb(${FG})"
+hypr_set misc:background_color "0x${BG}"
 
 # ─── 2. Waybar ─────────────────────────────────────────────────────────────────
 

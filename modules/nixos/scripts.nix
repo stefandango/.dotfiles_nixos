@@ -134,6 +134,13 @@ in
 				recursive = true;
 				executable = true;
 			};
+			# Sourced by theme-switcher / focus-mode / ao-launch, and run directly
+			# by hypridle and swaync. Papers over hyprctl's hyprlang-vs-Lua split.
+			"Scripts/hypr-compat.sh" = {
+				source = ../scripts/hypr-compat.sh;
+				recursive = true;
+				executable = true;
+			};
 			"Scripts/waybar-updates.sh" = {
 				source = ../scripts/waybar-updates.sh;
 				recursive = true;
