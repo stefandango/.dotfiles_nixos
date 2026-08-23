@@ -135,7 +135,8 @@ in
 				executable = true;
 			};
 			# Sourced by theme-switcher / focus-mode / ao-launch, and run directly
-			# by hypridle and swaync. Papers over hyprctl's hyprlang-vs-Lua split.
+			# by hypridle and swaync. Wraps the `hyprctl eval` / Lua-dispatch forms
+			# that Hyprland's Lua config manager requires.
 			"Scripts/hypr-compat.sh" = {
 				source = ../scripts/hypr-compat.sh;
 				recursive = true;

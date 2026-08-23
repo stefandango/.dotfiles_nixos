@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# bash (was sh) so this can source hypr-compat.sh, which papers over the
-# hyprlang -> Lua config-manager differences in hyprctl.
+# bash (not sh) so this can source hypr-compat.sh, which wraps the
+# `hyprctl eval` calls that Hyprland's Lua config manager requires.
 
 STATE_FILE="/tmp/hypr-focus-mode"
 PID_FILE="/tmp/hypr-focus-mode-daemon.pid"
