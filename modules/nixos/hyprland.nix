@@ -1,4 +1,4 @@
-{config, lib, system, pkgs, vars, host, ... }:
+{config, lib, system, pkgs, vars, host, desktopShell, ... }:
 
 let
   colors = import ../../theme/colors.nix;
@@ -6,6 +6,39 @@ let
   # (pkill), which then blocks every later launch with "Rofi already running" and the
   # menu dies instantly. Remove it before (re)launching so the toggle keybinds keep working.
   rofiKill = "rm -f /run/user/$(id -u)/rofi.pid; pkill rofi";
+
+  onDms = desktopShell == "dms";
+
+  # The binds that reach into the shell rather than the compositor. Both
+  # variants are always generated; which one lands in hyprland.lua follows
+  # `desktopShell` in ./default.nix, so flipping that value is a complete
+  # switch with no leftover binds pointing at a shell that is not running.
+  shellBinds =
+    if onDms then ''
+		-- DankMaterialShell owns the launcher, clipboard, notification centre,
+		-- lock screen and power menu. Each of these is an IPC call into the
+		-- already-running shell process, not a fresh program launch — so there is
+		-- no cold start, and no stale-pidfile dance like rofi needs.
+		hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("dms ipc call spotlight toggle"))
+		hl.bind("SUPER + L", hl.dsp.exec_cmd("dms ipc call lock lock"))
+		hl.bind("SUPER + N", hl.dsp.exec_cmd("dms ipc call notifications toggle"))
+		hl.bind("SUPER + SHIFT + E", hl.dsp.exec_cmd("dms ipc call powermenu toggle"))
+		hl.bind("SUPER + Y", hl.dsp.exec_cmd("dms ipc call clipboard toggle"))
+		hl.bind("SUPER + SHIFT + T", hl.dsp.exec_cmd("dms ipc call settings open"))
+		-- DMS generates its keybind reference from the live binds, unlike our
+		-- hand-maintained cheatsheet.sh (which had already drifted from reality).
+		hl.bind("SUPER + SHIFT + plus", hl.dsp.exec_cmd("dms ipc call keybinds toggle"))
+		hl.bind("SUPER + ALT + SPACE", hl.dsp.exec_cmd("dms ipc call control-center toggle"))
+    '' else ''
+		hl.bind(mainMod .. " + D", hl.dsp.exec_cmd(rofiKill .. [[ || rofi -show drun -theme ~/.config/rofi/launcher.rasi]]))
+		hl.bind("SUPER + L", hl.dsp.exec_cmd("${pkgs.hyprlock}/bin/hyprlock"))
+		hl.bind("SUPER + N", hl.dsp.exec_cmd("${pkgs.swaynotificationcenter}/bin/swaync-client -t"))
+		hl.bind("SUPER + SHIFT + E", hl.dsp.exec_cmd(rofiKill .. [[ || $HOME/.config/rofi/powermenu.sh]]))
+		hl.bind("SUPER + Y", hl.dsp.exec_cmd(rofiKill .. [[ || cliphist list | rofi -dmenu -theme $HOME/.config/rofi/clipboard.rasi | cliphist decode | wl-copy]]))
+		hl.bind("SUPER + SHIFT + T", hl.dsp.exec_cmd(rofiKill .. [[ || ~/Scripts/theme-rofi.sh]]))
+		hl.bind("SUPER + SHIFT + plus", hl.dsp.exec_cmd(rofiKill .. [[ || ~/Scripts/cheatsheet.sh]]))
+		hl.bind("SUPER + ALT + SPACE", hl.dsp.exec_cmd(rofiKill .. [[ || ~/Scripts/omarchy-menu.sh]]))
+    '';
 in
 {
 
@@ -63,7 +96,9 @@ in
 			#nvidiaPatches = true;
 			xwayland.enable = true;
 		};
-		hyprlock.enable = true;                 # Sets up PAM (security.pam.services.hyprlock)
+		# Sets up PAM (security.pam.services.hyprlock). Under DMS the lock screen
+		# is part of the shell process and brings its own PAM handling.
+		hyprlock.enable = !onDms;
 	};
 	systemd.sleep.settings.Sleep = {
 		AllowSuspend = "no";
@@ -435,17 +470,12 @@ in
 		end)
 
 		hl.bind("SUPER + SHIFT + SPACE", hl.dsp.window.float({ action = "toggle" }))
-		hl.bind(mainMod .. " + D", hl.dsp.exec_cmd(rofiKill .. [[ || rofi -show drun -theme ~/.config/rofi/launcher.rasi]]))
+${shellBinds}
 		hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())       -- dwindle
 		hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit")) -- dwindle (0.54+: via layoutmsg)
 		hl.bind("SUPER + SHIFT + R", hl.dsp.exec_cmd("${pkgs.hyprland}/bin/hyprctl reload"))
 		hl.bind("SUPER + F", hl.dsp.window.fullscreen())
-		hl.bind("SUPER + L", hl.dsp.exec_cmd("${pkgs.hyprlock}/bin/hyprlock"))
-		hl.bind("SUPER + N", hl.dsp.exec_cmd("${pkgs.swaynotificationcenter}/bin/swaync-client -t"))
-		hl.bind("SUPER + SHIFT + E", hl.dsp.exec_cmd(rofiKill .. [[ || $HOME/.config/rofi/powermenu.sh]]))
 		hl.bind("print", hl.dsp.exec_cmd([[${pkgs.grimblast}/bin/grimblast --notify --freeze --wait 1 copysave area ~/Pictures/$(date +%Y-%m-%dT%H%M%S).png]]))
-		hl.bind("SUPER + Y", hl.dsp.exec_cmd(rofiKill .. [[ || cliphist list | rofi -dmenu -theme $HOME/.config/rofi/clipboard.rasi | cliphist decode | wl-copy]]))
-		hl.bind("SUPER + T", hl.dsp.exec_cmd(rofiKill .. [[ || ~/Scripts/waybar-tmux-manager.sh]]))
 		-- Was `code:49` under hyprlang. The Lua bind parser silently swallows
 		-- `code:NN` (0.56.1 registers the bind with an empty key and keycode 0, so it
 		-- never fires), so this uses the keysym. Keycode 49 is <TLDE>, which on the
@@ -454,10 +484,7 @@ in
 		hl.bind("SUPER + Z", hl.dsp.exec_cmd("pypr zoom"))
 		hl.bind("SUPER + E", hl.dsp.exec_cmd("pypr toggle files"))
 		hl.bind("SUPER + I", hl.dsp.exec_cmd("~/Scripts/imv_launcher.sh"))
-		hl.bind("SUPER + SHIFT + T", hl.dsp.exec_cmd(rofiKill .. [[ || ~/Scripts/theme-rofi.sh]]))
 		hl.bind("SUPER + SHIFT + F", hl.dsp.exec_cmd("~/Scripts/focus-mode-toggle.sh"))
-		hl.bind("SUPER + SHIFT + plus", hl.dsp.exec_cmd(rofiKill .. [[ || ~/Scripts/cheatsheet.sh]]))
-		hl.bind("SUPER + ALT + SPACE", hl.dsp.exec_cmd(rofiKill .. [[ || ~/Scripts/omarchy-menu.sh]]))
 
 		-- Volume
 		hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ -5%"), { repeating = true })
@@ -740,21 +767,49 @@ in
 		-- Layer rules for blur
 		hl.layer_rule({
 			name         = "blur-layers",
-			match        = { namespace = "^(rofi|waybar|swaync)$" },
+			-- DMS namespaces every layer surface "dms:<something>" (dms:bar,
+			-- dms:clipboard-context-menu, ...), so it needs its own alternative —
+			-- a namespace that does not match here silently loses blur.
+			match        = { namespace = "^(rofi|waybar|swaync|dms:.*)$" },
 			blur         = true,
 			ignore_alpha = 0.5,
 		})
+${lib.optionalString onDms ''
+
+		-- With a transparent bar over translucent widget cards, blur that samples
+		-- the windows underneath turns muddy as soon as anything is maximised.
+		-- xray makes it sample the wallpaper instead, so the cards stay legible.
+		-- DMS generates this same rule into ~/.config/hypr/dms/layout.lua, which
+		-- our Nix-generated hyprland.lua deliberately does not source.
+		hl.layer_rule({
+			name  = "dms-bar-xray",
+			match = { namespace = "^dms:bar$" },
+			xray  = true,
+		})
+''}
 
 		-------------------
 		---- AUTOSTART ----
 		-------------------
 
 		hl.on("hyprland.start", function()
-			-- Initialize theme files from Nix defaults before apps start
+${lib.optionalString (!onDms) ''
+			-- Initialize theme files from Nix defaults before apps start. Only
+			-- needed for the GTK/rasi stack: DMS reads a JSON theme straight
+			-- from the store, so it has no read-only-file problem to work around.
 			hl.exec_cmd([==[[ ! -f $HOME/.config/waybar/style.css ] && cp $HOME/.config/waybar/style.default.css $HOME/.config/waybar/style.css && chmod u+w $HOME/.config/waybar/style.css; [ ! -f $HOME/.config/rofi/shared/colors.rasi ] && cp $HOME/.config/rofi/shared/colors.default.rasi $HOME/.config/rofi/shared/colors.rasi && chmod u+w $HOME/.config/rofi/shared/colors.rasi; [ ! -f $HOME/.config/swaync/style.css ] && cp $HOME/.config/swaync/style.default.css $HOME/.config/swaync/style.css && chmod u+w $HOME/.config/swaync/style.css; true]==])
+''}
 
 			hl.exec_cmd("${pkgs.awww}/bin/awww-daemon")
+${if onDms then ''
+			-- One process for bar, notifications, launcher, OSD, lock and polkit.
+			-- Started here rather than as a systemd user unit: the unit binds
+			-- graphical-session.target by default, which this machine's plain
+			-- (non-UWSM) Hyprland session never activates — see modules/nixos/ntfy.nix.
+			hl.exec_cmd("dms run")
+'' else ''
 			hl.exec_cmd("${pkgs.waybar}/bin/waybar")
+''}
 			hl.exec_cmd("${pkgs.openrazer-daemon}/bin/openrazer-daemon")
 			hl.exec_cmd("${pkgs.networkmanagerapplet}/bin/nm-applet --indicator")
 
@@ -763,10 +818,12 @@ in
 			-- hosts/nixos-desktop/default.nix that lets CoreCtrl start its root helper
 			-- without an auth prompt — without it CoreCtrl exited at boot with
 			-- "Cannot start helper". --minimize-systray asks it to start with no
-			-- window (minimized to the system tray), so it also needs a settled tray:
-			-- the theme-switcher (run at boot) does `pkill waybar; waybar`, so we wait
-			-- until Waybar's org.kde.StatusNotifierWatcher has been present
-			-- continuously for ~5s (the pkill resets the counter) before launching.
+			-- window (minimized to the system tray), so it also needs a settled tray.
+			-- Whichever shell is selected owns org.kde.StatusNotifierWatcher, so we
+			-- wait until that bus name has been present continuously for ~5s before
+			-- launching. Under waybar the counter genuinely resets mid-boot, because
+			-- the theme-switcher does `pkill waybar; waybar`; under DMS the shell
+			-- starts once and the wait simply settles sooner.
 			--
 			-- QT_QPA_PLATFORMTHEME/QT_STYLE_OVERRIDE are unset for corectrl only: with
 			-- the system-wide qt.platformTheme = "gnome" (qgnomeplatform), Qt reports
@@ -780,22 +837,33 @@ in
 
 			hl.exec_cmd("${pkgs.hyprland-autoname-workspaces}/bin/hyprland-autoname-workspaces")
 			hl.exec_cmd("pypr")
+${lib.optionalString (!onDms) ''
+			-- DMS ships its own clipboard manager and history, so running
+			-- cliphist alongside it means two managers recording the same
+			-- selections while only one of them is reachable from SUPER+Y.
 			hl.exec_cmd("wl-clipboard-history -t")
 			hl.exec_cmd("wl-paste --watch cliphist store")
 			hl.exec_cmd([[rm "$HOME/.cache/cliphist/db"]])   -- it'll delete history at every restart
+''}
 			hl.exec_cmd("sleep 3 && ~/Scripts/awww_random.sh")
 			hl.exec_cmd("sleep 4 && insync start --qt-qpa-platform=xcb --no-daemon")
-			-- Restore saved theme if one was selected
+${lib.optionalString (!onDms) ''
+			-- Restore saved theme if one was selected. Under DMS the palette is
+			-- baked into settings.json at build time, so there is nothing to
+			-- re-apply at login.
 			hl.exec_cmd([[sleep 2 && test -f $HOME/.config/theme/current && ~/Scripts/theme-switcher.sh $HOME/.config/theme/themes/$(cat $HOME/.config/theme/current).json]])
+''}
 
+${lib.optionalString (!onDms) ''
 			hl.exec_cmd("${pkgs.hypridle}/bin/hypridle")
+''}
 		end)
 		'';
 	in
 	{
 		xdg.configFile."hypr/hyprland.lua".text = hyprlandLua;
-		xdg.configFile."hypr/hyprlock.conf".text = hyprlockConf;
-		xdg.configFile."hypr/hypridle.conf".text = hypridleConf;
+		xdg.configFile."hypr/hyprlock.conf" = lib.mkIf (!onDms) { text = hyprlockConf; };
+		xdg.configFile."hypr/hypridle.conf" = lib.mkIf (!onDms) { text = hypridleConf; };
 
 	};
 }

@@ -47,6 +47,16 @@
 			inputs.nixpkgs.follows = "nixpkgs";
 		};
 
+		# TEMP[dms-trial]: evaluating DankMaterialShell as a replacement for the
+		# waybar + rofi + swaync + hyprlock/hypridle stack. Selected by
+		# `desktopShell` in modules/nixos/default.nix; drop this input if the
+		# trial ends with us staying on waybar.
+		# TEMP-CHECK: recheck_after 2026-10-01
+		dank-material-shell = {
+			url = "github:AvengeMedia/DankMaterialShell";
+			inputs.nixpkgs.follows = "nixpkgs";
+		};
+
 		# Deliberately does NOT follow nixpkgs — see nixpkgs-darwin-stable above.
 		hunk = {
 			url = "github:modem-dev/hunk";
