@@ -35,6 +35,7 @@ nixtest           # Test configuration without building
 nixclean          # Clean up old generations and optimize store
 nixgen            # List system generations
 nixvalidate       # Pre-flight checks before switching
+nixworkarounds    # List temporary pins/patches and which can now be deleted
 
 # Enhanced Nix helpers
 nixsearch firefox # Search packages with detailed info
@@ -205,6 +206,34 @@ This setup uses both Nix packages and selective Homebrew packages:
 - **Enhanced search** - detailed package information with version details
 - **System monitoring** - track generations, store size, and update status
 - **Automated cleanup** - intelligent garbage collection and store optimization
+- **Workaround expiry** - temporary pins are checked automatically, not remembered
+
+### Temporary Pins, Patches and Overrides
+
+Every temporary hack (a version pin, a local `fetchpatch`, a disabled test suite,
+an overlay routing around a broken upstream) **must** carry a `TEMP` marker so
+`nixworkarounds` can tell you when it has outlived its reason:
+
+```nix
+# TEMP[ananicy-cpp-includes]: local copy of the nixpkgs include fix
+# TEMP-CHECK: nix_pkg_has_patch x86_64-linux ananicy-cpp fix-cstring-include
+ananicy-cpp = prev.ananicy-cpp.overrideAttrs (old: { ... });
+```
+
+`TEMP-CHECK` answers "can this go yet?" by exit status — **0 means obsolete**,
+non-zero means still needed. Helpers available inside it (defined in
+`modules/scripts/nixworkarounds`, which also documents them):
+
+| Helper | Obsolete when |
+| --- | --- |
+| `nix_pkg_has_patch <system> <attr> <patch>` | upstream nixpkgs carries the fix itself |
+| `nix_pkg_cached <system> <attr>` | hydra built it, so it builds for us (eval-only, works cross-platform) |
+| `nix_input_missing <input> <pattern>` | a flake input dropped the offending code |
+| `recheck_after <YYYY-MM-DD>` | nothing to probe — plain calendar nag |
+
+Omit `TEMP-CHECK` only when nothing can be tested; the entry is then listed for
+manual review on every run. `nixup` and `nixvalidate` both run the report, so a
+channel bump surfaces its own cleanup work.
 
 ## Common Workflows
 

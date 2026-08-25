@@ -35,4 +35,9 @@ else
 fi
 
 echo ""
+if [[ -x ~/Scripts/nixworkarounds ]]; then
+    ~/Scripts/nixworkarounds || true
+fi
+
+echo ""
 echo "🚀 Configuration looks good! Run 'nixswitch' to apply."

@@ -23,6 +23,12 @@
         efiSupport = true;
         enable = true;
         useOSProber = true;
+        # /boot is 511M and each generation costs ~84M there (14M kernel + a 70M
+        # initrd, fat because initrd.kernelModules pulls in amdgpu firmware). The
+        # default limit of 100 filled the partition until switches died with
+        # "No space left on device" — install-grub copies the new generation in
+        # before pruning old ones, so the ceiling is (N+1) * 84M + 15M <= 511M.
+        configurationLimit = 4;
       };
     };
     kernelPackages = pkgs.linuxPackages_latest;
@@ -79,6 +85,11 @@
     # re-applied automatically each boot.
     # (Renamed from programs.corectrl.gpuOverclock.enable.)
     amdgpu.overdrive.enable = true;
+    # DDC/CI to the monitor over the DisplayPort i2c bus, for ddcutil. Loads
+    # i2c-dev and grants access to the "i2c" group (and to any locally seated
+    # user). Lets brightness/volume/input be driven from the CLI instead of the
+    # monitor's joystick -- see the ddcutil note in modules/nixos/apps.nix.
+    i2c.enable = true;
     openrazer = {
       enable = true;
       batteryNotifier.enable = true;
@@ -194,6 +205,8 @@
   # NixOS-specific packages
   environment.systemPackages = with pkgs; [
     inputs.nix-claude-code.packages.${pkgs.stdenv.hostPlatform.system}.default
+    # TEMP[mcp-nixos-fastmcp]: build mcp-nixos ourselves instead of its flake package
+    # TEMP-CHECK: nix_input_missing mcp-nixos fastmcp3
     # Build mcp-nixos against our own nixpkgs (native fastmcp 3.3.1) instead of
     # inputs.mcp-nixos.packages.default, which force-pins fastmcp to 3.2.4 via its
     # `fastmcp3` overlay. That pin now breaks: nixos-unstable split fastmcp into
@@ -232,6 +245,13 @@
 
     # Hardware tools
     lshw
+    # DDC/CI monitor control (needs hardware.i2c.enable above). The LG answers
+    # on /dev/i2c-8 (card1-DP-2): brightness x10, contrast x12, volume x62,
+    # input x60. Dual Mode is NOT reachable this way -- it is not exposed on any
+    # VCP register, so it stays a bezel-button affair. Do not go poking the
+    # xE0-xFF manufacturer range looking for it: that is the pattern implicated
+    # in ddcutil issue #419, where an LG panel stopped waking from sleep.
+    ddcutil
     amdgpu_top   # AMD GPU TUI: usage, power draw, temps, VRAM, per-process
     nvtopPackages.amd   # htop-style GPU monitor with live graphs (AMD build)
     # protontricks now provided by programs.steam.protontricks.enable (wrapped for the FHS env)
@@ -383,6 +403,6 @@
   users.users.${vars.user} = {
     isNormalUser = true;
     shell = pkgs.zsh;
-    extraGroups = [ "wheel" "video" "audio" "networkmanager" "lp" "input" "docker" "corectrl" "gamemode" ];
+    extraGroups = [ "wheel" "video" "audio" "networkmanager" "lp" "input" "docker" "corectrl" "gamemode" "i2c" ];
   };
 }

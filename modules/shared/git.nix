@@ -47,7 +47,22 @@
         # with the temp files to compare (see `hunk diff before after`).
         hunk.cmd = ''hunk diff "$LOCAL" "$REMOTE"'';
       };
+      # Syncing this repo between the desktop and the MacBook used to merge on
+      # every pull, so a plain `git pull` with nothing to integrate still left a
+      # "Merge remote-tracking branch 'origin/main'" bubble behind. Rebasing
+      # replays the local commits on top instead, so a no-op sync is a no-op.
+      pull = {
+        rebase = true;
+      };
+      rebase = {
+        # Without this a rebasing pull refuses to run on a dirty tree, which is
+        # the normal state here (half-edited nix modules). Stash, rebase, pop.
+        autoStash = true;
+      };
       merge = {
+        # Deliberate merges keep their merge commit: `wt done` folding a feature
+        # branch back into main should stay visible as one. Pulls no longer
+        # reach this setting now that they rebase.
         ff = false;
         # hunk is a read-only review viewer and cannot resolve 3-way merges,
         # so merges use git's built-in nvimdiff mergetool instead of meld.

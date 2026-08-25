@@ -1,0 +1,134 @@
+#!/usr/bin/env bash
+set -uo pipefail
+# Report on temporary pins/patches/overrides in the dotfiles, and say which ones
+# have outlived their reason and can be deleted.
+#
+# Annotate any temporary hack in a .nix file like this:
+#
+#     # TEMP[ananicy-cpp-includes]: patch missing <cstdint>/<cstring> includes
+#     # TEMP-CHECK: nix_pkg_has_patch x86_64-linux ananicy-cpp fix-cstring-include
+#
+# TEMP-CHECK answers "can this go yet?" through its exit status:
+#     0        -> OBSOLETE, delete the hack
+#     non-zero -> still needed, leave it alone
+# Leave TEMP-CHECK off when nothing can be tested automatically; the entry is
+# then always listed for a manual look.
+#
+# Helpers available inside a TEMP-CHECK line:
+#     nix_pkg_has_patch <system> <attr> <patch-name>   upstream carries the fix
+#     nix_pkg_cached    <system> <attr>                hydra built it -> builds for us
+#     nix_input_missing <input> <pattern>              input dropped the offending code
+#     recheck_after     <YYYY-MM-DD>                   plain calendar nag
+#
+# Runs from nixup and nixvalidate; also fine to run on its own.
+
+DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+
+if [[ ! -f "$DOTFILES/flake.nix" ]]; then
+    echo "❌ flake.nix not found in $DOTFILES" >&2
+    exit 1
+fi
+cd "$DOTFILES" || exit 1
+
+# ── check helpers ────────────────────────────────────────────────────────────
+
+# Evaluate against the *locked* inputs, so a check never lies about what the
+# next rebuild would actually use.
+_flake_eval() { # <attr path suffix> [extra nix args...]
+    local expr="$1"; shift
+    nix eval --impure --raw --expr "(builtins.getFlake (toString ./.))$expr" "$@" 2>/dev/null
+}
+
+# Upstream nixpkgs already applies <patch-name> -> our own copy is redundant.
+nix_pkg_has_patch() { # <system> <attr> <patch-name>
+    local patches
+    patches=$(nix eval --impure --json \
+        --expr "(builtins.getFlake (toString ./.)).inputs.nixpkgs.legacyPackages.$1.$2.patches" \
+        --apply 'ps: map (p: baseNameOf (toString p)) ps' 2>/dev/null) || return 1
+    [[ "$patches" == *"$3"* ]]
+}
+
+# The output path is in the binary cache -> hydra built it, so it is not broken
+# for us either. The cheapest possible "does upstream work again?" probe, and it
+# works for aarch64-darwin from Linux (and vice versa) since it is eval-only.
+nix_pkg_cached() { # <system> <attr>
+    local out hash
+    out=$(_flake_eval ".inputs.nixpkgs.legacyPackages.$1.$2.outPath") || return 1
+    hash=${out#/nix/store/}
+    hash=${hash%%-*}
+    [[ -n "$hash" ]] || return 1
+    curl -sfI --max-time 20 -o /dev/null "https://cache.nixos.org/$hash.narinfo"
+}
+
+# A flake input no longer contains <pattern> -> whatever we routed around is gone.
+nix_input_missing() { # <input> <pattern>
+    local src
+    src=$(_flake_eval ".inputs.$1.outPath") || return 1
+    [[ -d "$src" ]] || return 1
+    ! grep -rqE -- "$2" "$src" 2>/dev/null
+}
+
+# Nothing to probe — just nag once the date passes.
+recheck_after() { # <YYYY-MM-DD>
+    local target
+    target=$(date -d "$1" +%s 2>/dev/null || date -j -f "%Y-%m-%d" "$1" +%s 2>/dev/null) || return 1
+    (( $(date +%s) >= target ))
+}
+
+# ── collect and report ───────────────────────────────────────────────────────
+
+echo "🧹 Temporary workarounds"
+echo "════════════════════════"
+
+mapfile -t hits < <(grep -rn --include="*.nix" -E '^[[:space:]]*#[[:space:]]*TEMP\[' . 2>/dev/null | sort)
+
+if (( ${#hits[@]} == 0 )); then
+    echo "   (none — nothing marked with # TEMP[...])"
+    exit 0
+fi
+
+obsolete=0
+needed=0
+manual=0
+
+for hit in "${hits[@]}"; do
+    file=${hit%%:*}
+    rest=${hit#*:}
+    line=${rest%%:*}
+    text=${rest#*:}
+
+    id=${text#*TEMP[}
+    id=${id%%]*}
+    desc=${text#*]:}
+    desc=${desc# }
+
+    # The check may sit a few comment lines below the marker.
+    check=$(sed -n "$((line + 1)),$((line + 6))p" "$file" 2>/dev/null |
+        grep -m1 -E '^[[:space:]]*#[[:space:]]*TEMP-CHECK:' |
+        sed -E 's/^[[:space:]]*#[[:space:]]*TEMP-CHECK:[[:space:]]*//')
+
+    echo ""
+    if [[ -z "$check" ]]; then
+        echo "   👀 $id — review by hand"
+        manual=$((manual + 1))
+    elif eval "$check"; then
+        echo "   🎉 $id — OBSOLETE, delete it"
+        obsolete=$((obsolete + 1))
+    else
+        echo "   ⏳ $id — still needed"
+        needed=$((needed + 1))
+    fi
+    echo "      $desc"
+    echo "      ${file#./}:$line"
+    [[ -n "$check" ]] && echo "      check: $check"
+done
+
+echo ""
+echo "─────────────────────────"
+echo "   $obsolete obsolete · $needed still needed · $manual manual"
+if (( obsolete > 0 )); then
+    echo ""
+    echo "💡 Remove the entries marked OBSOLETE, then run nixswitch to confirm."
+fi
+
+exit 0

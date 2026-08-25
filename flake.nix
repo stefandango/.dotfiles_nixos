@@ -4,13 +4,12 @@
 	inputs = {
 		nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
-		# Last nixpkgs line that still supports x86_64-darwin (26.11 dropped it and
-		# now throws on import for that platform). Used for two things, both Darwin:
-		#   1. hunk's nixpkgs — its flake-parts systems list includes x86_64-darwin,
-		#      so following our unstable nixpkgs breaks eval of the whole Darwin config.
-		#   2. terminal-notifier — its build is broken on 26.11/aarch64-darwin (cctools
-		#      ld crashes) and it isn't in the cache, so we overlay it in from here.
-		# Both should go away once upstream catches up; see modules/darwin/ntfy.nix.
+		# TEMP[hunk-darwin-nixpkgs]: hunk follows 26.05 rather than our unstable nixpkgs
+		# TEMP-CHECK: nix_input_missing hunk 'x86_64-darwin'
+		# Last nixpkgs line that still supports x86_64-darwin (26.11 dropped it and now
+		# throws on import for that platform). hunk's flake-parts systems list includes
+		# x86_64-darwin, so following our unstable nixpkgs breaks eval of the whole
+		# Darwin config. Drop once hunk stops claiming that platform.
 		nixpkgs-darwin-stable.url = "github:NixOS/nixpkgs/nixpkgs-26.05-darwin";
 
 		home-manager = {
@@ -84,20 +83,6 @@
 				specialArgs = { inherit inputs vars; };
 				modules = [
 					{ nixpkgs.hostPlatform = "aarch64-darwin"; }
-					# terminal-notifier (used by modules/darwin/ntfy.nix) fails to link on
-					# nixpkgs 26.11/aarch64-darwin — cctools ld dies with SIGTRAP — and it
-					# isn't in the binary cache, so the build is unavoidable. Take it from
-					# 26.05, where it's cached and working. Drop once 26.11 builds it.
-					{
-						nixpkgs.overlays = [
-							(final: prev: {
-								inherit (import inputs.nixpkgs-darwin-stable {
-									inherit (prev.stdenv.hostPlatform) system;
-									config.allowUnfree = true;
-								}) terminal-notifier;
-							})
-						];
-					}
 					./hosts/macbook
 					./modules/shared/system.nix
 					./modules/darwin
@@ -117,6 +102,8 @@
 				specialArgs = { inherit inputs vars; };
 				modules = [
 					{ nixpkgs.hostPlatform = "x86_64-linux"; }
+					# TEMP[openldap-nocheck]: openldap test suite disabled (flaky, no upstream fix to wait on)
+					# TEMP-CHECK: recheck_after 2027-02-01
 					# Disable openldap's flaky syncreplication test suite. The
 					# i686-linux build is pulled in transitively via lutris's
 					# 32-bit FHS env, and test017-syncreplication-refresh

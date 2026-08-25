@@ -149,6 +149,11 @@
       executable = true;
     };
 
+    "Scripts/nixworkarounds" = {
+      source = ../scripts/nixworkarounds;
+      executable = true;
+    };
+
     "Scripts/tmux-quit" = {
       source = ../scripts/tmux-quit;
       executable = true;

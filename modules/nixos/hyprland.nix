@@ -196,6 +196,70 @@ in
 		hl.monitor({ output = "desc:LG Electronics", mode = "5120x2160@120", position = "auto", scale = 1 })
 		hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" })
 
+		-- Dual Mode follower (LG 45GX950A).
+		--
+		-- The button under the bottom bezel flips the panel between 5K2K@165 and
+		-- WFHD@330, and it is a *real hotplug*: the monitor drops off DP and comes
+		-- back advertising a completely different EDID. In dual mode 5120x2160 is
+		-- not offered at all (the list becomes 2560x1080@330/240/120 + 1080p).
+		--
+		-- The static rule above pins a custom 5120x2160@120 modeline -- 120 is not
+		-- an EDID mode, it is chosen for DSC link margin on the VRR retrain and for
+		-- the panel's gamma-tuned point (see the vrr = 3 note in misc below). Being
+		-- a forced modeline, Hyprland keeps driving that timing into a panel that
+		-- can no longer display it, so dual mode just showed the monitor's own
+		-- "Out of Range" OSD -- with nothing visible to fix it with.
+		--
+		-- So re-pick the mode from whatever the panel actually advertises after
+		-- every hotplug/reload. 5K stays capped at 120 for the reasons above; dual
+		-- mode has no such history, so it takes the highest refresh on offer. If
+		-- the OLED ever flickers in dual mode, cap DUAL_MAX_HZ below.
+		local LG_DESC     = "LG Electronics"
+		local DUAL_MAX_HZ = math.huge
+
+		local function lgPickMode(m)
+			local has5k, dual = false, nil
+			for _, mode in ipairs(m.available_modes) do
+				if mode.width == 5120 and mode.height == 2160 then
+					has5k = true
+				elseif mode.width == 2560 and mode.height == 1080 and mode.refresh_rate <= DUAL_MAX_HZ then
+					if not dual or mode.refresh_rate > dual.refresh_rate then dual = mode end
+				end
+			end
+			if has5k then return 5120, 2160, 120 end
+			if dual then return dual.width, dual.height, dual.refresh_rate end
+			return nil
+		end
+
+		local function lgFollowDualMode()
+			for _, m in ipairs(hl.get_monitors()) do
+				if m.description:find(LG_DESC, 1, true) then
+					local w, h, r = lgPickMode(m)
+					-- Compare numerically. hl.monitor() re-emits monitor.layout_changed,
+					-- and comparing the formatted strings ("120" vs "120.00") never
+					-- matches, which would re-apply the mode forever.
+					local matches = w and m.width == w and m.height == h
+						and math.abs(m.refresh_rate - r) < 1.0
+					if w and not matches then
+						hl.monitor({
+							output   = "desc:" .. LG_DESC,
+							mode     = string.format("%dx%d@%.2f", w, h, r),
+							position = "auto",
+							scale    = 1,
+						})
+					end
+				end
+			end
+		end
+
+		-- monitor.added covers the button press and the initial enumeration at
+		-- startup; config.reloaded covers `hyprctl reload` re-applying the static
+		-- 5K rule while the panel is in dual mode.
+		hl.on("monitor.added",           lgFollowDualMode)
+		hl.on("monitor.layout_changed",  lgFollowDualMode)
+		hl.on("config.reloaded",         lgFollowDualMode)
+		hl.on("hyprland.start",          lgFollowDualMode)
+
 		-------------------------------
 		---- ENVIRONMENT VARIABLES ----
 		-------------------------------
