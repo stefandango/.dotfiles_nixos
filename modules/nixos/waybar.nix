@@ -113,6 +113,7 @@ in
 					#temperature,
 					#pulseaudio,
 					#network,
+					#custom-tailscale,
 					#tray,
 					#custom-notification,
 					#custom-logout {
@@ -141,6 +142,7 @@ in
 					#temperature:hover,
 					#pulseaudio:hover,
 					#network:hover,
+					#custom-tailscale:hover,
 					#custom-notification:hover,
 					#custom-logout:hover {
 						background: rgba(${rgb.active}, 0.2);
@@ -310,6 +312,26 @@ in
 
 					#network.disconnected {
 						color: #${hex.red};
+					}
+
+					#custom-tailscale {
+						color: #${hex.fg};
+					}
+
+					#custom-tailscale.disconnected {
+						color: #${hex.gray};
+					}
+
+					#custom-tailscale.warning {
+						color: #${hex.orange};
+					}
+
+					/* Routing through an exit node is worth noticing at a glance —
+					   it silently changes where all your egress traffic comes from. */
+					#custom-tailscale.exitnode {
+						color: #${hex.cyan};
+						background: rgba(${rgb.cyan}, 0.15);
+						border: 1px solid rgba(${rgb.cyan}, 0.4);
 					}
 
 					#custom-logout {

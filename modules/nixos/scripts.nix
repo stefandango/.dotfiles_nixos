@@ -32,6 +32,16 @@ in
 				recursive = true;
 				executable = true;
 			};
+			"Scripts/waybar-tailscale.sh" = {
+				source = ../scripts/waybar-tailscale.sh;
+				recursive = true;
+				executable = true;
+			};
+			"Scripts/tailscale-peers.sh" = {
+				source = ../scripts/tailscale-peers.sh;
+				recursive = true;
+				executable = true;
+			};
 				
 			"Scripts/waybar-clipboard.sh" = {
 				source = ../scripts/waybar-clipboard.sh;

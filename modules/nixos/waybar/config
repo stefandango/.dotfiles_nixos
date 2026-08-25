@@ -1,7 +1,6 @@
 {
 	"layer": "top",
 	"position": "top",
-	"mod": "dock",
 	"exclusive": true,
 	"passthrough": false,
 	"gtk-layer-shell": true,
@@ -32,7 +31,7 @@
 	},
 	"group/media-net": {
 		"orientation": "inherit",
-		"modules": ["pulseaudio", "network", "custom/razerviperbattery"]
+		"modules": ["pulseaudio", "network", "custom/tailscale", "custom/razerviperbattery"]
 	},
 	"group/status": {
 		"orientation": "inherit",
@@ -67,7 +66,7 @@
 	"custom/weather": {
 		"tooltip": true,
 		"format": " {}",
-		"interval": 30,
+		"interval": 1800,
 		"exec": "~/Scripts/waybar-wttr.py",
 		"return-type": "json"
 	},
@@ -88,12 +87,21 @@
 		"on-click": "~/Scripts/llama toggle",
 		"on-click-right": "kitty -e ~/Scripts/llama logs"
 	},
+	"custom/tailscale": {
+		"format": "{}",
+		"return-type": "json",
+		"exec": "~/Scripts/waybar-tailscale.sh",
+		"interval": 15,
+		"tooltip": true,
+		"on-click": "~/Scripts/tailscale-peers.sh",
+		"on-click-right": "kitty --hold -- tailscale status",
+		"on-click-middle": "tailscale ip -4 | tr -d '\\n' | wl-copy && notify-send -a tailscale 'Copied own tailnet IP'"
+	},
 	"custom/devserver": {
 		"format": "󰿟  {}",
 		"return-type": "json",
 		"exec": "~/Scripts/waybar-devserver.sh",
-		"interval": 5,
-		"on-click": "~/Scripts/dev-server-manager.sh"
+		"interval": 5
 	},
 	"custom/tmux": {
 		"format": "󰌌  {}",
@@ -113,7 +121,7 @@
 	},
 	"custom/logout": {
 		"interval": "once",
-		"on-click": "pkill rofi || ~/.config/rofi/powermenu.sh",
+		"on-click": "rm -f /run/user/$(id -u)/rofi.pid; pkill rofi || ~/.config/rofi/powermenu.sh",
 		"format": "⏻",
 		"tooltip": true,
 		"tooltip-format": "Power Menu"
@@ -129,8 +137,8 @@
 		"format": "󰅌  {}",
 		"interval": 5,
 		"return-type": "json",
-		"on-click": "pkill rofi || cliphist list | rofi -dmenu -theme $HOME/.config/rofi/clipboard.rasi | cliphist decode | wl-copy",
-		"on-click-right": "cliphist list | rofi -dmenu -theme $HOME/.config/rofi/clipboard.rasi | cliphist delete",
+		"on-click": "rm -f /run/user/$(id -u)/rofi.pid; pkill rofi || cliphist list | rofi -dmenu -theme $HOME/.config/rofi/clipboard.rasi | cliphist decode | wl-copy",
+		"on-click-right": "rm -f /run/user/$(id -u)/rofi.pid; cliphist list | rofi -dmenu -theme $HOME/.config/rofi/clipboard.rasi | cliphist delete",
 		"on-click-middle": "cliphist wipe && pkill -RTMIN+9 waybar && notify-send 'Cleared clipboard history' -i clipboard",
 		"exec": "~/Scripts/waybar-clipboard.sh",
 		"signal": 9

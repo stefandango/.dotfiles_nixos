@@ -179,6 +179,7 @@ tooltip {
 #temperature,
 #pulseaudio,
 #network,
+#custom-tailscale,
 #tray,
 #custom-notification,
 #custom-logout {
@@ -206,6 +207,7 @@ tooltip {
 #temperature:hover,
 #pulseaudio:hover,
 #network:hover,
+#custom-tailscale:hover,
 #custom-notification:hover,
 #custom-logout:hover {
     background: rgba(${RGB_ACTIVE}, 0.2);
@@ -350,6 +352,26 @@ tooltip {
 
 #network.disconnected {
     color: #${RED};
+}
+
+#custom-tailscale {
+    color: #${FG};
+}
+
+#custom-tailscale.disconnected {
+    color: #${GRAY};
+}
+
+#custom-tailscale.warning {
+    color: #${ORANGE};
+}
+
+/* Routing through an exit node is worth noticing at a glance — it silently
+   changes where all your egress traffic comes from. */
+#custom-tailscale.exitnode {
+    color: #${CYAN};
+    background: rgba(${RGB_CYAN}, 0.15);
+    border: 1px solid rgba(${RGB_CYAN}, 0.4);
 }
 
 #custom-logout {
