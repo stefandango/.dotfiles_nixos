@@ -20,6 +20,11 @@ let
 		-- already-running shell process, not a fresh program launch — so there is
 		-- no cold start, and no stale-pidfile dance like rofi needs.
 		hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("dms ipc call spotlight toggle"))
+		-- spotlight-bar is a genuinely different surface from `spotlight`:
+		-- a slim one-line prompt with no results list until you type, where
+		-- SUPER+D opens the full panel. (`launcher` is NOT a third option --
+		-- DMSShellIPC.qml aliases it to `spotlight` for backwards compat.)
+		hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("dms ipc call spotlight-bar toggle"))
 		hl.bind("SUPER + L", hl.dsp.exec_cmd("dms ipc call lock lock"))
 		hl.bind("SUPER + N", hl.dsp.exec_cmd("dms ipc call notifications toggle"))
 		hl.bind("SUPER + SHIFT + E", hl.dsp.exec_cmd("dms ipc call powermenu toggle"))
@@ -31,6 +36,7 @@ let
 		hl.bind("SUPER + ALT + SPACE", hl.dsp.exec_cmd("dms ipc call control-center toggle"))
     '' else ''
 		hl.bind(mainMod .. " + D", hl.dsp.exec_cmd(rofiKill .. [[ || rofi -show drun -theme ~/.config/rofi/launcher.rasi]]))
+		hl.bind("SUPER + SPACE", hl.dsp.exec_cmd(rofiKill .. [[ || rofi -show run -theme ~/.config/rofi/launcher.rasi]]))
 		hl.bind("SUPER + L", hl.dsp.exec_cmd("${pkgs.hyprlock}/bin/hyprlock"))
 		hl.bind("SUPER + N", hl.dsp.exec_cmd("${pkgs.swaynotificationcenter}/bin/swaync-client -t"))
 		hl.bind("SUPER + SHIFT + E", hl.dsp.exec_cmd(rofiKill .. [[ || $HOME/.config/rofi/powermenu.sh]]))
