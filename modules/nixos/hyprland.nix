@@ -45,6 +45,27 @@ let
 		hl.bind("SUPER + SHIFT + plus", hl.dsp.exec_cmd(rofiKill .. [[ || ~/Scripts/cheatsheet.sh]]))
 		hl.bind("SUPER + ALT + SPACE", hl.dsp.exec_cmd(rofiKill .. [[ || ~/Scripts/omarchy-menu.sh]]))
     '';
+
+  # Under waybar the custom/submap module renders submap state in the bar,
+  # fed by waybar-submap.sh off the socket2 event stream. DMS has no
+  # equivalent -- HyprlandService.qml carries no submap support -- so SUPER+Q
+  # armed the kill submap with nothing on screen to say so. A DMS toast fills
+  # the gap: themed like the rest of the shell and dropped from the top edge
+  # under the island, rather than Hyprland's own hl.notification overlay,
+  # which is unstyled and sits in the corner.
+  killPrompt =
+    if onDms then ''
+		local function killPromptShow()
+			hl.exec_cmd([[dms ipc call toast errorWith "Kill window?" "Q or Enter to confirm  ·  Esc to cancel" "" "submap"]])
+		end
+		local function killPromptHide()
+			hl.exec_cmd("dms ipc call toast dismiss submap")
+		end
+    '' else ''
+		-- waybar's custom/submap module already shows this in the bar.
+		local function killPromptShow() end
+		local function killPromptHide() end
+    '';
 in
 {
 
@@ -461,18 +482,39 @@ in
 		hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd("kitty"))
 
 		-- Kill submap: SUPER+Q arms it, then Q or Return confirms.
-		hl.bind(mainMod .. " + Q", hl.dsp.submap("kill"))
+${killPrompt}
+		-- The prompt is the only thing saying the kill is armed, and DMS's error
+		-- toast lives 5s, so the submap expires on the same clock. Previously it
+		-- stayed armed indefinitely: a forgotten SUPER+Q meant the next stray Q
+		-- closed a window with no warning at all.
+		local killTimer = nil
+		local function killDisarm()
+			if killTimer then
+				killTimer:set_enabled(false)
+				killTimer = nil
+			end
+			killPromptHide()
+			hl.dispatch(hl.dsp.submap("reset"))
+		end
+
+		hl.bind(mainMod .. " + Q", function()
+			if killTimer then killTimer:set_enabled(false) end
+			killPromptShow()
+			killTimer = hl.timer(killDisarm, { timeout = 5000, type = "oneshot" })
+			hl.dispatch(hl.dsp.submap("kill"))
+		end)
+
 		hl.define_submap("kill", function()
 			-- hyprlang stacked two binds on one key (killactive, then submap reset);
 			-- in Lua a single function does both, with unambiguous ordering.
 			local function killAndReset()
 				hl.dispatch(hl.dsp.window.close())
-				hl.dispatch(hl.dsp.submap("reset"))
+				killDisarm()
 			end
 			hl.bind("Q",        killAndReset)
 			hl.bind("Return",   killAndReset)
-			hl.bind("escape",   hl.dsp.submap("reset"))
-			hl.bind("catchall", hl.dsp.submap("reset"))
+			hl.bind("escape",   killDisarm)
+			hl.bind("catchall", killDisarm)
 		end)
 
 		hl.bind("SUPER + SHIFT + SPACE", hl.dsp.window.float({ action = "toggle" }))
