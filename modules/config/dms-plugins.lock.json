@@ -1,0 +1,30 @@
+{
+  "lockfileVersion": 1,
+  "plugins": {
+    "amdGpuMonitor": {
+      "repo": "https://github.com/navidagz/dms-amd-gpu-monitor",
+      "commit": "d0f87efb534b86dc07107288c5f86cfeb7ad9cd2"
+    },
+    "claudeCodeUsage": {
+      "repo": "https://github.com/titeya/dms-claudecode",
+      "commit": "4c29b39f8299abbc113bfc085e28f805fde35e10"
+    },
+    "dankRazer": {
+      "repo": "https://github.com/zachfi/dms-razer",
+      "commit": "934d16998b130de11cbe3821e37e92b5b535f7c5"
+    },
+    "ddcBrightness": {
+      "repo": "https://github.com/smithyyang/dms-brightness-plugin",
+      "commit": "d3221bb267e99f02dd7793b505ece2cbae118623"
+    },
+    "systemMonitorPlus": {
+      "repo": "https://github.com/Dadangdut33/dms-plugins",
+      "path": "SystemMonitorPlus",
+      "commit": "63fe6b87c497f1f7c2ea61432716817db1c5c3a4"
+    },
+    "wallpaperCarousel": {
+      "repo": "https://github.com/motor-dev/wallpaperCarousel",
+      "commit": "761ecd1b7f347beee9f17909f8334d987c935a1a"
+    }
+  }
+}

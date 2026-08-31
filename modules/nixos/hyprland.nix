@@ -114,8 +114,8 @@ in
 			thunar-volman		# Auto manage removable drives etc..
 			imv			# Simple image viewer
 
-			# Should be moved to own files
-			swaynotificationcenter #loaded in seperate nix file
+			# notify-send, used by scripts and by grimblast --notify. The daemon
+			# behind org.freedesktop.Notifications is DMS.
 			libnotify
 
 			#Other
@@ -879,7 +879,6 @@ ${lib.optionalString (!onDms) ''
 			hl.exec_cmd([==[[ ! -f $HOME/.config/waybar/style.css ] && cp $HOME/.config/waybar/style.default.css $HOME/.config/waybar/style.css && chmod u+w $HOME/.config/waybar/style.css; [ ! -f $HOME/.config/rofi/shared/colors.rasi ] && cp $HOME/.config/rofi/shared/colors.default.rasi $HOME/.config/rofi/shared/colors.rasi && chmod u+w $HOME/.config/rofi/shared/colors.rasi; [ ! -f $HOME/.config/swaync/style.css ] && cp $HOME/.config/swaync/style.default.css $HOME/.config/swaync/style.css && chmod u+w $HOME/.config/swaync/style.css; true]==])
 ''}
 
-			hl.exec_cmd("${pkgs.awww}/bin/awww-daemon")
 ${if onDms then ''
 			-- One process for bar, notifications, launcher, OSD, lock and polkit.
 			-- Started here rather than as a systemd user unit: the unit binds
@@ -924,7 +923,6 @@ ${lib.optionalString (!onDms) ''
 			hl.exec_cmd("wl-paste --watch cliphist store")
 			hl.exec_cmd([[rm "$HOME/.cache/cliphist/db"]])   -- it'll delete history at every restart
 ''}
-			hl.exec_cmd("sleep 3 && ~/Scripts/awww_random.sh")
 			hl.exec_cmd("sleep 4 && insync start --qt-qpa-platform=xcb --no-daemon")
 ${lib.optionalString (!onDms) ''
 			-- Restore saved theme if one was selected. Under DMS the palette is

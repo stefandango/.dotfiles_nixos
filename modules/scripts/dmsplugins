@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+# Sync DMS plugins against the lockfile committed in this repo.
+#
+# DMS installs plugins by git-cloning them into ~/.config/DankMaterialShell/plugins,
+# which is runtime state Nix deliberately does not own (see the note in
+# modules/nixos/dms.nix about why settings.json is seeded rather than symlinked).
+# The lockfile is what makes that state reproducible: it records the exact commit
+# of every plugin, so a fresh machine can be brought to the same set with `sync`.
+#
+# This is a script rather than a home.activation entry on purpose — restoring
+# runs git clone/fetch, and nixswitch should not need the network.
+
+set -euo pipefail
+
+DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+LOCKFILE="$DOTFILES/modules/config/dms-plugins.lock.json"
+
+usage() {
+	cat <<'USAGE'
+dmsplugins — sync DMS plugins with the lockfile in ~/.dotfiles
+
+Usage:
+  dmsplugins [sync]   Restore every plugin at its locked commit, and remove
+                      any plugin that is not in the lockfile (--prune).
+  dmsplugins update   Update all plugins to their upstream HEAD, then re-lock.
+                      Prints the resulting diff — commit it to keep the pin.
+  dmsplugins list     Show the currently installed plugins.
+  dmsplugins -h       This help.
+
+The lockfile lives at modules/config/dms-plugins.lock.json and is read straight
+out of the repo checkout. Set DOTFILES to point somewhere else.
+USAGE
+}
+
+die() { echo "dmsplugins: $*" >&2; exit 1; }
+
+# A few plugins ship a helper they expect to compile themselves — dankRazer
+# builds a Go CLI that talks to openrazer over D-Bus. `restore` and `update` are
+# git operations, so they wipe or stale that artefact every time; without this
+# the plugin loads fine and then silently reports no devices.
+#
+# The binary is built inside the plugin's own directory under ~/.config, so
+# nothing here writes outside $HOME. Note this executes code from the plugin
+# repo — the same trust already granted by loading its QML into the shell.
+build_helpers() {
+	local plugindir="${XDG_CONFIG_HOME:-$HOME/.config}/DankMaterialShell/plugins"
+	local script
+	[[ -d "$plugindir" ]] || return 0
+	for script in "$plugindir"/*/build.sh; do
+		[[ -f "$script" ]] || continue
+		echo "Building helper for $(basename "$(dirname "$script")")"
+		(cd "$(dirname "$script")" && sh build.sh) || echo "  ...failed, continuing" >&2
+	done
+}
+
+command -v dms >/dev/null 2>&1 || die "dms not found in PATH (is desktopShell set to \"dms\"?)"
+
+case "${1:-sync}" in
+	-h | --help | help)
+		usage
+		;;
+
+	sync)
+		[[ -f "$LOCKFILE" ]] || die "no lockfile at $LOCKFILE"
+		echo "Restoring plugins from $LOCKFILE"
+		dms plugins restore "$LOCKFILE" --prune
+		build_helpers
+		;;
+
+	update)
+		[[ -d "$DOTFILES/.git" ]] || die "$DOTFILES is not a git checkout; cannot re-lock"
+		dms plugins update -a
+		build_helpers
+		dms plugins lock -o "$LOCKFILE"
+		echo
+		if git -C "$DOTFILES" diff --quiet -- "$LOCKFILE"; then
+			echo "Lockfile unchanged — everything was already at its locked commit."
+		else
+			git -C "$DOTFILES" --no-pager diff --stat -- "$LOCKFILE"
+			echo
+			echo "Lockfile changed — commit it to keep the pin:"
+			echo "  git -C $DOTFILES add modules/config/dms-plugins.lock.json"
+		fi
+		;;
+
+	list)
+		dms plugins list
+		;;
+
+	*)
+		usage >&2
+		exit 1
+		;;
+esac
