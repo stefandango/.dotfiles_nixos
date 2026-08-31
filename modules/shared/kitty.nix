@@ -3,9 +3,11 @@
 {
   programs.kitty = {
     enable = true;
-    # No themeFile — colors below define the "Graphite" scheme directly. On Linux the
-    # theme-switcher overrides these live via ~/.config/kitty/theme-override.conf
-    # (included at the end of extraConfig); on macOS these settings are the source.
+    # No themeFile. On Linux the surface colours below are overridden live by
+    # ~/.config/kitty/dank-theme.conf, which matugen regenerates from the DMS
+    # wallpaper (see modules/nixos/matugen.nix); the ANSI ramp there is the same
+    # muted one as here, deliberately not wallpaper-derived. On macOS there is no
+    # matugen, so these settings are the source.
     settings = {
       confirm_os_window_close = 0;
       enable_audio_bell = "no";
@@ -57,8 +59,12 @@
       listen_on = "unix:/tmp/kitty";
     };
     extraConfig = ''
-      # Load theme override from theme switcher (overrides themeFile colors)
-      include ~/.config/kitty/theme-override.conf
+      ${lib.optionalString pkgs.stdenv.isLinux ''
+        # Surface colours from matugen. globinclude rather than include: it
+        # matches nothing silently before the first matugen run, where a plain
+        # include would log an error on every kitty start.
+        globinclude dank-theme.conf
+      ''}
 
       font_features MonoLisa-Medium +zero +ss04 +ss07 +ss08 +ss09
       font_features MonoLisa-MediumItalic +zero +ss04 +ss07 +ss08 +ss09

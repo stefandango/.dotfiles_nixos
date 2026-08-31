@@ -305,16 +305,19 @@
     '';
   };
 
-  # Qt theming — make Qt apps (corectrl, etc.) follow a dark theme instead of
-  # the default light Fusion look. Uses the supported `qt` module rather than a
-  # hand-set QT_QPA_PLATFORMTHEME. platformTheme = "gnome" sources colors via
-  # qgnomeplatform; style = "adwaita-dark" forces the dark widget style so Qt
-  # apps stay dark even without GNOME gsettings configured under Hyprland.
-  qt = {
-    enable = true;
-    platformTheme = "gnome";
-    style = "adwaita-dark";
-  };
+  # No `qt` block here on purpose. Qt follows GTK3 via home-manager's
+  # qt.platformTheme.name = "gtk3" (theme/theming.nix), which puts
+  # QT_QPA_PLATFORMTHEME=gtk3 in environment.d — and GTK3 is adw-gtk3-dark
+  # carrying matugen's colours, so Qt inherits the wallpaper palette for free.
+  #
+  # This used to set platformTheme = "gnome" + style = "adwaita-dark". Both had
+  # to go: home-manager's gtk3 already won the platformTheme race, and
+  # style = "adwaita-dark" exported QT_STYLE_OVERRIDE, which makes adwaita-qt
+  # paint its own fixed palette and ignore the platform theme entirely. That
+  # override was the actual thing pinning Qt apps to a static dark grey.
+  #
+  # qt5ct/qt6ct are deliberately not used: neither is installed, and inheriting
+  # GTK3 needs no colour files of its own.
 
   # Services
   services = {

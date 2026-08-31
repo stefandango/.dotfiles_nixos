@@ -12,7 +12,7 @@
                 {
                     "type": "os",
                     "style": "plain",
-                    "foreground": "#8b8b94",
+                    "foreground": "#909090",
                     "template": " {{.Icon}}",
                     "properties": {
                         "macos": "󰀵",
@@ -23,7 +23,7 @@
                 {
                     "type": "path",
                     "style": "plain",
-                    "foreground": "#c6c6cd",
+                    "foreground": "#c8c7c8",
                     "template": " {{ .Path }}",
                     "properties": {
                         "style": "folder",
@@ -35,11 +35,11 @@
                 {
                     "type": "git",
                     "style": "plain",
-                    "foreground": "#8b8b94",
+                    "foreground": "#909090",
                     "foreground_templates": [
                         "{{ if or (.Working.Changed) (.Staging.Changed) }}#b56b6b{{ end }}",
                         "{{ if and (gt .Ahead 0) (gt .Behind 0) }}#c2a15c{{ end }}",
-                        "{{ if gt .Ahead 0 }}#6f8fb3{{ end }}",
+                        "{{ if gt .Ahead 0 }}#bac9d1{{ end }}",
                         "{{ if gt .Behind 0 }}#c2a15c{{ end }}"
                     ],
                     "template": "  {{ .HEAD }}{{ if .Working.Changed }} +{{ .Working.Added }}{{ if .Working.Deleted }} -{{ .Working.Deleted }}{{ end }}{{ if .Working.Modified }} ~{{ .Working.Modified }}{{ end }}{{ end }}{{ if .Staging.Changed }} {{ .Staging.String }}{{ end }}",
@@ -51,37 +51,37 @@
                 {
                     "type": "dotnet",
                     "style": "plain",
-                    "foreground": "#8b8b94",
+                    "foreground": "#909090",
                     "template": " [  :{{ .Full }} ]"
                 },
                 {
                     "type": "node",
                     "style": "plain",
-                    "foreground": "#8b8b94",
+                    "foreground": "#909090",
                     "template": " [  :{{ .Full }} ]"
                 },
                 {
                     "type": "python",
                     "style": "plain",
-                    "foreground": "#8b8b94",
+                    "foreground": "#909090",
                     "template": " [  :{{ .Full }} ]"
                 },
                 {
                     "type": "rust",
                     "style": "plain",
-                    "foreground": "#8b8b94",
+                    "foreground": "#909090",
                     "template": " [  :{{ .Full }} ]"
                 },
                 {
                     "type": "go",
                     "style": "plain",
-                    "foreground": "#8b8b94",
+                    "foreground": "#909090",
                     "template": " [ 󰟓 {{ .Full }} ]"
                 },
                 {
                     "type": "nix-shell",
                     "style": "plain",
-                    "foreground": "#8b8b94",
+                    "foreground": "#909090",
                     "template": "{{ if and .Type (ne .Type \"unknown\") }} [ nix:{{ .Type }} ]{{end}}"
                 }
             ]
@@ -94,7 +94,7 @@
                 {
                     "type": "executiontime",
                     "style": "plain",
-                    "foreground": "#6a6a73",
+                    "foreground": "#6e6d6e",
                     "template": "{{ .FormattedMs }}",
                     "properties": {
                         "threshold": 1000,
@@ -123,7 +123,7 @@
                 {
                     "type": "text",
                     "style": "plain",
-                    "foreground": "#6f8fb3",
+                    "foreground": "#bac9d1",
                     "template": " ❯"
                 }
             ]

@@ -169,6 +169,14 @@
       executable = true;
     };
 
+    # Palette is static, unlike kitty and tmux which matugen regenerates from
+    # the wallpaper. Not an oversight: the config is dense with Go templates
+    # ({{ .HEAD }}, {{ if gt .Ahead 0 }}...) and matugen's engine parses {{ }}
+    # itself with no raw-block escape, so rendering it through matugen would
+    # mean deleting every segment template. The greys here are picked to match
+    # scheme-neutral output; the red/yellow/green are the same muted semantic
+    # colours as kitty's ANSI ramp. It will drift if the wallpaper moves far,
+    # which is the accepted cost.
     ".config/oh-my-posh/ohmyposhv3-v2.json" = {
       source = ../config/ohmyposhv3-v2.json;
     };
@@ -367,7 +375,9 @@
       # Smart quit using tmux-quit script
       bind-key X run-shell '~/Scripts/tmux-quit'
 
-      # Graphite — neutral greys + a single steel-blue accent
+      # Static fallback palette: macOS (no matugen) and the window before the
+      # first matugen run. On Linux the source-file at the end of this block
+      # overrides every colour below from the DMS wallpaper.
       set -g status-position bottom
       set -g status-justify centre
       set -g status-style bg=default,fg=#c6c6cd
@@ -406,6 +416,11 @@
       set -g display-panes-active-colour #6f8fb3
       set -g display-panes-colour #6a6a73
       set -g display-panes-time 1500
+
+      # Colours from matugen, regenerated on every wallpaper change. -q so this
+      # is a no-op on macOS and before the first run. Must come last: tmux is
+      # last-write-wins, so this is what makes it an override.
+      source-file -q ~/.config/tmux/dank-colors.conf
     '';
   };
 }

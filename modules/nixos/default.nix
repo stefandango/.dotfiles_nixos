@@ -7,6 +7,7 @@
     ./scripts.nix
     ./pyprland.nix
     ./hyprland.nix
+    ./matugen.nix
     ./dms.nix
     ./apps.nix
     ./dotnet.nix
