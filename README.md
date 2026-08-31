@@ -12,12 +12,16 @@ Cross-platform Nix configuration for NixOS and macOS using Nix flakes with enhan
 - **Smart Tmux Integration**: Mouse scrolling, battery indicator, and project-focused sessionizer
 - **Seamless Clipboard Experience**: Universal system clipboard across terminal, tmux, and neovim
 - **Development Workflow Optimizations**: Port management, quick file serving, and network diagnostics
-- **Hyprland Desktop (NixOS)**: Wayland compositor with Waybar, Rofi, SwayNC, greetd, and pyprland
+- **Hyprland Desktop (NixOS)**: Wayland compositor with DankMaterialShell (one Quickshell process for bar, notifications, launcher, OSD, lock screen, polkit and wallpaper), greetd, and pyprland
 - **Push Notifications (ntfy)**: Receive-only [ntfy](https://ntfy.sh) subscriber on both platforms — native desktop notifications from a self-hosted server
 - **Modern Audio Stack**: PipeWire with ALSA/JACK/PulseAudio compatibility (NixOS)
 - **Gaming Support (NixOS)**: Steam with gamescope session, GameMode, MangoHud, Lutris, CoreCtrl
 - **Development Environment**: Docker, .NET (via omnisharp/netcoredbg), Node.js, Python with intelligent tooling
-- **Tokyo Night Theme**: Consistent theming across all applications
+- **Wallpaper-derived theming**: matugen generates a Material 3 palette from the
+  current wallpaper on `scheme-neutral`, and DankMaterialShell, kitty, tmux, GTK
+  and Qt all follow it. Two deliberate exceptions: kitty's 16 ANSI colours stay a
+  muted static ramp (matugen's own ramp is far too saturated for a terminal, and
+  herdr inherits it), and Neovim keeps its own colourscheme in its own repo.
 
 ## Installation
 
@@ -50,6 +54,29 @@ nix run nix-darwin --extra-experimental-features nix-command --extra-experimenta
 ```bash
 sudo nixos-rebuild switch --flake .#stefan
 ```
+
+### After the first NixOS switch
+
+Two things are runtime state that Nix deliberately does not own, so a fresh
+machine needs them once:
+
+```bash
+~/Scripts/dmsplugins sync    # restore DMS plugins from dms-plugins.lock.json
+```
+
+Then, in DankMaterialShell: **Settings → Theme & Colors → Apply GTK Colors**.
+This copies `adw-gtk3` out of the read-only Nix store into
+`~/.local/share/themes/` and splices matugen's palette into it — GTK apps stay
+on the stock theme until it has run once. There is no CLI equivalent in `dms`
+itself, but the underlying script can be called directly:
+
+```bash
+DMS_DIR=$(dirname $(readlink -f $(which dms)))/../share/quickshell/dms
+bash "$DMS_DIR/scripts/gtk.sh" ~/.config apply false "$DMS_DIR"
+bash "$DMS_DIR/scripts/gtk.sh" ~/.config patch false "$DMS_DIR"
+```
+
+After that, every wallpaper change re-patches GTK automatically.
 
 ## Usage
 
@@ -143,7 +170,7 @@ the `ntfy` CLI as the subscriber:
 - **macOS**: `modules/darwin/ntfy.nix` runs a `launchd` user agent
   (`ntfy-subscribe`) that fires native notifications via `terminal-notifier`.
 - **NixOS**: `modules/nixos/ntfy.nix` runs a `systemd --user` service
-  (`ntfy-subscribe`) that pipes messages to `notify-send`, rendered by SwayNC.
+  (`ntfy-subscribe`) that pipes messages to `notify-send`, rendered by DankMaterialShell.
 
 Credentials are **never** stored in the Nix store or committed to git. On **both**
 platforms, create the same out-of-store credentials file once:
@@ -234,12 +261,12 @@ This configuration uses a hybrid approach:
 ├── modules/              # Reusable modules
 │   ├── shared/           # Cross-platform (git, zsh, kitty, firefox, system)
 │   ├── darwin/           # macOS-specific home-manager modules
-│   ├── nixos/            # NixOS-specific modules (hyprland, waybar, rofi,
-│   │                     #   swaync, ntfy, greetd, pyprland, apps, dotnet, env)
+│   ├── nixos/            # NixOS-specific modules (hyprland, dms, matugen,
+│   │                     #   ntfy, greetd, pyprland, apps, dotnet, env)
 │   ├── config/           # Dotfile assets (oh-my-posh, lsd, omnisharp)
-│   └── scripts/          # Shell scripts (nix helpers, clipboard, tmux, waybar)
+│   └── scripts/          # Shell scripts (nix helpers, clipboard, tmux, dmsplugins)
 ├── nix/                  # Standalone nix configs (nvim.nix via nixvim)
-└── theme/                # UI theming (colors.nix, theming.nix, themes/)
+└── theme/                # GTK/Qt/cursor/font settings (theming.nix)
 ```
 
 ### Key Components
@@ -250,7 +277,7 @@ This configuration uses a hybrid approach:
 - **Consistent UX**: Unified command interface across all tools with PATH integration
 - **Development Tools**: Git, Neovim (via nixvim), ripgrep, lazygit, gh (GitHub CLI) with enhanced workflows
 - **Modern CLI Tools**: bat, lsd, fzf, fd, tree-sitter for enhanced terminal experience
-- **Hyprland Desktop (NixOS)**: Wayland compositor orchestrated with Waybar, Rofi, SwayNC, pyprland, and greetd as the login manager
+- **Hyprland Desktop (NixOS)**: Wayland compositor orchestrated with DankMaterialShell, pyprland, and greetd as the login manager
 - **Audio System**: PipeWire with ALSA/JACK/PulseAudio compatibility (NixOS)
 - **Gaming (NixOS)**: Steam + gamescope session, GameMode, MangoHud, Lutris, CoreCtrl, and Wine/Proton tooling
 - **Docker**: Container development environment with port management utilities
@@ -386,7 +413,10 @@ Edit `/Users/stefan/.dotfiles/modules/config/ohmyposhv3-v2.json` to customize th
 - NixOS: check the subscriber with `systemctl --user status ntfy-subscribe` and
   tail logs via `journalctl --user -u ntfy-subscribe -f`
 - NixOS: if it doesn't auto-start with the Hyprland session, switch the unit's
-  `WantedBy` from `graphical-session.target` to `default.target` in `modules/nixos/ntfy.nix`
+  `WantedBy` from `graphical-session.target` to `default.target` in `modules/nixos/ntfy.nix`.
+  This session runs plain `start-hyprland`, not UWSM, so `graphical-session.target`
+  never activates — the same reason DankMaterialShell is launched from the Hyprland
+  autostart in `modules/nixos/hyprland.nix` rather than its packaged systemd unit
 - macOS: check the agent with `launchctl list | grep ntfy-subscribe` and tail
   `/tmp/ntfy-subscribe.err.log`
 - macOS: grant `terminal-notifier` notification permission in

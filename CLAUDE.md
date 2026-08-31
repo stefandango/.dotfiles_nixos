@@ -18,11 +18,11 @@ The repository is structured as a unified flake supporting multiple system confi
 - **modules/**: Reusable Nix modules organized by functionality
   - `shared/`: Cross-platform home-manager modules (`git.nix`, `zsh.nix`, `kitty.nix`, `firefox.nix`) and the shared `system.nix`
   - `darwin/`: macOS-specific home-manager modules (placeholder)
-  - `nixos/`: Linux-specific modules — `hyprland.nix`, `waybar.nix`, `rofi.nix`, `swaync.nix`, `greetd.nix`, `pyprland.nix`, `apps.nix`, `dotnet.nix`, `env.nix`, `scripts.nix`
+  - `nixos/`: Linux-specific modules — `hyprland.nix`, `dms.nix` (DankMaterialShell, the desktop shell), `matugen.nix` (user colour templates), `greetd.nix`, `pyprland.nix`, `apps.nix`, `dotnet.nix`, `env.nix`, `scripts.nix`, `tailscale.nix`, `ntfy.nix`
   - `config/`: Static dotfile assets (`ohmyposhv3-v2.json`, `lsdconfig.yaml`, `lsdtheme.yaml`, `omnisharp.json`)
   - `scripts/`: Shell scripts packaged via `modules/nixos/scripts.nix` and exposed to `~/Scripts`
 - **nix/**: Standalone nix configs (`nvim.nix` for nixvim)
-- **theme/**: Theming and color scheme definitions (`colors.nix`, `theming.nix`, `themes/`)
+- **theme/**: GTK/Qt/cursor/font settings (`theming.nix`). Colours are not defined here — matugen derives them from the wallpaper at runtime; see `modules/nixos/matugen.nix`
 
 ## Common Commands
 
