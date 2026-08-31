@@ -53,8 +53,8 @@
       "quiet"                                           # Suppress kernel log output on console — needed for plymouth
       "splash"                                          # Tell plymouth to show the splash screen
 
-      # Recolour the Linux VT's 16-colour palette to the One Dark Pro scheme
-      # (theme/colors.nix). This is what makes the tuigreet login (a console
+      # Recolour the Linux VT's 16-colour palette to the One Dark Pro scheme.
+      # This is what makes the tuigreet login (a console
       # app limited to the 16 named ANSI colours) look themed instead of using
       # the garish default TTY palette. Order = palette slots 0..15
       # (0-7 normal, 8-15 bright): black, red, green, yellow, blue, magenta,

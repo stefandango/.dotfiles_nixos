@@ -15,52 +15,6 @@
 # session. That is exactly how swaync kept stealing them during the trial.
 
 let
-  themeNames = [ "graphite" "slate" "umber" "moss" "mono" ];
-
-  # Our palette is a neutral ramp (black < bg < inactive < gray < comment <
-  # text < fg) plus an accent and three semantic colours. Material 3 wants
-  # tonal *roles* instead, so map the ramp onto the surface hierarchy and let
-  # the accent drive primary. Colours arrive as bare hex (no "#").
-  toM3 = p: {
-    name = p.name;
-
-    # Accent drives every "primary" role. primaryText sits ON primary, so it
-    # has to be the dark end of the ramp, not the light one.
-    primary = "#${p.accent}";
-    primaryText = "#${p.bg}";
-    primaryContainer = "#${p.accentDim}";
-    surfaceTint = "#${p.accent}";
-
-    # `purple` is deliberately a neutral slate in our palette (see the comment
-    # in theme/colors.nix), which is exactly what a secondary role wants.
-    secondary = "#${p.purple}";
-
-    # Surface hierarchy walks up the neutral ramp.
-    background = "#${p.black}";
-    backgroundText = "#${p.fg}";
-    surface = "#${p.bg}";
-    surfaceText = "#${p.fg}";
-    surfaceVariant = "#${p.inactive}";
-    surfaceVariantText = "#${p.text}";
-    surfaceContainer = "#${p.inactive}";
-    surfaceContainerHigh = "#${p.gray}";
-    surfaceContainerHighest = "#${p.comment}";
-    outline = "#${p.gray}";
-
-    error = "#${p.danger}";
-    warning = "#${p.warning}";
-    info = "#${p.cyan}";
-  };
-
-  # DMS reads { dark, light }; with only `dark` present it reuses it for light
-  # mode (Theme.qml:1650-1652). Our themes are dark-only, so that is correct.
-  mkTheme = name:
-    let palette = builtins.fromJSON (builtins.readFile ../../theme/themes/${name}.json);
-    in pkgs.writeText "dms-${name}.json" (builtins.toJSON { dark = toM3 palette; });
-
-  dmsThemes = pkgs.linkFarm "dms-themes"
-    (map (n: { name = "${n}.json"; path = mkTheme n; }) themeNames);
-
   # ── Seed configuration ────────────────────────────────────────────────────
   # Captured from a live session with `dms ipc call settings dump` after
   # hand-tuning, then folded back in here. This is only the STARTING state:
@@ -69,12 +23,21 @@ let
   dmsSeedSettings = {
     configVersion = 16;
 
-    # Wallpaper-derived colours, chosen over the pinned Graphite palette. The
-    # five generated themes stay available to switch back to via the Settings
-    # UI (currentThemeName = "custom").
+    # matugen derives the whole palette from the wallpaper, and every app in
+    # Phase 4 follows it. `scheme-neutral` is the reason that is liveable:
+    # the default `scheme-tonal-spot` pulled a strong wallpaper hue through
+    # every surface (bg #0f1417, primary #8ad0ee off ships_at_sea.png),
+    # where neutral lands on bg #121314 / primary #bac9d1 -- within a hair of
+    # the Graphite palette this replaced. `scheme-monochrome` is the next
+    # step down if even that reads as too much colour.
+    #
+    # Note this does NOT mute the dank16 ANSI ramp: that is generated from
+    # the primary independent of the M3 scheme, so it stays saturated
+    # (red #f06c96, green #68d174). Hence kitty keeps a static ramp -- see
+    # modules/nixos/matugen.nix.
     currentThemeName = "dynamic";
     currentThemeCategory = "dynamic";
-    customThemeFile = "${dmsThemes}/graphite.json";
+    matugenScheme = "scheme-neutral";
 
     cornerRadius = 12;
     popupTransparency = 0.96;
@@ -82,9 +45,18 @@ let
     barElevationEnabled = false;
     systemTrayIconTintMode = "monochrome";
 
-    fontFamily = "Inter";
+    fontFamily = "Inter SemiBold";
     monoFontFamily = "MonoLisa Nerd Font";
-    fontWeight = 600;               # matches waybar's font-weight: 600
+    fontWeight = 600;
+
+    # Popouts and modals open faster than stock. Hyprland's own layer
+    # animation is disabled for dms:* namespaces (see hyprland.nix), so these
+    # are the only curve on those surfaces.
+    syncComponentAnimationSpeeds = false;
+    popoutAnimationSpeed = 4;
+    popoutCustomAnimationDuration = 120;
+    modalAnimationSpeed = 4;
+    modalCustomAnimationDuration = 120;
 
     clockFormat = "24h";
     clockDateFormat = "d/M";
@@ -102,12 +74,13 @@ let
     # machine never locks and never blanks. Values reproduce the old hypridle
     # listeners exactly (lock at 600s, monitors off at 660s). Suspend stays 0:
     # this host disables Suspend/Hibernate outright in systemd.sleep.settings.
+    # No *SuspendTimeout keys: DMS discards them on load (they are not
+    # properties), and this host disables Suspend/Hibernate outright in
+    # systemd.sleep.settings anyway.
     acLockTimeout = 600;
     acMonitorTimeout = 660;
-    acSuspendTimeout = 0;
     batteryLockTimeout = 600;
     batteryMonitorTimeout = 660;
-    batterySuspendTimeout = 0;
     lockBeforeSuspend = true;       # was hypridle's before_sleep_cmd
 
     # Dank Island rather than the classic bar. The island renders whichever
@@ -148,22 +121,49 @@ let
       { id = "darkMode";          enabled = true; width = 50; }
     ];
 
-    # DMS ships matugen templates that write theme files for other apps.
-    # Hyprland colours come from theme-switcher.sh via hyprctl and kitty from
-    # theme-override.conf; letting DMS also write them would mean two writers
-    # for one file. GTK/Qt are pinned static in theme/theming.nix.
-    matugenTemplateHyprland = false;
+    # DMS ships matugen templates that write theme files for other apps. Only
+    # one writer per file is allowed, so each of these is either DMS's job or
+    # ours (via ~/.config/matugen/config.toml, see modules/nixos/matugen.nix).
+    #
+    # GTK is DMS's: scripts/gtk.sh does more than render a template -- it
+    # copies adw-gtk3 out of the read-only store into ~/.local/share/themes
+    # and splices the colours into the theme's own gtk.css. Reimplementing
+    # that would be pure duplication.
+    matugenTemplateGtk = true;
+
+    # Ours, because DMS's version would also rewrite the 16 ANSI colours from
+    # dank16, which stays saturated regardless of matugenScheme. Our template
+    # takes the surface roles and keeps a muted static ramp.
     matugenTemplateKitty = false;
-    matugenTemplateGtk = false;
+
+    # Hyprland's borders are a gradient built in hyprland.nix and reapplied at
+    # runtime by setBorder(); DMS's template writes a flat col.active_border
+    # that setBorder would immediately overwrite, and it has no notion of the
+    # submap state colour. Left to Nix.
+    matugenTemplateHyprland = false;
+
+    # Qt inherits GTK3 via QT_QPA_PLATFORMTHEME=gtk3, so there is nothing for
+    # qt5ct/qt6ct to do -- and neither is installed.
     matugenTemplateQt5ct = false;
     matugenTemplateQt6ct = false;
     matugenTemplateQtengine = false;
+
+    # Neovim lives in its own repo (github:stefandango/LazyVim-Config) and
+    # keeps its own colourscheme (kanagawa) on purpose -- editor syntax
+    # highlighting wants a palette designed for it, not one derived from a
+    # wallpaper.
     matugenTemplateNeovim = false;
+
+    # Compositors we do not run.
+    matugenTemplateNiri = false;
+    matugenTemplateMangowc = false;
+
+    # Left at their defaults (true) and written today: Zed, Vencord, and the
+    # KDE colour schemes. Those apps have no competing writer, so letting the
+    # shell theme them is the whole point of unifying on matugen.
     matugenTemplateFirefox = false;
     matugenTemplateZenBrowser = false;
     matugenTemplateVscode = false;
-    matugenTemplateNiri = false;
-    matugenTemplateMangowc = false;
 
     barConfigs = [{
       id = "default";

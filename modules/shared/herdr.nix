@@ -21,9 +21,12 @@
     # Inherit Kitty's ANSI palette so panes/chrome match the terminal exactly.
     name = "terminal"
 
-    # Overlay the "Graphite" design tokens (theme/colors.nix) so herdr's
-    # highlights and agent-status colors stay on-brand:
-    #   accent = steel-blue, green = done, yellow = needs-attention, red = error.
+    # theme.name = "terminal" means herdr inherits kitty's palette, which is
+    # matugen-derived for the surfaces and a static muted ramp for the ANSI
+    # colours (see modules/nixos/matugen.nix). These four overlay the semantic
+    # accents on top: accent = steel-blue, green = done, yellow =
+    # needs-attention, red = error. Static on purpose -- "this agent errored"
+    # should not change hue when the wallpaper does.
     [theme.custom]
     accent = "#6f8fb3"
     green  = "#7d9a6b"

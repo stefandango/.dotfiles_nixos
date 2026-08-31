@@ -1,7 +1,6 @@
 {config, lib, system, pkgs, vars, host, ... }:
 
 let
-  colors = import ../../theme/colors.nix;
   # The binds that reach into the shell rather than the compositor.
   # DankMaterialShell owns all of them, so each is an IPC call into the
   # already-running shell process rather than a program launch.
@@ -126,7 +125,21 @@ in
 		# (the exit code is always 1, so the "config ok" line is the only signal;
 		# it does catch unknown config keys and unknown rule fields, with line
 		# numbers, but not wrong values inside layoutmsg strings.)
-		hyprlandLua = with colors.scheme.default.hex;
+		# Compositor chrome. Deliberately static rather than matugen-derived:
+		# these are a 1px border and a groupbar, they are reapplied at runtime by
+		# setBorder() (which would overwrite anything a template wrote), and the
+		# submap colour is semantic -- a "this is armed" warning wants to stay warm
+		# and distinct however the wallpaper shifts. Neutral values chosen to sit
+		# with matugen's scheme-neutral output rather than fight it.
+		hyprlandLua = with {
+			borderActive   = "bac9d1";   # matugen scheme-neutral primary
+			borderActive2  = "8b9aa3";   # dimmer, so the 45deg gradient still reads
+			borderInactive = "4a4a52";
+			submapWarn     = "c2a15c";   # kill-submap armed: warm on purpose
+			submapWarn2    = "bd8b5e";
+			groupActive    = "bac9d1";
+			bg             = "121314";   # matugen scheme-neutral background
+		};
 		''
 		------------------
 		---- MONITORS ----
@@ -215,9 +228,9 @@ in
 		-- runtime via setBorder() below, in-process. The hyprlang config shelled out
 		-- to `hyprctl keyword general:col.active_border ...` for this, which does not
 		-- work under the Lua manager ("keyword can't work with non-legacy parsers").
-		local BORDER_NORMAL   = { colors = { "rgba(${cyan}ee)", "rgba(${green}ee)" }, angle = 45 }
-		local BORDER_WINDOW   = { colors = { "rgba(${yellow}ee)", "rgba(${orange}ee)" }, angle = 45 }
-		local BORDER_INACTIVE = "rgba(${gray}aa)"
+		local BORDER_NORMAL   = { colors = { "rgba(${borderActive}ee)", "rgba(${borderActive2}ee)" }, angle = 45 }
+		local BORDER_WINDOW   = { colors = { "rgba(${submapWarn}ee)", "rgba(${submapWarn2}ee)" }, angle = 45 }
+		local BORDER_INACTIVE = "rgba(${borderInactive}aa)"
 
 		local function setBorder(gradient)
 			hl.config({ general = { col = { active_border = gradient } } })
@@ -258,8 +271,8 @@ in
 
 			group = {
 				col = {
-					border_active   = "rgba(${cyan}ee)",
-					border_inactive = "rgba(${gray}aa)",
+					border_active   = "rgba(${borderActive}ee)",
+					border_inactive = "rgba(${borderInactive}aa)",
 				},
 
 				groupbar = {
@@ -268,8 +281,8 @@ in
 					height        = 30,
 					render_titles = true,
 					col = {
-						active   = "rgb(${blue})",
-						inactive = "rgb(${gray})",
+						active   = "rgb(${groupActive})",
+						inactive = "rgb(${borderInactive})",
 					},
 					text_color         = "rgb(ffffff)",
 					rounding           = 6,
