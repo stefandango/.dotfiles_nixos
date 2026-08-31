@@ -34,6 +34,11 @@ let
 		-- hand-maintained cheatsheet.sh (which had already drifted from reality).
 		hl.bind("SUPER + SHIFT + plus", hl.dsp.exec_cmd("dms ipc call keybinds toggle"))
 		hl.bind("SUPER + ALT + SPACE", hl.dsp.exec_cmd("dms ipc call control-center toggle"))
+		-- Opens the nixosUpdates popout without having to aim at the pill. The id
+		-- resolves through BarWidgetService, so this only works while the widget
+		-- is actually on the bar -- and the pill hides itself when up to date,
+		-- which is exactly when you would reach for the keybind instead.
+		hl.bind("SUPER + U", hl.dsp.exec_cmd("dms ipc call widget toggle nixosUpdates"))
     '' else ''
 		hl.bind(mainMod .. " + D", hl.dsp.exec_cmd(rofiKill .. [[ || rofi -show drun -theme ~/.config/rofi/launcher.rasi]]))
 		hl.bind("SUPER + SPACE", hl.dsp.exec_cmd(rofiKill .. [[ || rofi -show run -theme ~/.config/rofi/launcher.rasi]]))

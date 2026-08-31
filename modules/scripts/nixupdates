@@ -1,0 +1,532 @@
+#!/usr/bin/env bash
+# How far the running system's nixpkgs is behind its branch, and which packages
+# a rebuild would move.
+#
+# Consumers:
+#   nixupdates            the coloured terminal panel (pyprland `nixupdates`
+#                         scratchpad, or typed by hand)
+#   nixupdates --json     full state as one object — the DMS nixosUpdates widget
+#   nixupdates --waybar   waybar JSON line — the custom/updates module on the
+#                         desktopShell = "waybar" path
+#   nixupdates --check    refresh updates.json (cheap: one GitHub API call)
+#   nixupdates --diff     build diff.txt (expensive: resolves the inputs `nixup`
+#                         would pick, then dry-run evaluates against them)
+#
+# The GitHub API is unauthenticated (60 req/hr/IP), so the cache is the point:
+# --json and --waybar never hit the network themselves, they fork a background
+# --check only once the cache has aged past MAX_AGE.
+
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/nix-updates"
+CACHE_FILE="$CACHE_DIR/updates.json"
+DIFF_FILE="$CACHE_DIR/diff.txt"
+LOCK_FILE="$CACHE_DIR/check.lock"
+DIFF_LOCK="$CACHE_DIR/diff.lock"
+FLAKE_DIR="$HOME/.dotfiles"
+HOSTNAME="stefan"
+MAX_AGE=$((4 * 3600)) # 4 hours
+
+# ── vendored build-dependency families ───────────────────────────────────────
+# Some packaging tools emit one derivation per upstream dependency, so a single
+# program can account for most of the diff. Those are real store changes, but
+# nothing anyone chose to install, and listing them buries the packages that do
+# matter. Each family here collapses to one summary line instead.
+#   bun-pkg-  bun2nix's naming convention, plus its own helper derivations.
+#             Today that is hunk's npm tree — ~340 of the ~410 entries, none
+#             of which you installed.
+DEP_GROUPS='[{"prefixes": ["bun-pkg-", "bun2nix-"],
+              "label": "bun/npm build dependencies"}]'
+
+mkdir -p "$CACHE_DIR"
+
+# Colors for terminal output
+BOLD='\033[1m'
+DIM='\033[2m'
+CYAN='\033[36m'
+GREEN='\033[32m'
+YELLOW='\033[33m'
+RED='\033[31m'
+BLUE='\033[34m'
+RESET='\033[0m'
+
+# ── flake.lock accessors ─────────────────────────────────────────────────────
+# Resolve the actual top-level nixpkgs node — `.nodes.nixpkgs` may be a
+# transitive dep (e.g. an input that doesn't `follows`); root.inputs.nixpkgs
+# is the authoritative pointer.
+flake_node() {
+    jq -r '.nodes.root.inputs.nixpkgs // "nixpkgs"' "$FLAKE_DIR/flake.lock" 2>/dev/null
+}
+
+flake_field() { # $1 = jq path under the nixpkgs node
+    jq -r --arg n "$(flake_node)" ".nodes[\$n].$1 // \"\"" "$FLAKE_DIR/flake.lock" 2>/dev/null
+}
+
+# ── running-system accessors ─────────────────────────────────────────────────
+# "How far behind am I" is a question about the system that booted, not about
+# flake.lock. The two diverge exactly when it matters: `nixup` rewrites the lock
+# *before* it builds, so keying off the lock declares you up to date the moment
+# an update starts — and keeps saying so if that build then fails. Both fall
+# back to the lock so the script still answers on a non-NixOS host.
+system_field() { # $1 = key in `nixos-version --json`
+    nixos-version --json 2>/dev/null | jq -r ".$1 // \"\"" 2>/dev/null
+}
+
+current_rev_of_system() {
+    local rev
+    rev=$(system_field 'nixpkgsRevision')
+    [ -n "$rev" ] && { printf '%s\n' "$rev"; return 0; }
+    flake_field 'locked.rev'
+}
+
+# nixosVersion looks like 26.11.20260822.2c423e0 — pick out the date segment
+# rather than the release or the short rev.
+current_date_of_system() {
+    local stamp epoch
+    stamp=$(system_field 'nixosVersion' | tr '.' '\n' | grep -x '[0-9]\{8\}' | head -1)
+    if [ -n "$stamp" ]; then
+        printf '%s-%s-%s\n' "${stamp:0:4}" "${stamp:4:2}" "${stamp:6:2}"
+        return 0
+    fi
+    epoch=$(flake_field 'locked.lastModified')
+    [ -n "$epoch" ] && date -d "@$epoch" '+%Y-%m-%d' 2>/dev/null
+}
+
+# ── locking ──────────────────────────────────────────────────────────────────
+# flock rather than touch-files: the previous version trapped EXIT to remove
+# them, so a SIGKILL left the lock behind and wedged refresh permanently. A
+# flock is released by the kernel when the fd closes, however the process dies.
+lock_held() { # true when someone else is mid-run
+    [ -e "$1" ] || return 1
+    ( exec 9>"$1"; flock -n 9 ) && return 1 || return 0
+}
+
+# ── staleness ────────────────────────────────────────────────────────────────
+cache_stale() {
+    [ -f "$CACHE_FILE" ] || return 0
+
+    # Rev drift beats age: if the running system no longer matches what we last
+    # checked against, an update just landed and the cached verdict is wrong now
+    # — this is what makes the bar go green one poll after a successful switch.
+    local cached_cur live_cur
+    cached_cur=$(jq -r '.current_rev // ""' "$CACHE_FILE" 2>/dev/null)
+    live_cur=$(current_rev_of_system)
+    if [ -n "$live_cur" ] && [ "$cached_cur" != "$live_cur" ]; then
+        return 0
+    fi
+
+    local age
+    age=$(( $(date +%s) - $(stat -c %Y "$CACHE_FILE") ))
+    [ "$age" -gt "$MAX_AGE" ]
+}
+
+refresh_if_stale() {
+    if cache_stale; then
+        bash "$0" --check &>/dev/null &
+        disown
+    fi
+}
+
+# ── the cheap check: one GitHub API call ─────────────────────────────────────
+check_updates() {
+    local force="${1:-}"
+
+    # Another check already in flight, or nothing to do: both are fine, and
+    # `nixupdates --check && ...` should not trip over either.
+    exec 9>"$LOCK_FILE"
+    flock -n 9 || return 0
+
+    [ "$force" = "--force" ] || cache_stale || return 0
+
+    local current_rev branch latest_info latest_rev latest_date
+    current_rev=$(current_rev_of_system)
+    if [ -z "$current_rev" ]; then
+        echo "nixupdates: cannot determine the running system's nixpkgs rev" >&2
+        return 1
+    fi
+
+    branch=$(flake_field 'original.ref')
+    [ -n "$branch" ] || branch="nixos-unstable"
+
+    latest_info=$(curl -sf -H "Accept: application/vnd.github.v3+json" \
+        "https://api.github.com/repos/NixOS/nixpkgs/commits/$branch" 2>/dev/null)
+
+    # Rate-limited or offline: leave the previous cache alone rather than
+    # clobbering a good answer with an empty one.
+    if [ -z "$latest_info" ]; then
+        echo "nixupdates: could not reach the GitHub API for branch $branch" >&2
+        return 1
+    fi
+
+    latest_rev=$(echo "$latest_info" | jq -r '.sha')
+    latest_date=$(echo "$latest_info" | jq -r '.commit.committer.date')
+
+    local current_epoch current_date_fmt latest_date_fmt
+    current_date_fmt=$(current_date_of_system)
+    [ -n "$current_date_fmt" ] || current_date_fmt="unknown"
+    current_epoch=$(date -d "$current_date_fmt" '+%s' 2>/dev/null || echo 0)
+    latest_date_fmt=$(date -d "$latest_date" '+%Y-%m-%d' 2>/dev/null || echo "$latest_date")
+
+    if [ "$current_rev" = "$latest_rev" ]; then
+        jq -n \
+            --arg current_rev "$current_rev" \
+            --arg current_date "$current_date_fmt" \
+            --arg branch "$branch" \
+            --argjson checked_at "$(date +%s)" \
+            '{status: "current", branch: $branch, current_rev: $current_rev,
+              current_date: $current_date, checked_at: $checked_at}' \
+            > "$CACHE_FILE"
+        rm -f "$DIFF_FILE"
+    else
+        local latest_epoch days_behind
+        latest_epoch=$(date -d "$latest_date" '+%s' 2>/dev/null)
+        # An unreadable current date would otherwise report ~20000 days behind.
+        if [ "$current_epoch" -gt 0 ] 2>/dev/null; then
+            days_behind=$(( (latest_epoch - current_epoch) / 86400 ))
+        else
+            days_behind=0
+        fi
+
+        jq -n \
+            --arg branch "$branch" \
+            --arg current_rev "$current_rev" \
+            --arg current_date "$current_date_fmt" \
+            --arg latest_rev "$latest_rev" \
+            --arg latest_date "$latest_date_fmt" \
+            --argjson days "$days_behind" \
+            --argjson checked_at "$(date +%s)" \
+            '{status: "outdated", branch: $branch,
+              current_rev: $current_rev, current_date: $current_date,
+              latest_rev: $latest_rev, latest_date: $latest_date,
+              days: $days, checked_at: $checked_at}' \
+            > "$CACHE_FILE"
+    fi
+}
+
+# ── the expensive check: evaluate the system against the branch tip ──────────
+build_diff() {
+    exec 8>"$DIFF_LOCK"
+    flock -n 8 || return 0
+
+    local latest_rev sim_lock dry_output rc packages
+    latest_rev=$(jq -r '.latest_rev // ""' "$CACHE_FILE" 2>/dev/null)
+
+    # Model what `nixup` actually does. It runs a plain `nix flake update`, which
+    # moves *every* input; overriding nixpkgs alone would hold the eight inputs
+    # that `follows = "nixpkgs"` at their current revs while nixpkgs jumps ahead.
+    # That combination never gets built, and it reports failures that a real
+    # rebuild would not hit — a lagging zen-browser passing a `ffmpeg_7` that
+    # nixpkgs has since dropped, say. --output-lock-file resolves the update
+    # into a throwaway lock, leaving the repo's flake.lock untouched.
+    sim_lock=$(mktemp "$CACHE_DIR/sim-lock.XXXXXX") || return 0
+    if ! nix flake update --flake "$FLAKE_DIR" \
+        --output-lock-file "$sim_lock" >/dev/null 2>&1; then
+        {
+            echo "$latest_rev"
+            echo "error"
+            echo "Could not resolve updated flake inputs"
+        } > "$DIFF_FILE"
+        rm -f "$sim_lock"
+        return 0
+    fi
+
+    dry_output=$(nix build "$FLAKE_DIR#nixosConfigurations.$HOSTNAME.config.system.build.toplevel" \
+        --reference-lock-file "$sim_lock" \
+        -o /tmp/nix-updates-result --no-write-lock-file --dry-run 2>&1)
+    rc=$?
+    rm -f "$sim_lock"
+
+    if [ "$rc" -eq 0 ] || echo "$dry_output" | grep -q 'will be built\|will be fetched'; then
+        # A .drv scrape cannot tell a package from a build-time dependency, so
+        # this only prunes what is unambiguously not one: vendored source
+        # archives (npm .tgz, cargo .crate), NixOS plumbing derivations, and
+        # names with no version at all. The per-output derivations of one
+        # package (-bin, -dev, -man...) collapse to a single entry. Vendored
+        # dependency derivations that do carry a version still get through;
+        # separating those needs `nix store diff-closures`, which compares
+        # realised closures and so needs a real build rather than a dry run.
+        packages=$(echo "$dry_output" | grep '\.drv$' | \
+            sed 's|.*/[a-z0-9]*-||; s|\.drv$||' | \
+            grep -vE '\.(tgz|tar\.gz|tar\.xz|tar\.bz2|tar\.zst|crate|gem|whl|zip|jar|patch|diff|json|conf)$' | \
+            sed -E 's/-(bin|dev|doc|man|info|lib|out|debug|dist)$//' | \
+            grep -E -- '-[0-9][0-9a-zA-Z.+_]*$' | \
+            grep -vE '^(system-|etc$|user-|unit-|activate$|X-Restart|system-path|nixos-system-|home-manager-)' | \
+            sort -u)
+
+        if [ -n "$packages" ]; then
+            {
+                echo "$latest_rev"
+                echo "ok"
+                echo "$packages"
+            } > "$DIFF_FILE"
+        else
+            {
+                echo "$latest_rev"
+                echo "empty"
+            } > "$DIFF_FILE"
+        fi
+    else
+        # Evaluating the updated inputs can fail outright (a removed attribute,
+        # a changed function signature). Because the lock above is the one
+        # `nixup` would produce, this is a real answer — "your next nixup will
+        # not build" — not an empty package list, so it gets its own status
+        # rather than being counted as one.
+        {
+            echo "$latest_rev"
+            echo "error"
+            echo "$dry_output" | sed -n 's/^ *error: *\(.\+\)$/\1/p' | head -1
+        } > "$DIFF_FILE"
+    fi
+
+    # Only meaningful on the waybar path; a no-op under DMS, which polls.
+    pgrep -x waybar >/dev/null 2>&1 && pkill -RTMIN+8 waybar
+    return 0
+}
+
+# ── diff freshness ───────────────────────────────────────────────────────────
+# diff.txt is keyed by the latest_rev it was built against; once the branch tip
+# moves on it describes an evaluation nobody asked for.
+# diff.txt is: <latest_rev> / <status> / <packages or message...>
+# Files written before the status line existed are read as a bare package list.
+diff_status() {
+    local tok
+    tok=$(sed -n '2p' "$DIFF_FILE" 2>/dev/null)
+    case "$tok" in
+        ok | empty | error) echo "$tok" ;;
+        *) echo "legacy" ;;
+    esac
+}
+
+diff_body() {
+    if [ "$(diff_status)" = "legacy" ]; then
+        tail -n +2 "$DIFF_FILE" 2>/dev/null
+    else
+        tail -n +3 "$DIFF_FILE" 2>/dev/null
+    fi
+}
+
+# The body minus every entry belonging to a DEP_GROUPS family. jq's startswith
+# does the matching, so a prefix never has to be regex-escaped.
+diff_pkg_list() {
+    diff_body | jq -R -s -r --argjson g "$DEP_GROUPS" \
+        'split("\n") | map(select(length > 0))
+         | map(select(. as $x | ($g | any(.prefixes[] as $p | $x | startswith($p))) | not))
+         | .[]'
+}
+
+# One "<count>\t<label>" line per family that actually matched something.
+diff_group_lines() {
+    diff_body | jq -R -s -r --argjson g "$DEP_GROUPS" \
+        'split("\n") | map(select(length > 0)) as $all
+         | $g
+         | map(. as $grp | $grp + {count: ($all | map(select(. as $x
+             | $grp.prefixes | any(. as $p | $x | startswith($p)))) | length)})
+         | map(select(.count > 0))
+         | .[] | "\(.count)\t\(.label)"'
+}
+
+diff_fresh() {
+    local latest_rev
+    latest_rev=$(jq -r '.latest_rev // ""' "$CACHE_FILE" 2>/dev/null)
+    [ -n "$latest_rev" ] && [ -f "$DIFF_FILE" ] \
+        && [ "$(head -1 "$DIFF_FILE" 2>/dev/null)" = "$latest_rev" ]
+}
+
+# ── output: --json (the DMS widget) ──────────────────────────────────────────
+diff_json() {
+    if ! diff_fresh; then
+        echo '{"fresh":false,"status":"stale","count":0,"packages":[],"groups":[],"message":""}'
+        return
+    fi
+    local st
+    st=$(diff_status)
+    if [ "$st" = "error" ]; then
+        diff_body | jq -R -s -c '{fresh: true, status: "error", count: 0,
+                                  packages: [], groups: [],
+                                  message: (. | rtrimstr("\n"))}'
+    else
+        diff_body | jq -R -s -c --arg st "$st" --argjson g "$DEP_GROUPS" \
+            'split("\n") | map(select(length > 0)) as $all
+             | ($all | map(select(. as $x
+                 | ($g | any(.prefixes[] as $p | $x | startswith($p))) | not))) as $pkgs
+             | ($g | map(. as $grp | {label: .label,
+                   count: ($all | map(select(. as $x
+                     | $grp.prefixes | any(. as $p | $x | startswith($p)))) | length)})
+                   | map(select(.count > 0))) as $groups
+             | {fresh: true, status: (if $st == "legacy" then "ok" else $st end),
+                count: ($pkgs | length), packages: $pkgs, groups: $groups, message: ""}'
+    fi
+}
+
+emit_json() {
+    refresh_if_stale
+
+    local checking diffing
+    lock_held "$LOCK_FILE" && checking=true || checking=false
+    lock_held "$DIFF_LOCK" && diffing=true || diffing=false
+
+    if [ ! -f "$CACHE_FILE" ]; then
+        jq -n --argjson checking "$checking" \
+            '{status: "unknown", branch: "", current_rev: "", current_date: "",
+              latest_rev: "", latest_date: "", days: 0, checked_at: 0,
+              checking: $checking, diffing: false,
+              diff: {fresh: false, count: 0, packages: []}}'
+        return
+    fi
+
+    jq -n \
+        --slurpfile cache "$CACHE_FILE" \
+        --argjson diff "$(diff_json)" \
+        --argjson checking "$checking" \
+        --argjson diffing "$diffing" \
+        '$cache[0]
+         | {status: (.status // "unknown"), branch: (.branch // ""),
+            current_rev: (.current_rev // ""), current_date: (.current_date // ""),
+            latest_rev: (.latest_rev // ""), latest_date: (.latest_date // ""),
+            days: (.days // 0), checked_at: (.checked_at // 0)}
+         + {checking: $checking, diffing: $diffing, diff: $diff}'
+}
+
+# ── output: --waybar (the custom/updates module) ─────────────────────────────
+emit_waybar() {
+    refresh_if_stale
+
+    if [ ! -f "$CACHE_FILE" ]; then
+        printf '{"text": "...", "tooltip": "Checking for updates...", "class": "checking"}\n'
+        return
+    fi
+
+    local status
+    status=$(jq -r '.status' "$CACHE_FILE")
+
+    if [ "$status" = "current" ]; then
+        local current_date
+        current_date=$(jq -r '.current_date' "$CACHE_FILE")
+        printf '{"text": "", "tooltip": "Up to date (%s)", "class": "current"}\n' "$current_date"
+        return
+    fi
+
+    local days current_date latest_date pkg_count
+    days=$(jq -r '.days' "$CACHE_FILE")
+    current_date=$(jq -r '.current_date' "$CACHE_FILE")
+    latest_date=$(jq -r '.latest_date' "$CACHE_FILE")
+
+    if diff_fresh && [ "$(diff_status)" != "error" ] && [ "$(diff_status)" != "empty" ]; then
+        pkg_count=$(diff_pkg_list | grep -c .)
+        printf '{"text": "󰏔  %s", "tooltip": "%s package(s) to update (%s days behind)\\nLocked: %s → Latest: %s\\nClick for details", "class": "updates"}\n' \
+            "$pkg_count" "$pkg_count" "$days" "$current_date" "$latest_date"
+    else
+        printf '{"text": "󰏔  %sd", "tooltip": "%s days behind nixpkgs\\nLocked: %s → Latest: %s\\nClick for details", "class": "updates"}\n' \
+            "$days" "$days" "$current_date" "$latest_date"
+    fi
+}
+
+# ── output: the terminal panel (default) ─────────────────────────────────────
+render_diff_error() {
+    echo -e "  ${RED}${BOLD}󰅚  A rebuild would fail to evaluate${RESET}"
+    echo ""
+    diff_body | while read -r line; do echo -e "    ${DIM}$line${RESET}"; done
+}
+
+render_diff_packages() {
+    local packages pkg_count
+    packages=$(diff_pkg_list)
+    pkg_count=$(echo "$packages" | grep -c .)
+
+    echo -e "  ${BOLD}${BLUE}$pkg_count package(s) would be updated:${RESET}"
+    echo -e "  ${DIM}─────────────────────────────────────────${RESET}"
+    echo ""
+    echo "$packages" | while read -r pkg; do
+        [ -n "$pkg" ] && echo -e "    ${CYAN}•${RESET} $pkg"
+    done
+    diff_group_lines | while IFS=$'\t' read -r count label; do
+        echo -e "    ${DIM}+ $count $label${RESET}"
+    done
+}
+
+display() {
+    # Blocking rather than backgrounded: this is a foreground view, and waiting
+    # on one API call beats rendering a stale answer the reader can't see is stale.
+    cache_stale && check_updates
+
+    clear
+    echo ""
+    echo -e "  ${BOLD}${CYAN}󱄅  NixOS Update Status${RESET}"
+    echo -e "  ${DIM}─────────────────────────────────────────${RESET}"
+    echo ""
+
+    if [ ! -f "$CACHE_FILE" ]; then
+        echo -e "  ${DIM}No update information available yet.${RESET}"
+        echo ""
+        return
+    fi
+
+    status=$(jq -r '.status' "$CACHE_FILE")
+
+    if [ "$status" = "current" ]; then
+        current_date=$(jq -r '.current_date' "$CACHE_FILE")
+        echo -e "  ${GREEN}${BOLD}󰄬  System is up to date${RESET}"
+        echo -e "  ${DIM}Locked: $current_date${RESET}"
+        echo ""
+        return
+    fi
+
+    days=$(jq -r '.days' "$CACHE_FILE")
+    current_date=$(jq -r '.current_date' "$CACHE_FILE")
+    latest_date=$(jq -r '.latest_date' "$CACHE_FILE")
+
+    echo -e "  ${YELLOW}${BOLD}󰏔  $days days behind nixpkgs${RESET}"
+    echo ""
+    echo -e "  ${DIM}Current lock:${RESET}  $current_date"
+    echo -e "  ${DIM}Latest nixpkgs:${RESET} $latest_date"
+    echo ""
+
+    if ! diff_fresh; then
+        echo -e "  ${DIM}Evaluating package diff...${RESET}"
+        echo -e "  ${DIM}This may take about a minute.${RESET}"
+        echo ""
+        build_diff
+    fi
+
+    if ! diff_fresh; then
+        : # build_diff failed to produce anything usable; the header still stands.
+    elif [ "$(diff_status)" = "error" ]; then
+        render_diff_error
+    elif [ "$(diff_status)" = "empty" ]; then
+        echo -e "  ${DIM}No package changes detected.${RESET}"
+    else
+        render_diff_packages
+    fi
+
+    echo ""
+    echo -e "  ${DIM}─────────────────────────────────────────${RESET}"
+    echo -e "  ${DIM}Run${RESET} ${BOLD}nixup${RESET} ${DIM}to update${RESET}"
+    echo ""
+}
+
+usage() {
+    cat <<'USAGE'
+nixupdates — how far behind nixpkgs this system is
+
+Usage:
+  nixupdates            Show the update panel (default).
+  nixupdates --json     Full state as one JSON object (the DMS widget).
+  nixupdates --waybar   waybar JSON line (the custom/updates module).
+  nixupdates --check    Refresh the cached verdict if it is stale.
+      --force           ...even if it is not.
+  nixupdates --diff     Evaluate which packages a rebuild would move (~1 min).
+  nixupdates -h         This help.
+
+State is cached under ${XDG_CACHE_HOME:-~/.cache}/nix-updates and refreshed at
+most every 4 hours; the GitHub API is unauthenticated and rate-limited.
+USAGE
+}
+
+case "${1:-}" in
+    --check)   check_updates "${2:-}" ;;
+    --diff)    build_diff ;;
+    --json)    emit_json ;;
+    --waybar)  emit_waybar ;;
+    "")        display ;;
+    --display) display ;; # kept: the pyprland scratchpad used this name
+    -h | --help | help) usage ;;
+    *)         usage >&2; exit 1 ;;
+esac

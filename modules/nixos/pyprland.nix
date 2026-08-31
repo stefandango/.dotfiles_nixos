@@ -64,7 +64,7 @@ in
                     size = "60% 80%"
 
                     [scratchpads.nixupdates]
-                    command = "kitty --class scratchpad -e bash -c '~/Scripts/waybar-updates.sh --display; read -n1 -s -r -p \"Press any key to close...\"'"
+                    command = "kitty --class scratchpad -e bash -c '~/Scripts/nixupdates; read -n1 -s -r -p \"Press any key to close...\"'"
                     margin = 50
                     unfocus = "hide"
                     animation = "fromTop"

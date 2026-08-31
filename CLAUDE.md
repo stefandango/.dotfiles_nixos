@@ -36,6 +36,7 @@ nixclean          # Clean up old generations and optimize store
 nixgen            # List system generations
 nixvalidate       # Pre-flight checks before switching
 nixworkarounds    # List temporary pins/patches and which can now be deleted
+nixupdates        # How far behind nixpkgs we are, and what a rebuild would move
 
 # Enhanced Nix helpers
 nixsearch firefox # Search packages with detailed info

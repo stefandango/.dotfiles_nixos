@@ -152,13 +152,26 @@ in
 				recursive = true;
 				executable = true;
 			};
-			"Scripts/waybar-updates.sh" = {
-				source = ../scripts/waybar-updates.sh;
+			# How far the pinned nixpkgs is behind its branch, and which packages a
+			# rebuild would move. `--json` feeds the DMS nixosUpdates widget,
+			# `--waybar` the custom/updates module on the waybar path; a bare call
+			# prints the terminal panel the pyprland scratchpad shows.
+			"Scripts/nixupdates" = {
+				source = ../scripts/nixupdates;
 				recursive = true;
 				executable = true;
 			};
 			"Scripts/omarchy-menu.sh" = {
 				source = ../scripts/omarchy-menu.sh;
+				recursive = true;
+				executable = true;
+			};
+			# Syncs ~/.config/DankMaterialShell/plugins against the lockfile in
+			# modules/config/dms-plugins.lock.json. Kept out of home.activation on
+			# purpose — restoring git-clones the plugins, and nixswitch should not
+			# need the network. Only useful while desktopShell = "dms".
+			"Scripts/dmsplugins" = {
+				source = ../scripts/dmsplugins;
 				recursive = true;
 				executable = true;
 			};

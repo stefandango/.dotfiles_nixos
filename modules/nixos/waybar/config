@@ -233,7 +233,7 @@
 	"custom/updates": {
 		"format": "{}",
 		"return-type": "json",
-		"exec": "~/Scripts/waybar-updates.sh",
+		"exec": "~/Scripts/nixupdates --waybar",
 		"interval": 600,
 		"on-click": "pypr toggle nixupdates",
 		"signal": 8,

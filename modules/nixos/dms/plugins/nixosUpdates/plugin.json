@@ -1,0 +1,14 @@
+{
+  "id": "nixosUpdates",
+  "name": "NixOS Updates",
+  "description": "How far the pinned nixpkgs is behind its branch, and which packages a rebuild would move",
+  "version": "1.0.0",
+  "author": "stefan",
+  "icon": "system_update_alt",
+  "type": "widget",
+  "capabilities": ["dankbar-widget"],
+  "component": "./NixosUpdates.qml",
+  "settings": "./NixosUpdatesSettings.qml",
+  "dependencies": ["bash", "jq", "curl", "nix"],
+  "permissions": ["settings_read", "settings_write", "process"]
+}

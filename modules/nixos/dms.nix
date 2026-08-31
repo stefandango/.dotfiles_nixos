@@ -5,6 +5,12 @@
 # in ./default.nix — this module is only imported when that is "dms", so the
 # two shells can never both claim org.kde.StatusNotifierWatcher or
 # org.freedesktop.Notifications.
+#
+# Ending the trial also means deleting modules/config/dms-plugins.lock.json,
+# modules/scripts/dmsplugins (and its entry in ./scripts.nix), ./dms/ and the
+# environment.etc entry that ships it, and the SUPER+SHIFT+W carousel and
+# SUPER+U update binds in ./hyprland.nix. modules/scripts/nixupdates stays —
+# the waybar path drives it through `--waybar`.
 # TEMP-CHECK: recheck_after 2026-10-01
 
 let
@@ -120,6 +126,13 @@ let
     # builtin_tailscale is absent from DMS's defaults and its loader
     # deactivates itself when no entry is present — so Tailscale appears
     # nowhere at all until it is named here.
+    #
+    # The dankscale plugin was tried here and reverted: it exposes more
+    # (exit nodes, routes, DNS, account switching) but the built-in reads
+    # better for day-to-day use. If it is ever reconsidered, note that Control
+    # Center plugin ids are "plugin_" ++ the plugin id — NOT the bare id used
+    # in barConfigs — and a plugin only appears here if its widget defines
+    # ccWidgetIcon (Modules/ControlCenter/Models/WidgetModel.qml).
     controlCenterWidgets = [
       { id = "volumeSlider";      enabled = true; width = 50; }
       { id = "brightnessSlider";  enabled = true; width = 50; }
@@ -165,9 +178,37 @@ let
       # pacman/paru/yay, so on NixOS the widget can never report anything.
       # `vpn` is absent too — it is NetworkManager-only, and Tailscale is
       # surfaced through the Control Center widget instead.
+      #
+      # Everything before "systemTray" is a PLUGIN, not a built-in, and DMS
+      # renders nothing for an id it cannot resolve. All but one are restored
+      # from the lockfile by `~/Scripts/dmsplugins`; `nixosUpdates` is the
+      # exception — it is ours, and ships declaratively via the environment.etc
+      # entry at the bottom of this file, so it is there from the first switch.
+      #
+      # The first two replace six built-in widgets that used to sit here:
+      #   systemMonitorPlus → diskUsage + memUsage + cpuUsage + cpuTemp
+      #   amdGpuMonitor     → gpuTemp, plus VRAM/power/per-process detail
+      # `clipboard` is gone as well: SUPER+Y already opens the clipboard, and
+      # the spotlight has the `cb` trigger from builtInPluginSettings below.
+      #
+      # The rest close gaps waybar had and DMS's built-in set does not cover:
+      #   dankRazer     → the old custom/razerviperbattery module. Needs the Go
+      #                   helper its build.sh compiles — dmsplugins runs that.
+      #   ddcBrightness → brightness over DDC/CI. The built-in brightnessSlider
+      #                   drives a backlight class this desktop does not have;
+      #                   the LG only responds on i2c (see ddcutil notes).
+      #   nixosUpdates  → the old custom/updates module: days behind nixpkgs,
+      #                   with the package diff behind a click. See the
+      #                   environment.etc entry below for why not `systemUpdate`.
+      # Its manifest claims control-center too, but the widget never defines
+      # ccWidgetIcon, which is what WidgetModel.qml actually gates on — so
+      # dankRazer is bar-only in practice regardless of that capability.
+      #
+      # Bare strings are fine here — DMS normalises them to
+      # { id, enabled = true } on load (Common/settings/Lists.qml).
       rightWidgets = [
-        "clipboard"
-        "diskUsage" "memUsage" "cpuUsage" "cpuTemp" "gpuTemp"
+        "systemMonitorPlus" "amdGpuMonitor" "claudeCodeUsage"
+        "dankRazer" "ddcBrightness" "nixosUpdates"
         "systemTray" "notificationButton"
         "controlCenterButton" "powerMenuButton"
       ];
@@ -204,6 +245,27 @@ let
     (builtins.toJSON dmsSeedSettings);
 
   dmsSettingsPath = ".config/DankMaterialShell/settings.json";
+
+  # Installing a plugin does not enable it: `dms plugins install` only git-clones
+  # into ~/.config/DankMaterialShell/plugins, while the enabled flag lives in a
+  # separate plugin_settings.json that DMS normally writes from the Settings UI
+  # (Services/PluginService.qml enablePlugin()). Seeding it here means a fresh
+  # machine needs one command — `dmsplugins` — rather than that plus four toggles.
+  #
+  # Entries for a plugin that is not installed yet are harmless: DMS just carries
+  # the flag until the plugin appears, at which point it loads enabled.
+  dmsPluginSettingsFile = pkgs.writeText "dms-plugin-settings-seed.json"
+    (builtins.toJSON {
+      systemMonitorPlus.enabled = true;   # bar: disk + mem + cpu + cpu temp
+      amdGpuMonitor.enabled = true;       # bar: gpu usage/VRAM/temp/power
+      claudeCodeUsage.enabled = true;     # bar: Claude Code token usage
+      dankRazer.enabled = true;           # bar: Viper Ultimate battery/DPI/lighting
+      ddcBrightness.enabled = true;       # bar: DDC/CI brightness for the LG
+      wallpaperCarousel.enabled = true;   # daemon: SUPER+SHIFT+W overlay
+      nixosUpdates.enabled = true;        # bar: days behind nixpkgs (ships via /etc)
+    });
+
+  dmsPluginSettingsPath = ".config/DankMaterialShell/plugin_settings.json";
 in
 {
   # Taken as a module function so `lib` here is home-manager's extended lib,
@@ -251,18 +313,47 @@ in
     # keep.
     home.activation.seedDmsSettings =
       lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        target="$HOME/${dmsSettingsPath}"
-        if [ ! -e "$target" ] || [ -L "$target" ]; then
-          run mkdir -p "$(dirname "$target")"
-          run rm -f "$target"
-          run cp ${dmsSeedFile} "$target"
-          run chmod u+w "$target"
-          echo "dms: seeded $target (writable — DMS owns it from here)"
-        fi
+        seedDms() {
+          local src="$1" target="$HOME/$2"
+          if [ ! -e "$target" ] || [ -L "$target" ]; then
+            run mkdir -p "$(dirname "$target")"
+            run rm -f "$target"
+            run cp "$src" "$target"
+            run chmod u+w "$target"
+            echo "dms: seeded $target (writable — DMS owns it from here)"
+          fi
+        }
+        seedDms ${dmsSeedFile} ${dmsSettingsPath}
+        seedDms ${dmsPluginSettingsFile} ${dmsPluginSettingsPath}
       '';
 
     # Workspace app icons come from DMS's icon theme service rather than the
     # Nerd Font glyph table in waybar/config.toml, so it needs a real icon set.
     home.packages = with pkgs; [ papirus-icon-theme ];
   };
+
+  # The NixOS update indicator waybar used to carry, as a DMS plugin.
+  #
+  # Not the built-in `systemUpdate` widget: that is gated on
+  # SystemUpdateService.sysupdateAvailable, whose backend only knows
+  # pacman/paru/yay (Services/SystemUpdateService.qml:41), and
+  # SettingsData.updaterCustomCommand overrides only the *upgrade* command,
+  # never the check — so there is no seam to teach it about nix.
+  #
+  # It ships through /etc rather than ~/.config/DankMaterialShell/plugins
+  # because `dmsplugins sync` runs `dms plugins restore --prune`, which deletes
+  # every plugin in the user directory the lockfile does not name — and that
+  # lockfile records git remotes, which a hand-written plugin does not have.
+  # DMS watches both directories (Services/PluginService.qml:22-26) and loads
+  # them identically; a user-directory plugin shadows a system one but never
+  # the reverse, and the CLI refuses to mutate the system half at all.
+  # Nothing is ever written back into a plugin directory — settings go to
+  # plugin_settings.json and per-plugin state to ~/.local/state — so a
+  # read-only store symlink costs nothing here.
+  #
+  # The widget renders `~/Scripts/nixupdates --json` and owns no logic of its
+  # own; that script is installed from ./scripts.nix and is shared with the
+  # waybar path.
+  environment.etc."xdg/quickshell/dms-plugins/nixosUpdates".source =
+    ./dms/plugins/nixosUpdates;
 }
