@@ -1,24 +1,15 @@
-{config, lib, system, pkgs, vars, host, desktopShell, ... }:
+{config, lib, system, pkgs, vars, host, ... }:
 
 let
   colors = import ../../theme/colors.nix;
-  # rofi leaves a stale pidfile at $XDG_RUNTIME_DIR/rofi.pid when killed via SIGTERM
-  # (pkill), which then blocks every later launch with "Rofi already running" and the
-  # menu dies instantly. Remove it before (re)launching so the toggle keybinds keep working.
-  rofiKill = "rm -f /run/user/$(id -u)/rofi.pid; pkill rofi";
-
-  onDms = desktopShell == "dms";
-
-  # The binds that reach into the shell rather than the compositor. Both
-  # variants are always generated; which one lands in hyprland.lua follows
-  # `desktopShell` in ./default.nix, so flipping that value is a complete
-  # switch with no leftover binds pointing at a shell that is not running.
-  shellBinds =
-    if onDms then ''
+  # The binds that reach into the shell rather than the compositor.
+  # DankMaterialShell owns all of them, so each is an IPC call into the
+  # already-running shell process rather than a program launch.
+  shellBinds = ''
 		-- DankMaterialShell owns the launcher, clipboard, notification centre,
 		-- lock screen and power menu. Each of these is an IPC call into the
 		-- already-running shell process, not a fresh program launch — so there is
-		-- no cold start, and no stale-pidfile dance like rofi needs.
+		-- no cold start.
 		hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("dms ipc call spotlight toggle"))
 		-- spotlight-bar is a genuinely different surface from `spotlight`:
 		-- a slim one-line prompt with no results list until you type, where
@@ -35,49 +26,33 @@ let
 		hl.bind("SUPER + SHIFT + plus", hl.dsp.exec_cmd("dms ipc call keybinds toggle"))
 		hl.bind("SUPER + ALT + SPACE", hl.dsp.exec_cmd("dms ipc call control-center toggle"))
 		-- Wallpaper Carousel is a PLUGIN, so this bind is dead until
-		-- `~/Scripts/dmsplugins` has restored it from the lockfile. It needs DMS
-		-- to be the sole wallpaper manager, and it replaces awww_random.sh's
-		-- shuffle -- so the awww-daemon and awww_random.sh autostart lines below
-		-- have to go with it, or awww keeps drawing a second background layer
-		-- underneath DMS's (invisible, but still reshuffling every 300s).
+		-- `~/Scripts/dmsplugins` has restored it from the lockfile. DMS is the
+		-- sole wallpaper manager now, and this replaced awww's 300s shuffle --
+		-- which had been drawing a second background layer underneath DMS's,
+		-- invisible but still reshuffling. Wallpaper cycling is deliberately
+		-- off: the palette is derived from the wallpaper, so a timed shuffle
+		-- would recolour the whole desktop every few minutes.
 		hl.bind("SUPER + SHIFT + W", hl.dsp.exec_cmd("dms ipc call wallpaperCarousel toggle"))
 		-- Opens the nixosUpdates popout without having to aim at the pill. The id
 		-- resolves through BarWidgetService, so this only works while the widget
 		-- is actually on the bar -- and the pill hides itself when up to date,
 		-- which is exactly when you would reach for the keybind instead.
 		hl.bind("SUPER + U", hl.dsp.exec_cmd("dms ipc call widget toggle nixosUpdates"))
-    '' else ''
-		hl.bind(mainMod .. " + D", hl.dsp.exec_cmd(rofiKill .. [[ || rofi -show drun -theme ~/.config/rofi/launcher.rasi]]))
-		hl.bind("SUPER + SPACE", hl.dsp.exec_cmd(rofiKill .. [[ || rofi -show run -theme ~/.config/rofi/launcher.rasi]]))
-		hl.bind("SUPER + L", hl.dsp.exec_cmd("${pkgs.hyprlock}/bin/hyprlock"))
-		hl.bind("SUPER + N", hl.dsp.exec_cmd("${pkgs.swaynotificationcenter}/bin/swaync-client -t"))
-		hl.bind("SUPER + SHIFT + E", hl.dsp.exec_cmd(rofiKill .. [[ || $HOME/.config/rofi/powermenu.sh]]))
-		hl.bind("SUPER + Y", hl.dsp.exec_cmd(rofiKill .. [[ || cliphist list | rofi -dmenu -theme $HOME/.config/rofi/clipboard.rasi | cliphist decode | wl-copy]]))
-		hl.bind("SUPER + SHIFT + T", hl.dsp.exec_cmd(rofiKill .. [[ || ~/Scripts/theme-rofi.sh]]))
-		hl.bind("SUPER + SHIFT + plus", hl.dsp.exec_cmd(rofiKill .. [[ || ~/Scripts/cheatsheet.sh]]))
-		hl.bind("SUPER + ALT + SPACE", hl.dsp.exec_cmd(rofiKill .. [[ || ~/Scripts/omarchy-menu.sh]]))
-    '';
+  '';
 
-  # Under waybar the custom/submap module renders submap state in the bar,
-  # fed by waybar-submap.sh off the socket2 event stream. DMS has no
-  # equivalent -- HyprlandService.qml carries no submap support -- so SUPER+Q
-  # armed the kill submap with nothing on screen to say so. A DMS toast fills
-  # the gap: themed like the rest of the shell and dropped from the top edge
-  # under the island, rather than Hyprland's own hl.notification overlay,
-  # which is unstyled and sits in the corner.
-  killPrompt =
-    if onDms then ''
+  # DMS has no submap indicator -- HyprlandService.qml carries no submap
+  # support at all -- so SUPER+Q would arm the kill submap with nothing on
+  # screen to say so. A DMS toast fills the gap: themed like the rest of the
+  # shell and dropped from the top edge under the island, rather than
+  # Hyprland's own hl.notification overlay, which is unstyled and corner-bound.
+  killPrompt = ''
 		local function killPromptShow()
 			hl.exec_cmd([[dms ipc call toast errorWith "Kill window?" "Q or Enter to confirm  ·  Esc to cancel" "" "submap"]])
 		end
 		local function killPromptHide()
 			hl.exec_cmd("dms ipc call toast dismiss submap")
 		end
-    '' else ''
-		-- waybar's custom/submap module already shows this in the bar.
-		local function killPromptShow() end
-		local function killPromptHide() end
-    '';
+  '';
 in
 {
 
@@ -100,15 +75,10 @@ in
 		};
 
 		systemPackages = with pkgs; [
-			grimblast       	# Screenshot
-			hypridle        	# Idle Daemon
-			hyprlock                # Lock Screen
-			wl-clipboard    	# Clipboard
+			grimblast       	# Screenshot, bound to `print`
+			wl-clipboard    	# wl-copy, used by scripts (DMS owns the history)
 			wlr-randr       	# Monitor Settings
-			hyprland-autoname-workspaces
-			networkmanagerapplet
-			cliphist
-			awww			# Wallpaper daemon
+			networkmanagerapplet	# SNI tray + NetworkManager auth/VPN dialogs
 			insync			# Gdrive integration
 			thunar			# File explorer GUI
 			thunar-volman		# Auto manage removable drives etc..
@@ -135,9 +105,6 @@ in
 			#nvidiaPatches = true;
 			xwayland.enable = true;
 		};
-		# Sets up PAM (security.pam.services.hyprlock). Under DMS the lock screen
-		# is part of the shell process and brings its own PAM handling.
-		hyprlock.enable = !onDms;
 	};
 	systemd.sleep.settings.Sleep = {
 		AllowSuspend = "no";
@@ -148,108 +115,7 @@ in
 
 	home-manager.users.${vars.user} =
 	let
-		hyprlockConf = with colors.scheme.default.hex; ''
-		general {
-			disable_loading_bar = true
-			grace = 3
-			hide_cursor = true
-			no_fade_in = false
-		}
 
-		background {
-			monitor =
-			path = screenshot
-			blur_passes = 3
-			blur_size = 8
-			noise = 0.0117
-			contrast = 0.8916
-			brightness = 0.4
-			vibrancy = 0.1696
-			vibrancy_darkness = 0.0
-		}
-
-		input-field {
-			monitor =
-			size = 280, 60
-			outline_thickness = 3
-			dots_size = 0.25
-			dots_spacing = 0.3
-			dots_center = true
-			dots_rounding = -1
-			outer_color = rgba(${blue}ee)
-			inner_color = rgba(0, 0, 0, 0.6)
-			font_color = rgb(${fg})
-			fade_on_empty = true
-			placeholder_text = <i>Password...</i>
-			hide_input = false
-			rounding = 8
-			check_color = rgba(${green}ee)
-			fail_color = rgba(${red}ee)
-			fail_text = <i>$FAIL ($ATTEMPTS)</i>
-			fail_transition = 300
-			capslock_color = rgba(${yellow}ee)
-			position = 0, -20
-			halign = center
-			valign = center
-		}
-
-		label {
-			monitor =
-			text = cmd[update:1000] echo "$(date +"%H:%M:%S")"
-			color = rgba(${fg}ff)
-			font_size = 96
-			font_family = JetBrainsMono Nerd Font
-			position = 0, 240
-			halign = center
-			valign = center
-		}
-
-		label {
-			monitor =
-			text = cmd[update:60000] echo "$(date +"%A, %B %d")"
-			color = rgba(${fg}ff)
-			font_size = 24
-			font_family = JetBrainsMono Nerd Font
-			position = 0, 140
-			halign = center
-			valign = center
-		}
-
-		label {
-			monitor =
-			text =   $USER
-			color = rgba(${fg}ff)
-			font_size = 18
-			font_family = JetBrainsMono Nerd Font
-			position = 0, -120
-			halign = center
-			valign = center
-		}
-		'';
-
-		# dpms is driven through hypr-compat.sh rather than `hyprctl dispatch dpms on`:
-		# under the Lua config manager the dispatch argument is parsed as Lua, so the
-		# legacy form dies with "')' expected near 'on'" and the screen never wakes.
-		# The shim picks `hl.dsp.dpms("on")` or the legacy string per running manager.
-		hypridleConf = ''
-		general {
-			lock_cmd = pidof hyprlock || ${pkgs.hyprlock}/bin/hyprlock
-			before_sleep_cmd = loginctl lock-session
-			after_sleep_cmd = /home/${vars.user}/Scripts/hypr-compat.sh dpms on
-			ignore_dbus_inhibit = false
-		}
-
-		listener {
-			timeout = 600
-			on-timeout = loginctl lock-session
-		}
-
-		listener {
-			timeout = 660
-			on-timeout = /home/${vars.user}/Scripts/hypr-compat.sh dpms off
-			on-resume = /home/${vars.user}/Scripts/hypr-compat.sh dpms on
-		}
-		'';
 
 		# Hyprland's Lua config (0.55+). This replaced a hyprlang .conf that was kept
 		# alongside as a fallback during the port; it went away once this had proven
@@ -489,7 +355,6 @@ in
 		---------------------
 
 		local mainMod  = "SUPER"
-		local rofiKill = [[${rofiKill}]]
 
 		hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd("kitty"))
 
@@ -830,7 +695,7 @@ ${shellBinds}
 			-- DMS namespaces every layer surface "dms:<something>" (dms:bar,
 			-- dms:clipboard-context-menu, ...), so it needs its own alternative —
 			-- a namespace that does not match here silently loses blur.
-			match        = { namespace = "^(rofi|waybar|swaync|dms:.*)$" },
+			match        = { namespace = "^dms:.*$" },
 			blur         = true,
 			-- The spotlight's fullscreen scrim sits at exactly opacity 0.5
 			-- (DankLauncherV2ModalSpotlight.qml), so at ignore_alpha = 0.5 whether
@@ -840,7 +705,6 @@ ${shellBinds}
 			-- and still blur.
 			ignore_alpha = 0.6,
 		})
-${lib.optionalString onDms ''
 
 		-- With a transparent bar over translucent widget cards, blur that samples
 		-- the windows underneath turns muddy as soon as anything is maximised.
@@ -865,29 +729,20 @@ ${lib.optionalString onDms ''
 			match   = { namespace = "^dms:.*$" },
 			no_anim = true,
 		})
-''}
 
 		-------------------
 		---- AUTOSTART ----
 		-------------------
 
 		hl.on("hyprland.start", function()
-${lib.optionalString (!onDms) ''
-			-- Initialize theme files from Nix defaults before apps start. Only
-			-- needed for the GTK/rasi stack: DMS reads a JSON theme straight
-			-- from the store, so it has no read-only-file problem to work around.
-			hl.exec_cmd([==[[ ! -f $HOME/.config/waybar/style.css ] && cp $HOME/.config/waybar/style.default.css $HOME/.config/waybar/style.css && chmod u+w $HOME/.config/waybar/style.css; [ ! -f $HOME/.config/rofi/shared/colors.rasi ] && cp $HOME/.config/rofi/shared/colors.default.rasi $HOME/.config/rofi/shared/colors.rasi && chmod u+w $HOME/.config/rofi/shared/colors.rasi; [ ! -f $HOME/.config/swaync/style.css ] && cp $HOME/.config/swaync/style.default.css $HOME/.config/swaync/style.css && chmod u+w $HOME/.config/swaync/style.css; true]==])
-''}
-
-${if onDms then ''
-			-- One process for bar, notifications, launcher, OSD, lock and polkit.
-			-- Started here rather than as a systemd user unit: the unit binds
-			-- graphical-session.target by default, which this machine's plain
+			-- One process for bar, notifications, launcher, OSD, lock, polkit and
+			-- wallpaper. Started here rather than as a systemd user unit: the unit
+			-- binds graphical-session.target by default, which this machine's plain
 			-- (non-UWSM) Hyprland session never activates — see modules/nixos/ntfy.nix.
+			-- (programs.hyprland.withUWSM is true, but the session that actually runs
+			-- is bin/start-hyprland; if that is ever reconciled, the packaged
+			-- dms.service would start alongside this line.)
 			hl.exec_cmd("dms run")
-'' else ''
-			hl.exec_cmd("${pkgs.waybar}/bin/waybar")
-''}
 			hl.exec_cmd("${pkgs.openrazer-daemon}/bin/openrazer-daemon")
 			hl.exec_cmd("${pkgs.networkmanagerapplet}/bin/nm-applet --indicator")
 
@@ -897,11 +752,11 @@ ${if onDms then ''
 			-- without an auth prompt — without it CoreCtrl exited at boot with
 			-- "Cannot start helper". --minimize-systray asks it to start with no
 			-- window (minimized to the system tray), so it also needs a settled tray.
-			-- Whichever shell is selected owns org.kde.StatusNotifierWatcher, so we
-			-- wait until that bus name has been present continuously for ~5s before
-			-- launching. Under waybar the counter genuinely resets mid-boot, because
-			-- the theme-switcher does `pkill waybar; waybar`; under DMS the shell
-			-- starts once and the wait simply settles sooner.
+			-- DMS owns org.kde.StatusNotifierWatcher, so we wait until that bus name
+			-- has been present continuously for ~5s before launching. DMS starts once,
+			-- so the wait settles quickly -- but do not remove it: without a settled
+			-- tray corectrl pops its window instead of minimizing, and if it fails to
+			-- start the saved GPU undervolt profile is never applied.
 			--
 			-- QT_QPA_PLATFORMTHEME/QT_STYLE_OVERRIDE are unset for corectrl only: with
 			-- the system-wide qt.platformTheme = "gnome" (qgnomeplatform), Qt reports
@@ -913,34 +768,13 @@ ${if onDms then ''
 			-- corectrl quirk on wlroots; Steam/insync/nm-applet tray icons work fine.)
 			hl.exec_cmd([==[bash -c 'unset QT_QPA_PLATFORMTHEME QT_STYLE_OVERRIDE; stable=0; for i in $(seq 1 240); do if busctl --user status org.kde.StatusNotifierWatcher >/dev/null 2>&1; then stable=$((stable+1)); else stable=0; fi; [ "$stable" -ge 10 ] && break; sleep 0.5; done; exec ${pkgs.corectrl}/bin/corectrl --minimize-systray']==])
 
-			hl.exec_cmd("${pkgs.hyprland-autoname-workspaces}/bin/hyprland-autoname-workspaces")
 			hl.exec_cmd("pypr")
-${lib.optionalString (!onDms) ''
-			-- DMS ships its own clipboard manager and history, so running
-			-- cliphist alongside it means two managers recording the same
-			-- selections while only one of them is reachable from SUPER+Y.
-			hl.exec_cmd("wl-clipboard-history -t")
-			hl.exec_cmd("wl-paste --watch cliphist store")
-			hl.exec_cmd([[rm "$HOME/.cache/cliphist/db"]])   -- it'll delete history at every restart
-''}
 			hl.exec_cmd("sleep 4 && insync start --qt-qpa-platform=xcb --no-daemon")
-${lib.optionalString (!onDms) ''
-			-- Restore saved theme if one was selected. Under DMS the palette is
-			-- baked into settings.json at build time, so there is nothing to
-			-- re-apply at login.
-			hl.exec_cmd([[sleep 2 && test -f $HOME/.config/theme/current && ~/Scripts/theme-switcher.sh $HOME/.config/theme/themes/$(cat $HOME/.config/theme/current).json]])
-''}
-
-${lib.optionalString (!onDms) ''
-			hl.exec_cmd("${pkgs.hypridle}/bin/hypridle")
-''}
 		end)
 		'';
 	in
 	{
 		xdg.configFile."hypr/hyprland.lua".text = hyprlandLua;
-		xdg.configFile."hypr/hyprlock.conf" = lib.mkIf (!onDms) { text = hyprlockConf; };
-		xdg.configFile."hypr/hypridle.conf" = lib.mkIf (!onDms) { text = hypridleConf; };
 
 	};
 }

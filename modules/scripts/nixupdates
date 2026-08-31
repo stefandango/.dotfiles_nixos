@@ -6,14 +6,12 @@
 #   nixupdates            the coloured terminal panel (pyprland `nixupdates`
 #                         scratchpad, or typed by hand)
 #   nixupdates --json     full state as one object — the DMS nixosUpdates widget
-#   nixupdates --waybar   waybar JSON line — the custom/updates module on the
-#                         desktopShell = "waybar" path
 #   nixupdates --check    refresh updates.json (cheap: one GitHub API call)
 #   nixupdates --diff     build diff.txt (expensive: resolves the inputs `nixup`
 #                         would pick, then dry-run evaluates against them)
 #
 # The GitHub API is unauthenticated (60 req/hr/IP), so the cache is the point:
-# --json and --waybar never hit the network themselves, they fork a background
+# --json never hits the network itself, it forks a background
 # --check only once the cache has aged past MAX_AGE.
 
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/nix-updates"
@@ -276,8 +274,6 @@ build_diff() {
         } > "$DIFF_FILE"
     fi
 
-    # Only meaningful on the waybar path; a no-op under DMS, which polls.
-    pgrep -x waybar >/dev/null 2>&1 && pkill -RTMIN+8 waybar
     return 0
 }
 
@@ -385,39 +381,6 @@ emit_json() {
          + {checking: $checking, diffing: $diffing, diff: $diff}'
 }
 
-# ── output: --waybar (the custom/updates module) ─────────────────────────────
-emit_waybar() {
-    refresh_if_stale
-
-    if [ ! -f "$CACHE_FILE" ]; then
-        printf '{"text": "...", "tooltip": "Checking for updates...", "class": "checking"}\n'
-        return
-    fi
-
-    local status
-    status=$(jq -r '.status' "$CACHE_FILE")
-
-    if [ "$status" = "current" ]; then
-        local current_date
-        current_date=$(jq -r '.current_date' "$CACHE_FILE")
-        printf '{"text": "", "tooltip": "Up to date (%s)", "class": "current"}\n' "$current_date"
-        return
-    fi
-
-    local days current_date latest_date pkg_count
-    days=$(jq -r '.days' "$CACHE_FILE")
-    current_date=$(jq -r '.current_date' "$CACHE_FILE")
-    latest_date=$(jq -r '.latest_date' "$CACHE_FILE")
-
-    if diff_fresh && [ "$(diff_status)" != "error" ] && [ "$(diff_status)" != "empty" ]; then
-        pkg_count=$(diff_pkg_list | grep -c .)
-        printf '{"text": "󰏔  %s", "tooltip": "%s package(s) to update (%s days behind)\\nLocked: %s → Latest: %s\\nClick for details", "class": "updates"}\n' \
-            "$pkg_count" "$pkg_count" "$days" "$current_date" "$latest_date"
-    else
-        printf '{"text": "󰏔  %sd", "tooltip": "%s days behind nixpkgs\\nLocked: %s → Latest: %s\\nClick for details", "class": "updates"}\n' \
-            "$days" "$days" "$current_date" "$latest_date"
-    fi
-}
 
 # ── output: the terminal panel (default) ─────────────────────────────────────
 render_diff_error() {
@@ -509,7 +472,6 @@ nixupdates — how far behind nixpkgs this system is
 Usage:
   nixupdates            Show the update panel (default).
   nixupdates --json     Full state as one JSON object (the DMS widget).
-  nixupdates --waybar   waybar JSON line (the custom/updates module).
   nixupdates --check    Refresh the cached verdict if it is stale.
       --force           ...even if it is not.
   nixupdates --diff     Evaluate which packages a rebuild would move (~1 min).
@@ -524,7 +486,6 @@ case "${1:-}" in
     --check)   check_updates "${2:-}" ;;
     --diff)    build_diff ;;
     --json)    emit_json ;;
-    --waybar)  emit_waybar ;;
     "")        display ;;
     --display) display ;; # kept: the pyprland scratchpad used this name
     -h | --help | help) usage ;;

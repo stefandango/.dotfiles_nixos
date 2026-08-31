@@ -47,11 +47,9 @@
 			inputs.nixpkgs.follows = "nixpkgs";
 		};
 
-		# TEMP[dms-trial]: evaluating DankMaterialShell as a replacement for the
-		# waybar + rofi + swaync + hyprlock/hypridle stack. Selected by
-		# `desktopShell` in modules/nixos/default.nix; drop this input if the
-		# trial ends with us staying on waybar.
-		# TEMP-CHECK: recheck_after 2026-10-01
+		# The desktop shell: one Quickshell process for bar, notifications,
+		# launcher, OSD, lock, polkit and wallpaper. Configured in
+		# modules/nixos/dms.nix.
 		dank-material-shell = {
 			url = "github:AvengeMedia/DankMaterialShell";
 			inputs.nixpkgs.follows = "nixpkgs";

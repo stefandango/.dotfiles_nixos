@@ -1,17 +1,18 @@
 { config, lib, pkgs, inputs, vars, ... }:
 
-# TEMP[dms-trial]: DankMaterialShell, evaluated as a replacement for the
-# waybar + rofi + swaync + hyprlock/hypridle stack. Selected by `desktopShell`
-# in ./default.nix — this module is only imported when that is "dms", so the
-# two shells can never both claim org.kde.StatusNotifierWatcher or
-# org.freedesktop.Notifications.
+# DankMaterialShell: the desktop shell. One Quickshell process owns the bar,
+# notifications, launcher, OSD, lock screen, polkit agent and wallpaper — it
+# replaced a waybar + rofi + swaync + hyprlock/hypridle stack (in git history
+# up to the "Collapse the desktop shell onto DMS" commit if it is ever wanted
+# back).
 #
-# Ending the trial also means deleting modules/config/dms-plugins.lock.json,
-# modules/scripts/dmsplugins (and its entry in ./scripts.nix), ./dms/ and the
-# environment.etc entry that ships it, and the SUPER+SHIFT+W carousel and
-# SUPER+U update binds in ./hyprland.nix. modules/scripts/nixupdates stays —
-# the waybar path drives it through `--waybar`.
-# TEMP-CHECK: recheck_after 2026-10-01
+# It is launched from the Hyprland autostart in ./hyprland.nix, not systemd —
+# see the note on systemd.enable below.
+#
+# Nothing may reintroduce a package that ships a D-Bus activation file for
+# org.freedesktop.Notifications: activation bypasses module imports entirely,
+# and whichever daemon wins the name race owns every notification for the
+# session. That is exactly how swaync kept stealing them during the trial.
 
 let
   themeNames = [ "graphite" "slate" "umber" "moss" "mono" ];
