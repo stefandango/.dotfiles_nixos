@@ -34,6 +34,13 @@ let
 		-- hand-maintained cheatsheet.sh (which had already drifted from reality).
 		hl.bind("SUPER + SHIFT + plus", hl.dsp.exec_cmd("dms ipc call keybinds toggle"))
 		hl.bind("SUPER + ALT + SPACE", hl.dsp.exec_cmd("dms ipc call control-center toggle"))
+		-- Wallpaper Carousel is a PLUGIN, so this bind is dead until
+		-- `~/Scripts/dmsplugins` has restored it from the lockfile. It needs DMS
+		-- to be the sole wallpaper manager, and it replaces awww_random.sh's
+		-- shuffle -- so the awww-daemon and awww_random.sh autostart lines below
+		-- have to go with it, or awww keeps drawing a second background layer
+		-- underneath DMS's (invisible, but still reshuffling every 300s).
+		hl.bind("SUPER + SHIFT + W", hl.dsp.exec_cmd("dms ipc call wallpaperCarousel toggle"))
 		-- Opens the nixosUpdates popout without having to aim at the pill. The id
 		-- resolves through BarWidgetService, so this only works while the widget
 		-- is actually on the bar -- and the pill hides itself when up to date,
@@ -825,7 +832,13 @@ ${shellBinds}
 			-- a namespace that does not match here silently loses blur.
 			match        = { namespace = "^(rofi|waybar|swaync|dms:.*)$" },
 			blur         = true,
-			ignore_alpha = 0.5,
+			-- The spotlight's fullscreen scrim sits at exactly opacity 0.5
+			-- (DankLauncherV2ModalSpotlight.qml), so at ignore_alpha = 0.5 whether
+			-- the whole 5120x2160 surface takes a 2-pass blur every frame comes
+			-- down to a float compare landing the right way. 0.6 puts the scrim
+			-- clearly under the threshold; the cards are at popupTransparency 0.96
+			-- and still blur.
+			ignore_alpha = 0.6,
 		})
 ${lib.optionalString onDms ''
 
@@ -838,6 +851,19 @@ ${lib.optionalString onDms ''
 			name  = "dms-bar-xray",
 			match = { namespace = "^dms:bar$" },
 			xray  = true,
+		})
+
+		-- DMS animates every surface it maps itself (the spotlight opens over
+		-- _openDuration = 50ms, popouts over Theme.popoutAnimationDuration), so
+		-- Hyprland's own layer animation is a second, slower curve wrapped around
+		-- the first. `layers` is not overridden anywhere in this file, so it
+		-- inherits `global` -- speed 8 with the `default` bezier, ~80ms -- and the
+		-- two curves fighting is what reads as sluggish on SUPER+SPACE, not any
+		-- single slow step. Hand the motion back to DMS.
+		hl.layer_rule({
+			name    = "dms-noanim",
+			match   = { namespace = "^dms:.*$" },
+			no_anim = true,
 		})
 ''}
 
