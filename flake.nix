@@ -123,28 +123,6 @@
 							})
 						];
 					}
-					# TEMP[font-manager-vala-dragicon]: patch font-manager's two DragIcon call sites
-					# TEMP-CHECK: nix_pkg_cached x86_64-linux font-manager
-					# font-manager 0.9.4 stopped compiling: Gtk.DragIcon.get_for_drag is a
-					# constructor in the current vapi, so both call sites need `new`. Hydra
-					# fails on it too, so there is no cached build to fall back to. Upstream
-					# fix is FontManager PR #468; nixpkgs carries it in flight as PRs #556842
-					# and #557155 — drop this block once one of those lands.
-					{
-						nixpkgs.overlays = [
-							(final: prev: {
-								font-manager = prev.font-manager.overrideAttrs (old: {
-									patches = (old.patches or [ ]) ++ [
-										(final.fetchpatch {
-											name = "font-manager-vala-dragicon.patch";
-											url = "https://github.com/FontManager/font-manager/commit/e2ad529a88929bbc76906ac78260dacf4d8c8c6b.patch";
-											hash = "sha256-NmA9w61NRuoUG+Rnwpf0Q6OuDvf1eR/kdMJFApJwtCw=";
-										})
-									];
-								});
-							})
-						];
-					}
 					./hosts/nixos-desktop
 					./modules/shared/system.nix
 					./modules/nixos
