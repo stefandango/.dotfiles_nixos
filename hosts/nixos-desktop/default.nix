@@ -255,11 +255,10 @@
     amdgpu_top   # AMD GPU TUI: usage, power draw, temps, VRAM, per-process
     nvtopPackages.amd   # htop-style GPU monitor with live graphs (AMD build)
     # protontricks now provided by programs.steam.protontricks.enable (wrapped for the FHS env)
-    winetricks
 
-    # Gaming
-    lutris
-    wineWow64Packages.staging
+    # Gaming -- Steam only. lutris, wineWow64Packages.staging and winetricks were
+    # dropped along with the Anarchy Online install they existed to run; AO was the
+    # only Lutris game, and Steam brings its own Proton/SteamLinuxRuntime.
     mangohud
     corectrl
   ];
