@@ -55,15 +55,31 @@ else
 fi
 echo ""
 
-# Build and switch
-echo "🔨 [2/3] Building new configuration..."
-echo "─────────────────────────────────────"
-~/Scripts/nixswitch
+# A channel bump is exactly when a pin or patch of ours can become dead weight,
+# so check right here instead of trusting anyone to remember. This runs BEFORE
+# the build on purpose: an overlay that appends a patch nixpkgs has since adopted
+# does not go quietly obsolete, it fails the build with "Reversed (or previously
+# applied) patch", naming the package and never the overlay. Reported after the
+# build, that verdict only ever arrives on the runs that did not need it.
+echo "🧹 [2/3] Checking temporary workarounds..."
+echo "──────────────────────────────────────────"
+if [[ -x ~/Scripts/nixworkarounds ]]; then
+    ~/Scripts/nixworkarounds || true
+else
+    echo "   (nixworkarounds not installed — skipped)"
+fi
+echo ""
 
-if [[ $? -eq 0 ]]; then
+# Build and switch
+echo "🔨 [3/3] Building new configuration..."
+echo "─────────────────────────────────────"
+# `if` rather than a bare call: under `set -e` a failing nixswitch exits the
+# script right here, so the failure branch below was dead code and nixup died
+# on the raw nix error without a word of its own.
+if ~/Scripts/nixswitch; then
     echo ""
-    echo "🎉 [3/3] Update complete!"
-    echo "─────────────────────────"
+    echo "🎉 Update complete!"
+    echo "───────────────────"
 
     # Show new state
     if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -74,17 +90,12 @@ if [[ $? -eq 0 ]]; then
 
     echo "   New generation: $new_gen"
     echo ""
-
-    # A channel bump is exactly when a pin or patch of ours can become dead
-    # weight, so check right here instead of trusting anyone to remember.
-    if [[ -x ~/Scripts/nixworkarounds ]]; then
-        ~/Scripts/nixworkarounds || true
-    fi
-    echo ""
     echo "✨ Your system is now up to date!"
 else
     echo ""
     echo "❌ Build failed. Check errors above."
+    echo "   If a package died on an already-applied patch, re-read the"
+    echo "   workaround report above — one of our overlays is likely obsolete."
     popd > /dev/null
     exit 1
 fi
