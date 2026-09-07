@@ -49,6 +49,30 @@
       # NOTE: amdgpu.dcdebugmask=0x610 (disable PSR/PSR-SU/Panel Replay) was a
       # flicker workaround for the previous GPU. Removed after installing the
       # RX 9070 XT (Navi 48, DCN 4.0.1) — re-add if flickering reappears.
+      #
+      # DP 2.1 UHBR — 2026-09-07 black-screen incident. The LG 45GX950A is set to
+      # *DP 1.4* in its own OSD menu (Settings > General > DisplayPort Version),
+      # NOT DP 2.1. That setting lives in the monitor, not here, so this note is
+      # the only record of it. Leave it on 1.4 unless the cable is replaced first.
+      #
+      # What happened: the UHBR link degraded over ~2 days (isolated link losses
+      # on 09-06, total failure on 09-07) until the panel stopped answering
+      # DPCD/EDID entirely and every boot came up to a black screen. The GPU was
+      # never the problem — no hang, no reset, no MCE/EDAC/AER; greetd started
+      # and PAM opened the session every time, just with nothing on screen.
+      # All errors were in dcn31_hpo_dp_link_enc_*, the HPO encoder amdgpu uses
+      # *only* for DP 2.x UHBR (128b/132b) rates, which is why dropping to DP 1.4
+      # cleared it outright: HBR3 goes through a different encoder entirely.
+      #
+      # Diagnosing a repeat: `journalctl -b -1 -k | grep -i 'hpo_dp_link_enc\|EDID err\|enabling link'`
+      # and `sudo cat /sys/kernel/debug/dri/1/DP-*/link_settings` — the second
+      # field is the link rate, 0x1e = HBR3 (8.1 Gbps/lane, DP 1.4's max).
+      #
+      # Cost of staying on 1.4 is ~nil: HBR3 + DSC still drives 5120x2160@165,
+      # and the mode is capped to @120 for OLED gamma anyway (see hyprland.nix).
+      # To go back to DP 2.1/165Hz, replace the cable with a VESA-certified DP80
+      # (passive, <=2m) FIRST — cables sold as "DP 1.4 8K" routinely pass HBR3
+      # forever and fail UHBR, which is exactly the pattern seen here.
       "amdgpu.gpu_recovery=1"                           # Enable GPU reset on hang instead of crashing
       "quiet"                                           # Suppress kernel log output on console — needed for plymouth
       "splash"                                          # Tell plymouth to show the splash screen
@@ -246,11 +270,14 @@
     # Hardware tools
     lshw
     # DDC/CI monitor control (needs hardware.i2c.enable above). The LG answers
-    # on /dev/i2c-8 (card1-DP-2): brightness x10, contrast x12, volume x62,
+    # on /dev/i2c-9 (card1-DP-3): brightness x10, contrast x12, volume x62,
     # input x60. Dual Mode is NOT reachable this way -- it is not exposed on any
     # VCP register, so it stays a bezel-button affair. Do not go poking the
     # xE0-xFF manufacturer range looking for it: that is the pattern implicated
     # in ddcutil issue #419, where an LG panel stopped waking from sleep.
+    # The bus/connector pair is not stable across cable moves -- it was
+    # i2c-8/card1-DP-2 until the 2026-09-07 DP port swap. Nothing here hardcodes
+    # it, so just re-check with `ddcutil detect` if a script ever needs the path.
     ddcutil
     amdgpu_top   # AMD GPU TUI: usage, power draw, temps, VRAM, per-process
     nvtopPackages.amd   # htop-style GPU monitor with live graphs (AMD build)

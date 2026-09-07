@@ -1,0 +1,249 @@
+#!/usr/bin/env bash
+# Snapshot, diff and restore DankMaterialShell's settings.json.
+#
+# Why this exists: dank-material-shell is an unpinned `github:` input (flake.nix),
+# so every `nixup` lands a fresh master commit of a beta shell whose settings
+# schema is still moving. Two lines in the shell decide what survives that, both
+# in quickshell/Common/settings/SettingsStore.js:
+#
+#   parse():   if (!SPEC[k]) continue;
+#              -- a key that is not in the shell's current spec is ignored on load
+#   toJson():  if (Util.isDefault(value, SPEC[k].def)) continue;
+#              -- a value equal to the current default is never written out
+#
+# So when upstream renames or drops a setting, your value is ignored at the next
+# login and then ERASED from the file by the first save after that. And because
+# anything matching a default was never persisted in the first place, a default
+# upstream flips changes the shell silently. `dankIslandHomeStatusSlot` and
+# `dankIslandHomeWeatherSlot` went exactly this way -- they are in
+# settings.json.pre-cutover and gone from the live file, replaced upstream by
+# `dankIslandHomeLayout`.
+#
+# Nothing on the Nix side is involved: home-manager manages no file under
+# ~/.config/DankMaterialShell, and the seed in modules/nixos/dms.nix only fires
+# when settings.json is missing or a store symlink (it never has). The churn is
+# upstream's and cannot be prevented from here -- it can only be made visible.
+# nixswitch takes a snapshot before every rebuild, so the newest one is always
+# the last known-good state under the OLD shell; `dmssettings diff` after the
+# next login names exactly which keys the new one dropped.
+
+set -euo pipefail
+
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/DankMaterialShell"
+SNAP_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dms-settings-backups"
+
+# settings.json is the file that resets; plugin_settings.json rides along because
+# it is tiny and holds the enabled flags dmsplugins deliberately does not restore.
+FILES=(settings.json plugin_settings.json)
+KEEP=10
+
+usage() {
+	cat <<'USAGE'
+dmssettings — keep DMS's settings.json diffable across shell updates
+
+Usage:
+  dmssettings snapshot        Copy the current settings aside, keeping the last 10.
+                              A no-op when nothing changed since the last one.
+                              nixswitch runs this before every rebuild.
+  dmssettings diff [SNAP]     Compare a snapshot (default: newest) against the
+                              live files, key by key. Keys that vanished are
+                              labelled with WHY: dropped by upstream, or merely
+                              back at the shell's default.
+  dmssettings list            Show the snapshots on disk.
+  dmssettings restore [SNAP]  Copy a snapshot back over the live files.
+  dmssettings -h              This help.
+
+SNAP is a directory name from `dmssettings list` (or a full path).
+Snapshots live in ${XDG_STATE_HOME:-~/.local/state}/dms-settings-backups.
+USAGE
+}
+
+die() { echo "dmssettings: $*" >&2; exit 1; }
+
+latest_snapshot() {
+	local d
+	d=$(find "$SNAP_DIR" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort | tail -1)
+	[[ -n "$d" ]] || return 1
+	printf '%s\n' "$d"
+}
+
+# Resolve SNAP as either a bare directory name or a path, and fail loudly rather
+# than silently diffing against nothing.
+resolve_snapshot() {
+	local want="${1:-}" dir
+	if [[ -z "$want" ]]; then
+		dir=$(latest_snapshot) || die "no snapshots yet — run 'dmssettings snapshot'"
+	else
+		dir="$want"
+		[[ -d "$dir" ]] || dir="$SNAP_DIR/$want"
+		[[ -d "$dir" ]] || die "no such snapshot: $want"
+	fi
+	printf '%s\n' "$dir"
+}
+
+# The spec of the shell that is installed right now. `diff` needs it to tell
+# "upstream dropped this key" apart from "you set it back to the default" —
+# only the first is a loss, and without the spec the two look identical.
+spec_file() {
+	local root=""
+	root=$(pgrep -a quickshell 2>/dev/null | grep -oE '/nix/store/[^ ]*/share/quickshell/dms' | head -1 || true)
+	if [[ -z "$root" ]] && command -v dms >/dev/null 2>&1; then
+		root="$(dirname "$(readlink -f "$(command -v dms)")")/../share/quickshell/dms"
+	fi
+	[[ -n "$root" && -f "$root/Common/settings/SettingsSpec.js" ]] || return 1
+	printf '%s\n' "$root/Common/settings/SettingsSpec.js"
+}
+
+unchanged_since() {
+	local dir="$1" f
+	for f in "${FILES[@]}"; do
+		if [[ -f "$CONFIG_DIR/$f" ]]; then
+			cmp -s "$CONFIG_DIR/$f" "$dir/$f" || return 1
+		elif [[ -f "$dir/$f" ]]; then
+			return 1
+		fi
+	done
+	return 0
+}
+
+prune() {
+	local old
+	# The directory names are sortable timestamps, so this is a plain "drop
+	# everything past the newest $KEEP".
+	while IFS= read -r old; do
+		[[ -n "$old" ]] && rm -rf "$old"
+	done < <(find "$SNAP_DIR" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort -r | tail -n +$((KEEP + 1)))
+}
+
+cmd_snapshot() {
+	if [[ ! -f "$CONFIG_DIR/settings.json" ]]; then
+		echo "   (no DMS settings.json yet — nothing to snapshot)"
+		return 0
+	fi
+
+	local latest dir f
+	if latest=$(latest_snapshot) && unchanged_since "$latest"; then
+		echo "   DMS settings unchanged since $(basename "$latest") — no new snapshot"
+		return 0
+	fi
+
+	dir="$SNAP_DIR/$(date +%Y%m%d-%H%M%S)"
+	mkdir -p "$dir"
+	for f in "${FILES[@]}"; do
+		if [[ -f "$CONFIG_DIR/$f" ]]; then
+			cp -p "$CONFIG_DIR/$f" "$dir/$f"
+		fi
+	done
+	echo "   DMS settings snapshotted → ${dir/#$HOME/\~}"
+	prune
+}
+
+cmd_list() {
+	local dir count
+	if ! latest_snapshot >/dev/null 2>&1; then
+		echo "No snapshots yet."
+		return 0
+	fi
+	echo "Snapshots in ${SNAP_DIR/#$HOME/\~} (newest last):"
+	while IFS= read -r dir; do
+		count=$(find "$dir" -maxdepth 1 -type f | wc -l)
+		printf '  %s  (%s file(s))\n' "$(basename "$dir")" "$count"
+	done < <(find "$SNAP_DIR" -mindepth 1 -maxdepth 1 -type d | sort)
+}
+
+cmd_diff() {
+	local base spec="" f
+	base=$(resolve_snapshot "${1:-}")
+	spec=$(spec_file) || true
+
+	echo "Comparing $(basename "$base") → live settings"
+	if [[ -z "$spec" ]]; then
+		echo "  (shell spec not found — vanished keys cannot be explained)"
+	fi
+
+	for f in "${FILES[@]}"; do
+		[[ -f "$base/$f" || -f "$CONFIG_DIR/$f" ]] || continue
+		python3 - "$base/$f" "$CONFIG_DIR/$f" "$f" "$spec" <<'PY'
+import json, os, re, sys
+
+old_path, new_path, label, spec = sys.argv[1:5]
+
+
+def load(path):
+    try:
+        with open(path) as fh:
+            return json.load(fh)
+    except FileNotFoundError:
+        return {}
+    except ValueError as exc:
+        print("  %s: unreadable (%s)" % (path, exc))
+        return {}
+
+
+old, new = load(old_path), load(new_path)
+
+spec_keys = None
+if spec and os.path.exists(spec):
+    with open(spec) as fh:
+        spec_keys = set(re.findall(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*:\s*\{", fh.read(), re.M))
+
+removed = sorted(k for k in old if k not in new)
+added = sorted(k for k in new if k not in old)
+changed = sorted(k for k in old if k in new and old[k] != new[k])
+
+if not (removed or added or changed):
+    print("  %s: no change" % label)
+    sys.exit(0)
+
+print("  %s:" % label)
+
+
+def show(value):
+    text = json.dumps(value)
+    return text if len(text) <= 70 else text[:67] + "..."
+
+
+for key in removed:
+    print("    - %s = %s" % (key, show(old[key])))
+    if spec_keys is None:
+        continue
+    if key not in spec_keys:
+        print("        GONE FROM SPEC — upstream renamed or removed it; the value is lost")
+    else:
+        print("        back at the shell's default, so it is no longer persisted")
+for key in changed:
+    print("    ~ %s: %s → %s" % (key, show(old[key]), show(new[key])))
+for key in added:
+    print("    + %s = %s" % (key, show(new[key])))
+PY
+	done
+}
+
+cmd_restore() {
+	local base f
+	base=$(resolve_snapshot "${1:-}")
+
+	for f in "${FILES[@]}"; do
+		if [[ -f "$base/$f" ]]; then
+			cp "$base/$f" "$CONFIG_DIR/$f"
+			chmod u+w "$CONFIG_DIR/$f"
+			echo "restored $f from $(basename "$base")"
+		fi
+	done
+
+	# DMS holds settings.json in a FileView with watchChanges and reloads ~50ms
+	# after an external write, so there is nothing to restart. Keys the current
+	# shell no longer has in its spec are ignored on load and will drop out again
+	# on the next save — restore brings back what this shell still understands,
+	# not what it no longer does.
+	echo "DMS reloads the file itself. Keys the current shell no longer knows stay gone."
+}
+
+case "${1:-diff}" in
+	snapshot) shift; cmd_snapshot "$@" ;;
+	diff)     shift || true; cmd_diff "${1:-}" ;;
+	list)     cmd_list ;;
+	restore)  shift; cmd_restore "${1:-}" ;;
+	-h | --help | help) usage ;;
+	*) usage >&2; die "unknown command: $1" ;;
+esac

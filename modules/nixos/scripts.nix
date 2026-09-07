@@ -79,6 +79,16 @@ in
 				recursive = true;
 				executable = true;
 			};
+			# Snapshots ~/.config/DankMaterialShell/settings.json before every
+			# rebuild, and diffs it afterwards. DMS owns that file (see
+			# modules/nixos/dms.nix), and an unpinned dank-material-shell input
+			# means a rebuild can bring a shell whose schema silently drops keys
+			# it no longer recognises. Called from nixswitch.
+			"Scripts/dmssettings" = {
+				source = ../scripts/dmssettings;
+				recursive = true;
+				executable = true;
+			};
 
 			};
 		};

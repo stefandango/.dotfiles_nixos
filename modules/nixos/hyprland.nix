@@ -337,7 +337,13 @@ in
 				-- vrr=3 only toggles for game/video (not every fullscreen window like the
 				-- old crashing vrr=2), and the mode is capped to 5120x2160@120 (was @165):
 				-- 120Hz gives the DSC link margin so the VRR re-train is reliable (avoids
-				-- the DP-2-disconnect SIGSEGV) AND matches the panel's gamma-tuned point.
+				-- the DP-disconnect SIGSEGV, seen on DP-2 before the 2026-09-07 port swap)
+				-- AND matches the panel's gamma-tuned point.
+				--
+				-- Every VRR entry/exit is a DP link re-train, which is why this setting is
+				-- load-bearing rather than cosmetic: on a marginal link each re-train is a
+				-- chance to lose it outright. See the DP 2.1 UHBR note in the host's
+				-- kernelParams for the 2026-09-07 black-screen incident.
 				vrr                      = 3,
 				disable_hyprland_logo    = true,
 				disable_splash_rendering = true,

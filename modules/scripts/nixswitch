@@ -11,6 +11,18 @@ if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
     exit 1
 fi
 
+# DMS owns ~/.config/DankMaterialShell/settings.json outright -- nothing in this
+# repo writes it (see modules/nixos/dms.nix). But dank-material-shell is an
+# unpinned github: input, so a rebuild can land a beta shell whose settings
+# schema has moved, and keys it no longer recognises are dropped at the next
+# login and erased on the first save after that. Snapshot first so the loss is
+# diffable instead of invisible: `dmssettings diff` after the next login names
+# exactly what went. Never fatal -- a missing snapshot must not block a rebuild.
+if [[ -x "$HOME/Scripts/dmssettings" ]]; then
+    "$HOME/Scripts/dmssettings" snapshot || true
+    echo ""
+fi
+
 echo "🔨 Building configuration..."
 echo ""
 

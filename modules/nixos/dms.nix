@@ -20,8 +20,19 @@ let
   # hand-tuning, then folded back in here. This is only the STARTING state:
   # the activation script writes it once and DMS owns the file afterwards, so
   # re-dump and update this block when the look settles again.
+  #
+  # dank-material-shell is an unpinned github: input, so `nixup` moves the shell
+  # to a fresh master commit whenever upstream pushes -- and its settings schema
+  # is still changing. A key the shell does not have in SettingsSpec.js is
+  # ignored on load and erased on the next save, silently on both sides, so this
+  # block goes stale without ever failing a build. `dmssettings diff` after a
+  # login is what surfaces that; see modules/scripts/dmssettings.
   dmsSeedSettings = {
-    configVersion = 16;
+    # Must describe the SHAPE of this block, not the shell's current version:
+    # DMS runs every migration from here forward over the seed, so a stamp that
+    # is too low re-runs migrations against an already-migrated document. This
+    # is v17 because dankIslandHomeLayout below is the v17-era key.
+    configVersion = 17;
 
     # matugen derives the whole palette from the wallpaper, and every app in
     # Phase 4 follows it. `scheme-neutral` is the reason that is liveable:
@@ -86,8 +97,31 @@ let
     # Dank Island rather than the classic bar. The island renders whichever
     # barConfig its id points at, so the layout below drives both.
     dankIslandBarId = "default";
-    dankIslandHomeStatusSlot = "left";
-    dankIslandHomeWeatherSlot = "right";
+
+    # This replaced dankIslandHomeStatusSlot/dankIslandHomeWeatherSlot ("left"
+    # and "right"), which this seed carried until they stopped existing: both
+    # are gone from the shell's SettingsSpec.js, so DMS ignored them on load and
+    # dropped them on the next save. They are still visible in
+    # settings.json.pre-cutover, which is what that looks like from the outside.
+    #
+    # Any key in this block must exist in the CURRENT spec to have an effect --
+    # a seed key the shell does not know is silently discarded, with no warning
+    # on either side. Re-dump with `dms ipc call settings dump` after a shell
+    # update rather than assuming these names survived it.
+    #
+    # Order is the render order; status first and weather after the clock is
+    # what the two old slot keys used to mean. Enabled flags matter as much as
+    # the order: entries absent from this list fall back to the shell default,
+    # which has weather and status OFF.
+    dankIslandHomeLayout = [
+      { id = "status";        enabled = true; }
+      { id = "media";         enabled = true; }
+      { id = "clock";         enabled = true; }
+      { id = "weather";       enabled = true; }
+      { id = "notifications"; enabled = true; }
+      { id = "volume";        enabled = false; }
+      { id = "brightness";    enabled = false; }
+    ];
 
     # Launcher search prefixes.
     builtInPluginSettings = {
@@ -332,6 +366,32 @@ in
     # Nerd Font glyph table in waybar/config.toml, so it needs a real icon set.
     home.packages = with pkgs; [ papirus-icon-theme ];
   };
+
+  # The user profile image — the avatar in the Control Center header, the dash
+  # user card and the lock screen — is NOT a DMS setting. It is nowhere in
+  # settings.json or SettingsSpec.js (only `lockScreenShowProfileImage`, which is
+  # a bool). DMS keeps it in AccountsService instead, and without that daemon it
+  # keeps it nowhere at all: Services/PortalService.qml setProfileImage() calls
+  # SetIconFile over D-Bus when accountsServiceAvailable, and otherwise falls
+  # through to `profileImage = imagePath` — a plain QML property. The picture is
+  # then correct for as long as that Quickshell process lives and gone at the
+  # next login, which reads from the outside exactly like a rebuild resetting it.
+  #
+  # Upstream's own NixOS module sets this (distro/nix/nixos.nix), but only
+  # homeModules.dank-material-shell is imported above, so nothing pulled it in —
+  # `dms doctor` reported "accountsservice — Not available" and
+  # org.freedesktop.Accounts was not even activatable.
+  #
+  # Enabling the one daemon rather than importing that module: it also installs
+  # the shell system-wide, re-ships the plugin /etc entries, and switches on
+  # power-profiles-daemon and geoclue2 — all either already done here or
+  # deliberately not wanted.
+  #
+  # The icon path lands in /var/lib/AccountsService/users/${vars.user}, which is
+  # outside the store and which NixOS activation never touches, so it survives
+  # rebuilds. mutableUsers is true here, so the NIXOS_USERS_PURE lockdown the
+  # module applies under declarative users does not apply.
+  services.accounts-daemon.enable = true;
 
   # The NixOS update indicator waybar used to carry, as a DMS plugin.
   #

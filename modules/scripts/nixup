@@ -17,6 +17,22 @@ echo ""
 # Navigate to dotfiles
 pushd ~/.dotfiles > /dev/null
 
+# The locked commit of an input, read straight out of flake.lock. Taken before
+# AND after the update rather than diffed against git: flake.lock is routinely
+# dirty from an update that has not been switched yet, so HEAD is not a reliable
+# "what we were on" baseline.
+locked_rev() { # <input name>
+    python3 - "$1" 2>/dev/null <<'PYEOF' || true
+import json, sys
+try:
+    print(json.load(open("flake.lock"))["nodes"][sys.argv[1]]["locked"]["rev"])
+except Exception:
+    pass
+PYEOF
+}
+
+dms_rev_before=$(locked_rev dank-material-shell)
+
 # Show current state
 echo "📍 Current state:"
 if [[ -f flake.lock ]]; then
@@ -54,6 +70,44 @@ else
     git diff --color=always --stat -- flake.lock 2>/dev/null | sed 's/^/   /'
 fi
 echo ""
+
+# A moved dank-material-shell is the one input change that can quietly cost you
+# settings, so it gets called out by name instead of being left to a one-line
+# flake.lock stat. The shell ignores any settings key missing from its current
+# spec and erases it on the next save (SettingsStore.js parse/toJson), which
+# lands at the next login rather than during the switch -- long after you would
+# connect it to this update. See modules/scripts/dmssettings.
+dms_rev_after=$(locked_rev dank-material-shell)
+if [[ -n "$dms_rev_before" && -n "$dms_rev_after" && "$dms_rev_before" != "$dms_rev_after" ]]; then
+    echo "🧩 DankMaterialShell moved: ${dms_rev_before:0:7} → ${dms_rev_after:0:7}"
+
+    # The updated input is already realised in the store, so the incoming
+    # schema version can be read before anything is built.
+    dms_src=$(nix eval --impure --raw \
+        --expr '(builtins.getFlake (toString ./.)).inputs.dank-material-shell.outPath' \
+        2>/dev/null || true)
+    new_ver=""
+    if [[ -n "$dms_src" ]]; then
+        new_ver=$(grep -oE 'settingsConfigVersion:[[:space:]]*[0-9]+' \
+            "$dms_src/quickshell/Common/SettingsData.qml" 2>/dev/null |
+            grep -oE '[0-9]+' | head -1 || true)
+    fi
+    cur_ver=$(python3 -c 'import json,os,sys
+p = os.path.expanduser("~/.config/DankMaterialShell/settings.json")
+try:
+    print(json.load(open(p)).get("configVersion", ""))
+except Exception:
+    pass' 2>/dev/null || true)
+
+    if [[ -n "$new_ver" && -n "$cur_ver" && "$new_ver" != "$cur_ver" ]]; then
+        echo "   ⚠ settings schema v$cur_ver → v$new_ver — migrations will run at your next login"
+    elif [[ -n "$new_ver" && -n "$cur_ver" ]]; then
+        echo "   settings schema unchanged (v$cur_ver)"
+    fi
+    echo "   A snapshot is taken before the switch; after your next login run:"
+    echo "     dmssettings diff"
+    echo ""
+fi
 
 # A channel bump is exactly when a pin or patch of ours can become dead weight,
 # so check right here instead of trusting anyone to remember. This runs BEFORE
