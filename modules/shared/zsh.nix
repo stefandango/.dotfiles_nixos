@@ -230,8 +230,9 @@
       cbc = "clipclear";        # Clear clipboard
       cbcp = "copypath";        # Copy current path
 
-      # Quick pipe to clipboard
-      clip = if pkgs.stdenv.isDarwin then "pbcopy" else "xclip -selection clipboard";
+      # Quick pipe to clipboard. wl-copy, not xclip: the Linux host is a Wayland
+      # desktop and only wl-clipboard is installed (modules/nixos/hyprland.nix).
+      clip = if pkgs.stdenv.isDarwin then "pbcopy" else "wl-copy";
     } // (if pkgs.stdenv.isDarwin then {
       # claude alias removed - using native claude binary at ~/.local/bin/claude
       nixbuild = "nix build ~/.dotfiles#darwinConfigurations.Stefans-MacBook-Pro.system";

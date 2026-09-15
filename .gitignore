@@ -2,6 +2,9 @@
 .netcoredbg_hist
 result
 .claude/
+# ZDOTDIR experiments once wrote a zsh history file under the repo (and it got
+# committed). Nothing under .local/ is ever config.
+.local/
 *.swp
 *.swo
 *~
