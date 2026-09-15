@@ -99,16 +99,11 @@
       enable = true;
       enable32Bit = true;
     };
-    # Unlocks the voltage/frequency/power controls in the corectrl GUI by
-    # enabling the amdgpu overdrive bit. This sets the default mask
-    # amdgpu.ppfeaturemask=0xfffd7fff (the "less likely to flicker" value, NOT
-    # 0xffffffff — set hardware.amdgpu.overdrive.ppfeaturemask = "0xffffffff"
-    # explicitly if you ever need the full feature set, at the risk of the
-    # flicker issues this GPU has had). The default mask is enough to undervolt
-    # and set a power cap; the actual values are set in the corectrl app and
-    # re-applied automatically each boot.
-    # (Renamed from programs.corectrl.gpuOverclock.enable.)
-    amdgpu.overdrive.enable = true;
+    # CoreCtrl removed 2026-09-11 (unused). With it went hardware.amdgpu.overdrive
+    # .enable: that set amdgpu.ppfeaturemask=0xfffd7fff and had the driver upload
+    # an overdrive table, the trigger in freedesktop drm/amd #5404 for a Navi48
+    # SMU lockup. Back to stock power management. Re-add overdrive.enable + a
+    # CoreCtrl profile if undervolt/power-cap control is wanted again.
     # DDC/CI to the monitor over the DisplayPort i2c bus, for ddcutil. Loads
     # i2c-dev and grants access to the "i2c" group (and to any locally seated
     # user). Lets brightness/volume/input be driven from the CLI instead of the
@@ -186,25 +181,6 @@
         }
       });
 
-      // Let CoreCtrl start its privileged root helper without a prompt, so the
-      // GPU undervolt/power-cap profile is applied automatically at login.
-      // The helper actions default to allow_inactive=no / allow_active=
-      // auth_admin_keep (see org.corectrl.helper{,killer}.policy). CoreCtrl is
-      // autostarted by Hyprland (exec-once); like the reboot case above, those
-      // compositor-spawned processes appear to polkit as having NO active
-      // session, so allow_inactive=no denies the helper outright and CoreCtrl
-      // exits at boot with "Cannot start helper" (logged to
-      // ~/.cache/corectrl-boot.log), leaving the GPU at stock. No polkit auth
-      // agent runs in this Hyprland session, so there is nothing to satisfy the
-      // auth_admin challenge either. Grant the helper actions by group
-      // membership (UID-resolvable), matching the reboot rule above.
-      polkit.addRule(function(action, subject) {
-        if ((action.id == "org.corectrl.helper.init" ||
-             action.id == "org.corectrl.helperkiller.init") &&
-            subject.isInGroup("users")) {
-          return polkit.Result.YES;
-        }
-      });
     '';
   };
 
@@ -283,11 +259,16 @@
     nvtopPackages.amd   # htop-style GPU monitor with live graphs (AMD build)
     # protontricks now provided by programs.steam.protontricks.enable (wrapped for the FHS env)
 
-    # Gaming -- Steam only. lutris, wineWow64Packages.staging and winetricks were
-    # dropped along with the Anarchy Online install they existed to run; AO was the
-    # only Lutris game, and Steam brings its own Proton/SteamLinuxRuntime.
+    # Gaming. Steam brings its own Proton/SteamLinuxRuntime; wine and winetricks
+    # are back for Anarchy Online (Project Rubi-Ka), which runs outside Steam via
+    # ~/Scripts/ao-launch.sh -- raw `wine`, one WINEPREFIX per multibox instance
+    # under ~/Games. Lutris is deliberately not restored with them: the launcher
+    # always called wine directly, and lutris's 32-bit FHS env is what used to
+    # drag in the i686 openldap that the TEMP[openldap-nocheck] overlay in
+    # flake.nix exists to work around.
+    wineWow64Packages.staging
+    winetricks
     mangohud
-    corectrl
   ];
 
   # Font configuration
@@ -397,11 +378,6 @@
         };
       };
     };
-    corectrl = {
-      enable = true;
-      # GPU overclock/undervolt unlock moved to hardware.amdgpu.overdrive.enable
-      # (the option was renamed away from programs.corectrl).
-    };
   };
 
   # I/O scheduler: none for NVMe (lowest overhead).
@@ -432,6 +408,6 @@
   users.users.${vars.user} = {
     isNormalUser = true;
     shell = pkgs.zsh;
-    extraGroups = [ "wheel" "video" "audio" "networkmanager" "lp" "input" "docker" "corectrl" "gamemode" "i2c" ];
+    extraGroups = [ "wheel" "video" "audio" "networkmanager" "lp" "input" "docker" "gamemode" "i2c" ];
   };
 }

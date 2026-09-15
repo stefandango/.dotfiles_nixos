@@ -146,6 +146,13 @@ in
 		------------------
 
 		-- LG 45" ultrawide (update desc: string from hyprctl monitors if needed)
+		--
+		-- Note: on a hotplug Hyprland re-applies the monitor's *previous* mode
+		-- before any rule or handler gets a look in, so every dual-mode
+		-- transition briefly drives an out-of-range timing (the old 5K modeline
+		-- at a 2560x1080 panel, or vice versa) no matter what this rule says.
+		-- Setting it to "preferred" was tried and changes nothing -- the stray
+		-- modeset comes from Hyprland's state restore, not from here.
 		hl.monitor({ output = "desc:LG Electronics", mode = "5120x2160@120", position = "auto", scale = 1 })
 		hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" })
 
@@ -168,7 +175,57 @@ in
 		-- mode has no such history, so it takes the highest refresh on offer. If
 		-- the OLED ever flickers in dual mode, cap DUAL_MAX_HZ below.
 		local LG_DESC     = "LG Electronics"
-		local DUAL_MAX_HZ = math.huge
+		-- Capped so dual mode lands on 2560x1080@240.08, not the panel's @330.12.
+		--
+		-- 330 does not survive this link. amdgpu drives dual mode *uncompressed*
+		-- (dsc_clock_en = 0) over HBR3 x4, putting ~24 of the available 25.9 Gbps
+		-- on the wire -- about 93% utilisation, so no margin. The DP payload
+		-- handshake then fails ("SST Update Payload: ACT still not handled ...
+		-- Link loss occurred"), the connector drops, and after two retries the
+		-- panel gives up and reverts to 5K -- which presents as the button
+		-- instantly blanking the screen. 240 needs only ~17 Gbps and is stable.
+		--
+		-- Confirmed 2026-09-09. Not a kernel regression to wait out: 7.2.3 and
+		-- 7.2.4 fail identically. Not the config either -- the follower picks
+		-- correctly, and Hyprland re-applies the previous mode on reconnect
+		-- before any rule runs, so the out-of-range transient is unavoidable and
+		-- was equally present back when 330 did work.
+		--
+		-- Not a hardware ceiling either: link_settings reports UHBR13.5 (0x546)
+		-- verified on this link, but amdgpu stays on HBR3 because 330 fits on
+		-- paper. Raising DUAL_MAX_HZ needs either a forced preferred link rate
+		-- via .../DP-*/link_settings in debugfs, or a cable with better margin.
+		-- Capped at 240 (picks 2560x1080@240.08, not the panel's @330.12).
+		-- 330 does NOT hold on this link and a premium DP cable did not change that
+		-- (tested 2026-09-11): amdgpu drives dual mode uncompressed over HBR3 x4 at
+		-- ~93% bandwidth, the DP payload handshake fails ("SST Update Payload ...
+		-- branch" / "Link loss"), and the panel reverts to 5K -- i.e. a black flash,
+		-- self-recovered. It is a hard bandwidth wall, not signal margin: the fix
+		-- would be amdgpu stepping up to the UHBR rate the link reports as verified,
+		-- but it will not, and forcing DP 2.1 in the monitor OSD black-screens on
+		-- this RDNA4 (RX 9070 XT) driver. 240 needs ~17 of 25.9 Gbps and is solid.
+		local DUAL_MAX_HZ = 250
+
+		-- Ground truth for which EDID is live *right now*, read straight from the
+		-- kernel. hl.get_monitors() lags a hotplug by several event rounds:
+		-- monitor.added fires while available_modes still describes the panel's
+		-- previous state. Trusting that stale list is what turned a dual -> 5K
+		-- transition into an instant black screen -- the handler saw the outgoing
+		-- dual list, re-applied 2560x1080@330 to a panel already back in 5K, and
+		-- only recovered when layout_changed came round again with fresh data.
+		-- The kernel has already updated sysfs by the time it emits the udev
+		-- hotplug Hyprland is reacting to, so this never lags.
+		local function lgDrmModes(name)
+			for _, card in ipairs({ "card0", "card1", "card2" }) do
+				local f = io.open("/sys/class/drm/" .. card .. "-" .. name .. "/modes", "r")
+				if f then
+					local s = f:read("*a")
+					f:close()
+					if s and s ~= "" then return s end
+				end
+			end
+			return nil
+		end
 
 		local function lgPickMode(m)
 			local has5k, dual = false, nil
@@ -179,8 +236,27 @@ in
 					if not dual or mode.refresh_rate > dual.refresh_rate then dual = mode end
 				end
 			end
-			if has5k then return 5120, 2160, 120 end
-			if dual then return dual.width, dual.height, dual.refresh_rate end
+
+			local kmodes = lgDrmModes(m.name)
+			if not kmodes then
+				-- No ground truth available (unexpected card numbering, say): fall
+				-- back to Hyprland's list and accept the stale-read race.
+				if has5k then return 5120, 2160, 120 end
+				if dual then return dual.width, dual.height, dual.refresh_rate end
+				return nil
+			end
+
+			-- The two EDIDs are disjoint, so one substring settles which is live.
+			if kmodes:find("5120x2160", 1, true) then
+				-- 5K's refresh is pinned, so this needs nothing from the stale list.
+				return 5120, 2160, 120
+			end
+			if kmodes:find("2560x1080", 1, true) and dual then
+				-- Dual mode *does* need a refresh rate out of that list, so only act
+				-- once kernel and Hyprland agree. A disagreement just means Hyprland
+				-- has not caught up; the next event carries fresh data.
+				return dual.width, dual.height, dual.refresh_rate
+			end
 			return nil
 		end
 
@@ -765,27 +841,6 @@ ${shellBinds}
 			hl.exec_cmd("${pkgs.openrazer-daemon}/bin/openrazer-daemon")
 			hl.exec_cmd("${pkgs.networkmanagerapplet}/bin/nm-applet --indicator")
 
-			-- Start CoreCtrl minimized so its saved GPU profile (undervolt / power
-			-- limit) is applied at login. The real fix for this is the polkit rule in
-			-- hosts/nixos-desktop/default.nix that lets CoreCtrl start its root helper
-			-- without an auth prompt — without it CoreCtrl exited at boot with
-			-- "Cannot start helper". --minimize-systray asks it to start with no
-			-- window (minimized to the system tray), so it also needs a settled tray.
-			-- DMS owns org.kde.StatusNotifierWatcher, so we wait until that bus name
-			-- has been present continuously for ~5s before launching. DMS starts once,
-			-- so the wait settles quickly -- but do not remove it: without a settled
-			-- tray corectrl pops its window instead of minimizing, and if it fails to
-			-- start the saved GPU undervolt profile is never applied.
-			--
-			-- QT_QPA_PLATFORMTHEME/QT_STYLE_OVERRIDE are unset for corectrl only: with
-			-- the system-wide qt.platformTheme = "gnome" (qgnomeplatform), Qt reports
-			-- "no system tray available", so --minimize-systray can't minimize and
-			-- corectrl pops its WINDOW at login instead of starting silently. corectrl
-			-- ignores QT_STYLE_OVERRIDE and forces its own style anyway, so dropping
-			-- both for this one process costs nothing and restores the silent launch.
-			-- (corectrl never registers a visible SNI tray icon here regardless — a
-			-- corectrl quirk on wlroots; Steam/insync/nm-applet tray icons work fine.)
-			hl.exec_cmd([==[bash -c 'unset QT_QPA_PLATFORMTHEME QT_STYLE_OVERRIDE; stable=0; for i in $(seq 1 240); do if busctl --user status org.kde.StatusNotifierWatcher >/dev/null 2>&1; then stable=$((stable+1)); else stable=0; fi; [ "$stable" -ge 10 ] && break; sleep 0.5; done; exec ${pkgs.corectrl}/bin/corectrl --minimize-systray']==])
 
 			hl.exec_cmd("pypr")
 			hl.exec_cmd("sleep 4 && insync start --qt-qpa-platform=xcb --no-daemon")
