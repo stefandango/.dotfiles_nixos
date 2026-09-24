@@ -9,14 +9,14 @@ echo ""
 # Nix version
 echo "📦 Nix version: $(nix --version 2>/dev/null || echo 'Not found')"
 
-# Current generation
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    current_gen=$(darwin-rebuild --list-generations 2>/dev/null | tail -1 | awk '{print $1}' || echo "unknown")
-    echo "🔄 Current generation: $current_gen"
-else
-    current_gen=$(nixos-rebuild list-generations 2>/dev/null | tail -1 | awk '{print $1}' || echo "unknown")
-    echo "🔄 Current generation: $current_gen"
-fi
+# Current generation. From the profile symlink, not `--list-generations`:
+# that needs root for the profile lock, so it only ever reported "unknown"
+# (see nixswitch's note).
+current_gen=$(readlink /nix/var/nix/profiles/system 2>/dev/null || true)
+current_gen=${current_gen##*/}
+current_gen=${current_gen#system-}
+current_gen=${current_gen%-link}
+echo "🔄 Current generation: ${current_gen:-unknown}"
 
 # Flake status
 if [[ -f ~/.dotfiles/flake.lock ]]; then

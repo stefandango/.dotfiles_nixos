@@ -11,6 +11,21 @@ if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
     exit 1
 fi
 
+# The generation number, read straight off the system profile symlink rather
+# than from `{darwin,nixos}-rebuild --list-generations`. Those go through
+# nix-env, which locks /nix/var/nix/profiles/system.lock -- root-owned, so as
+# your user the command exits 1 with "Permission denied". Under `set -e` that
+# killed this script in the command substitution on the line right after
+# "Successfully switched!", which is how a switch that had worked came back to
+# nixup as a build failure. The symlink needs no privileges and no nix call.
+current_generation() {
+    local link
+    link=$(readlink /nix/var/nix/profiles/system 2>/dev/null) || return 0
+    link=${link##*/}
+    link=${link#system-}
+    printf '%s' "${link%-link}"
+}
+
 # DMS owns ~/.config/DankMaterialShell/settings.json outright -- nothing in this
 # repo writes it (see modules/nixos/dms.nix). But dank-material-shell is an
 # unpinned github: input, so a rebuild can land a beta shell whose settings
@@ -32,11 +47,9 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     BUILD_TARGET="$HOME/.dotfiles#darwinConfigurations.Stefans-MacBook-Pro.system"
     # nix-darwin now requires system activation to run as root
     SWITCH_CMD="sudo darwin-rebuild switch --flake $HOME/.dotfiles#Stefans-MacBook-Pro"
-    GEN_CMD="darwin-rebuild --list-generations"
 else
     BUILD_TARGET="$HOME/.dotfiles#nixosConfigurations.stefan.config.system.build.toplevel"
     SWITCH_CMD="sudo nixos-rebuild switch --flake $HOME/.dotfiles#stefan"
-    GEN_CMD="nixos-rebuild list-generations"
 fi
 
 if nom build "$BUILD_TARGET" "$@"; then
@@ -66,8 +79,8 @@ if nom build "$BUILD_TARGET" "$@"; then
         echo "✨ Successfully switched! (${switch_time}s)"
 
         # Show new generation
-        new_gen=$($GEN_CMD 2>/dev/null | tail -1 | awk '{print $1}')
-        echo "   Generation: #$new_gen"
+        new_gen=$(current_generation)
+        echo "   Generation: #${new_gen:-unknown}"
 
         total_time=$((build_time + switch_time))
         echo "   Total time: ${total_time}s"

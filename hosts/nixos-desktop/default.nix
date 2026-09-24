@@ -215,7 +215,11 @@
     # mkMcpNixos + pythonRelaxDeps builds cleanly on native fastmcp (needs >=3.2.0).
     # Revert to packages.default once upstream drops the fastmcp3 overlay.
     (inputs.mcp-nixos.lib.mkMcpNixos { inherit pkgs; })  # MCP server (used by .mcp.json)
-    inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default  # agent multiplexer (macOS uses Homebrew — upstream flake won't build on darwin)
+    # herdr (agent multiplexer) from nixpkgs, not the upstream flake: nixpkgs
+    # carries 0.9.1, and the plugin API our review-tab plugin needs
+    # (modules/shared/herdr.nix) only exists from 0.7.0 on — the old
+    # github:ogulcancelik/herdr/v0.6.6 input predates it entirely.
+    herdr
     zsh  # Add zsh at system level
     # GUI Applications
     # firefox is now managed declaratively via modules/shared/firefox.nix (home-manager)

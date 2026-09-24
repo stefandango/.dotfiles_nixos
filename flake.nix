@@ -42,11 +42,6 @@
 			inputs.nixpkgs.follows = "nixpkgs";
 		};
 
-		herdr = {
-			url = "github:ogulcancelik/herdr/v0.6.6";
-			inputs.nixpkgs.follows = "nixpkgs";
-		};
-
 		# The desktop shell: one Quickshell process for bar, notifications,
 		# launcher, OSD, lock, polkit and wallpaper. Configured in
 		# modules/nixos/dms.nix.

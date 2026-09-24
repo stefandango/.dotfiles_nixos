@@ -135,14 +135,15 @@ if ~/Scripts/nixswitch; then
     echo "🎉 Update complete!"
     echo "───────────────────"
 
-    # Show new state
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        new_gen=$(darwin-rebuild --list-generations 2>/dev/null | tail -1)
-    else
-        new_gen=$(nixos-rebuild list-generations 2>/dev/null | tail -1)
-    fi
+    # Show new state. Read off the system profile symlink, not
+    # `--list-generations`: that needs root for the profile lock and, failing,
+    # would abort this script here under `set -e` (see nixswitch's note).
+    new_gen=$(readlink /nix/var/nix/profiles/system 2>/dev/null || true)
+    new_gen=${new_gen##*/}
+    new_gen=${new_gen#system-}
+    new_gen=${new_gen%-link}
 
-    echo "   New generation: $new_gen"
+    echo "   New generation: #${new_gen:-unknown}"
     echo ""
     echo "✨ Your system is now up to date!"
 else

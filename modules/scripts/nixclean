@@ -2,6 +2,15 @@
 set -euo pipefail
 # Enhanced Nix cleanup with statistics
 
+# Counted from the profile directory rather than `--list-generations`, which
+# needs root for the profile lock and whose failure `wc -l` hides behind a
+# count of zero (see nixswitch's note).
+count_generations() {
+    local n
+    n=$(find /nix/var/nix/profiles -maxdepth 1 -name 'system-*-link' 2>/dev/null | wc -l)
+    printf '%s' "${n// /}"
+}
+
 echo "🧹 Nix Store Cleanup"
 echo "==================="
 echo ""
@@ -9,11 +18,7 @@ echo ""
 # Get before stats
 echo "📊 Current state:"
 
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    gen_count=$(darwin-rebuild --list-generations 2>/dev/null | wc -l || echo "0")
-else
-    gen_count=$(sudo nixos-rebuild list-generations 2>/dev/null | wc -l || echo "0")
-fi
+gen_count=$(count_generations)
 
 store_size_before=$(du -sh /nix/store 2>/dev/null | awk '{print $1}' || echo "unknown")
 
@@ -55,11 +60,7 @@ echo ""
 # Get after stats
 echo "📊 After cleanup:"
 
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    gen_count_after=$(darwin-rebuild --list-generations 2>/dev/null | wc -l || echo "0")
-else
-    gen_count_after=$(sudo nixos-rebuild list-generations 2>/dev/null | wc -l || echo "0")
-fi
+gen_count_after=$(count_generations)
 
 store_size_after=$(du -sh /nix/store 2>/dev/null | awk '{print $1}' || echo "unknown")
 

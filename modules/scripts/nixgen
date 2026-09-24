@@ -7,13 +7,16 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     echo "=============================="
     echo ""
 
-    generations=$(darwin-rebuild --list-generations 2>/dev/null)
+    # sudo, as on the NixOS branch below: --list-generations goes through
+    # nix-env, which locks the root-owned system profile. Without it the
+    # command exits 1 and `set -e` ends the script before the check below.
+    generations=$(sudo darwin-rebuild --list-generations 2>/dev/null || true)
 else
     echo "📜 System Generations (NixOS)"
     echo "============================"
     echo ""
 
-    generations=$(sudo nixos-rebuild list-generations 2>/dev/null)
+    generations=$(sudo nixos-rebuild list-generations 2>/dev/null || true)
 fi
 
 if [[ -z "$generations" ]]; then
