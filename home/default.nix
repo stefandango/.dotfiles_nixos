@@ -57,6 +57,7 @@
     # System utilities
     # curl + btop provided system-wide via modules/shared/system.nix
     gum           # Glamorous shell scripts
+    age           # File encryption (age / age-keygen)
 
     # AI tools
     pi-coding-agent  # pi (pi.dev) coding agent harness
