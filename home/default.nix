@@ -58,6 +58,9 @@
     # curl + btop provided system-wide via modules/shared/system.nix
     gum           # Glamorous shell scripts
 
+    # AI tools
+    pi-coding-agent  # pi (pi.dev) coding agent harness
+
     # herdr (agent multiplexer): macOS via Homebrew (hosts/macbook), NixOS via
     # flake input (hosts/nixos-desktop) — upstream flake won't build on darwin.
 
