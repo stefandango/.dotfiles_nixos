@@ -113,6 +113,46 @@
       enable = true;
       batteryNotifier.enable = true;
       users = [ vars.user ];
+      # TEMP[openrazer-module-cer]: install the driver through modules_install
+      # TEMP-CHECK: nix_input_missing nixpkgs 'cp -v driver/\*\.ko'
+      # nixpkgs now signs modules with kmodigest during modules_install and
+      # aggregateModules cats a <module>.ko.cer for every external module. The
+      # driver.nix in our lock still `cp`s the .ko files by hand, so no .cer
+      # exists and linux-*-modules dies with "cat: kernel/drivers/hid/
+      # razerkbd.ko.cer: No such file or directory" (exit 123). Same change as
+      # nixpkgs 0923331843f0; drop this once that reaches nixos-unstable.
+      packages.kernel =
+        let kernel = config.boot.kernelPackages.kernel;
+        in config.boot.kernelPackages.openrazer.overrideAttrs (old: {
+          makeFlags = old.makeFlags ++ [
+            "INSTALL_MOD_PATH=${placeholder "out"}"
+            "INSTALL_MOD_DIR=kernel/drivers/hid"
+            "INSTALL_MOD_STRIP=1"
+            "DEPMOD=true"
+          ];
+          installTargets = [ "modules_install" ];
+          installFlags = [
+            "-C"
+            "${kernel.dev}/lib/modules/${kernel.modDirVersion}/build"
+            "M=$(PWD)/driver"
+          ];
+          # Empty -> stdenv's default installPhase (make $installTargets).
+          installPhase = "";
+          postInstall = ''
+            RAZER_MOUNT_OUT="$out/bin/razer_mount"
+            RAZER_RULES_OUT="$out/etc/udev/rules.d/99-razer.rules"
+            install -m 644 -v -D install_files/udev/99-razer.rules $RAZER_RULES_OUT
+            install -m 755 -v -D install_files/udev/razer_mount $RAZER_MOUNT_OUT
+            substituteInPlace $RAZER_RULES_OUT \
+              --replace razer_mount $RAZER_MOUNT_OUT \
+              --replace plugdev openrazer
+            substituteInPlace $RAZER_MOUNT_OUT \
+              --replace /usr/bin/logger ${pkgs.util-linux}/bin/logger \
+              --replace chgrp ${pkgs.coreutils}/bin/chgrp \
+              --replace "PATH='/sbin:/bin:/usr/sbin:/usr/bin'" "" \
+              --replace plugdev openrazer
+          '';
+        });
     };
     # Required for Bluetooth controller firmware (otherwise hci0 FW download
     # fails with -19 on boot). Also enables AMD microcode updates via the

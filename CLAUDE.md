@@ -8,7 +8,7 @@ This is a cross-platform Nix configuration repository supporting both NixOS (Lin
 
 ## Architecture
 
-- **flake.nix**: Main entry point. Inputs: `nixpkgs` (unstable), `home-manager`, `darwin`, `dank-material-shell` (the desktop shell), `herdr` (agent multiplexer, NixOS only — macOS uses Homebrew), `hunk` (git diff viewer), `zen-browser`, `nix-claude-code`, `mcp-nixos`, `nixvim` (**declared but unused**, see `nix/`), and `nixpkgs-darwin-stable` (a `TEMP` pin that only `hunk` follows). Outputs: `nixosConfigurations.stefan`, `darwinConfigurations.Stefans-MacBook-Pro`, and a `devShells.default` with `nixpkgs-fmt` + `nil`
+- **flake.nix**: Main entry point. Inputs: `nixpkgs` (unstable), `home-manager`, `darwin`, `dank-material-shell` (the desktop shell), `herdr` (agent multiplexer, NixOS only — macOS uses Homebrew), `hunk` (git diff viewer), `zen-browser`, `nix-claude-code`, `mcp-nixos`, `nixvim` (**declared but unused**, see `nix/`), `nixpkgs-darwin-stable` (a `TEMP` pin that only `hunk` follows), and `nixpkgs-insync` (a `TEMP` pin to an older unstable rev, used only for insync). Outputs: `nixosConfigurations.stefan`, `darwinConfigurations.Stefans-MacBook-Pro`, and a `devShells.default` with `nixpkgs-fmt` + `nil`
 - **hosts/**: Host-specific system configurations
   - `macbook/`: Darwin host (`Stefans-MacBook-Pro`) — system defaults, Homebrew casks + brews (`uv`, `herdr`), Touch ID, fonts
   - `nixos-desktop/`: NixOS host (`stefan`) — boot/plymouth (GRUB `configurationLimit = 4`, `/boot` is 511 MB), AMD RX 9070 XT, PipeWire, Steam/GameMode, polkit rules, CIFS automount, plus `hardware-configuration.nix`. Its comments are the record of the hardware incidents (DP 2.1 black screen, Dual Mode, CoreCtrl removal)
@@ -16,7 +16,7 @@ This is a cross-platform Nix configuration repository supporting both NixOS (Lin
 - **modules/**: Reusable Nix modules organized by functionality
   - `shared/`: Cross-platform home-manager modules — `git.nix` (+ hunk as pager/difftool), `zsh.nix` (zsh, tmux, and registration of every cross-platform script), `kitty.nix`, `firefox.nix` (Linux only — Homebrew Firefox on macOS), `syncthing.nix`, `herdr.nix` — and the system-level `system.nix`
   - `darwin/`: `ntfy.nix` (launchd subscriber)
-  - `nixos/`: Linux-specific modules — `hyprland.nix` (generates `~/.config/hypr/hyprland.lua`), `dms.nix` (DankMaterialShell: seed settings, plugin flags, the `nixosUpdates` and `headsetBattery` plugins via `/etc`), `matugen.nix` (user colour templates for kitty/tmux), `greetd.nix` (tuigreet), `pyprland.nix` (scratchpads), `apps.nix` (GUI apps), `dotnet.nix`, `env.nix`, `llama-cpp.nix`, `tailscale.nix`, `ntfy.nix`, `scripts.nix` (NixOS-only script registration)
+  - `nixos/`: Linux-specific modules — `hyprland.nix` (generates `~/.config/hypr/hyprland.lua`), `dms.nix` (DankMaterialShell: seed settings, plugin flags, the `nixosUpdates` and `headsetBattery` plugins via `/etc`), `matugen.nix` (user colour templates for kitty/tmux), `greetd.nix` (tuigreet), `pyprland.nix` (scratchpads), `apps.nix` (GUI apps), `dotnet.nix`, `env.nix`, `llama-cpp.nix`, `tailscale.nix`, `ntfy.nix`, `wallgen.nix` (packages `scripts/wallgen.py` with numpy/pillow; phases follow the real sun in Copenhagen, a 10-minute user timer runs `wallgen --auto`, which only acts when the phase or DMS's light/dark mode changes; tone follows DMS's Theme schedule setting), `scripts.nix` (NixOS-only script registration)
   - `nixos/dms/plugins/{nixosUpdates,headsetBattery}/`: our own DMS bar widgets (QML), shipped read-only from the store. `headsetBattery` runs `headsetcontrol`, whose udev rules the host installs (`services.udev.packages`)
   - `config/`: Static assets — `ohmyposhv3-v2.json`, `lsdconfig.yaml`, `lsdtheme.yaml`, `omnisharp.json`, `matugen/{kitty,tmux}.conf` templates, `dms-plugins.lock.json`
   - `scripts/`: Everything that lands in `~/Scripts`
@@ -78,7 +78,7 @@ Omit `TEMP-CHECK` only when nothing can be tested; the entry is then listed for
 manual review on every run. `nixup` runs the report **before** the build, because
 an overlay appending a patch nixpkgs has since adopted fails the build with
 "Reversed (or previously applied) patch" rather than going quietly obsolete.
-Current entries: `hunk-darwin-nixpkgs` (flake.nix), `mcp-nixos-fastmcp` (host).
+Current entries: `hunk-darwin-nixpkgs`, `insync-nixpkgs-pin` (flake.nix), `mcp-nixos-fastmcp`, `openrazer-module-cer` (host).
 
 ## Common Commands
 
@@ -145,6 +145,7 @@ the matching workspace/session. `label_for()` in `wt` and
 dmsplugins [sync|update|list]      # Sync plugins against modules/config/dms-plugins.lock.json
 dmssettings snapshot|diff|list|restore   # Keep settings.json diffable across shell updates
 dms ipc call settings dump         # Current settings, for folding back into dms.nix's seed
+wallgen [--random] [--phase P] [--style S] [--tone T] [--event E] [--scene S] [--season S] [--seed N] [--no-apply] | prev | schedule | keep   # Generated 5120x2160 wallpaper for the light outside
 ```
 
 ### Local LLM

@@ -14,5 +14,6 @@
     ./llama-cpp.nix
     ./tailscale.nix
     ./ntfy.nix
+    ./wallgen.nix
   ];
 }

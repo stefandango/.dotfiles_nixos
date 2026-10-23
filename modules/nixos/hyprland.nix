@@ -1,4 +1,4 @@
-{config, lib, system, pkgs, vars, host, ... }:
+{config, lib, system, pkgs, vars, host, inputs, ... }:
 
 let
   # The binds that reach into the shell rather than the compositor.
@@ -35,6 +35,12 @@ let
 		-- off: the palette is derived from the wallpaper, so a timed shuffle
 		-- would recolour the whole desktop every few minutes.
 		hl.bind("SUPER + SHIFT + W", hl.dsp.exec_cmd("dms ipc call wallpaperCarousel toggle"))
+		-- wallgen (modules/nixos/wallgen.nix): a new random picture for the
+		-- current light, or back to the previous one. Either stays up until the
+		-- phase changes outside. A render takes a few seconds, so the change is
+		-- not instant.
+		hl.bind("SUPER + ALT + W", hl.dsp.exec_cmd("wallgen --random"))
+		hl.bind("SUPER + ALT + SHIFT + W", hl.dsp.exec_cmd("wallgen prev"))
 		-- Opens the nixosUpdates popout without having to aim at the pill. The id
 		-- resolves through BarWidgetService, so this only works while the widget
 		-- is actually on the bar -- and the pill hides itself when up to date,
@@ -81,7 +87,11 @@ in
 			wl-clipboard    	# wl-copy, used by scripts (DMS owns the history)
 			wlr-randr       	# Monitor Settings
 			networkmanagerapplet	# SNI tray + NetworkManager auth/VPN dialogs
-			insync			# Gdrive integration
+			# Gdrive integration. TEMP[insync-nixpkgs-pin] in flake.nix.
+			(import inputs.nixpkgs-insync {
+				inherit (pkgs.stdenv.hostPlatform) system;
+				config.allowUnfree = true;
+			}).insync
 			thunar			# File explorer GUI
 			thunar-volman		# Auto manage removable drives etc..
 			imv			# Simple image viewer

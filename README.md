@@ -394,6 +394,8 @@ nm-applet, openrazer-daemon and Insync.
 | `SUPER+Alt+Space` / `SUPER+Shift+T` | Control centre / DMS settings |
 | `SUPER+Shift+E` | Power menu |
 | `SUPER+Shift+W` | Wallpaper carousel (a plugin — dead until `dmsplugins sync` has run) |
+| `SUPER+Alt+W` | `wallgen --random`: a new generated wallpaper (takes a few seconds) |
+| `SUPER+Alt+Shift+W` | `wallgen prev`: back to the previous generated wallpaper |
 | `SUPER+U` | NixOS updates popout (only while the pill is on the bar, i.e. when behind) |
 | `SUPER+Shift+plus` | DMS keybind reference, generated from the live binds |
 | `SUPER+Shift+R` | Reload Hyprland config |
@@ -455,6 +457,62 @@ home-manager symlinks; *outputs* must be real files, so never declare them.
 GTK is DMS's job (`Apply GTK Colors`, see Installation), Qt follows GTK3, and
 Hyprland's border gradient and oh-my-posh stay static on purpose (the prompt
 config is full of Go templates that matugen's engine would eat).
+
+#### Generated wallpapers (wallgen)
+
+`modules/nixos/wallgen.nix` packages `modules/scripts/wallgen.py`, which renders
+calm 5120x2160 wallpapers. The date seeds the day's recipe -- drawing style,
+scene (ridges, forest, lake, hills, sea, archipelago, dunes), weather (clear,
+wisps, cloud banks, overcast), a palette variant per phase, sun placement,
+birds, aurora -- and the season comes from the calendar (spring greens, autumn
+rust, winter blue-grey with snow on the summits). All four phases of a day
+show the same picture under different light; the moon is drawn at its real
+phase.
+
+About two days in three are painted landscapes. The rest get a technical
+style, still in the phase's palette so matugen follows the light: `contour`
+(topographic map with survey ticks), `signal` (stacked waveform lines),
+`circuit` (PCB traces and chips), `wireframe` (perspective grid terrain),
+`lowpoly` (the landscape as flat-shaded triangles), `flow` (streamlines through
+a noise field) and `graph` (a node network with one lit path).
+
+Light and dark follow DMS's own setting (Settings -> Theme -> Theme schedule).
+On **Wallpaper**, DMS picks its mode from the image, so wallgen draws the
+natural light. On **Manual**, **Schedule** or **Location**, DMS decides, and
+wallgen tones the picture to match: in dark mode a daytime image is blended
+toward that day's night palette (blue hour, not black), in light mode a night
+image toward its day palette. Switching modes re-renders on the next timer
+run; `--tone dark|light|natural` overrides it for one render.
+
+A few dates get something extra: snowfall on about half of Advent and always
+on 24-26 December, fireworks on New Year's Eve, bonfires on the hills for
+Sankthans (23 June), a big amber hunter's moon on Halloween, and meteor
+streaks at the Perseid and Geminid peaks (11-13 August, 13-14 December).
+`--event NAME` adds one to any render.
+
+The phase follows the real sun in Copenhagen (`location` in the module): night
+below -6 degrees, dawn/dusk up to +6, day above. That puts December's "day" at
+roughly 10:00-14:20 and June's at 05:30-20:50. A `systemd --user` timer runs
+`wallgen --auto` every 10 minutes; it does nothing unless the phase has changed
+since the last image it applied, so a wallpaper picked by hand -- in DMS, or
+with `wallgen --random`/`--style` -- stays until the light changes. While
+GameMode is active the timer skips rendering and tries again next run. DMS reruns matugen on every change. Images go to
+`~/Pictures/Wallpapers/generated` and are pruned after 7 days.
+
+```bash
+wallgen                        # render (if needed) and apply the image for the light now
+wallgen schedule               # today's phase changes for the configured location
+wallgen --random               # a different picture now; stays until the light changes
+wallgen prev                   # back to the image applied before this one
+wallgen --phase dusk           # force a phase
+wallgen --style circuit        # force a style (landscape, contour, signal, circuit, ...)
+wallgen --tone dark            # override the light/dark tone for one render
+wallgen --event snow --event meteors   # add calendar events regardless of the date
+wallgen --scene lake --season winter --weather overcast   # force any part of the recipe
+wallgen --seed 42 --no-apply   # try another day's recipe without applying it
+wallgen keep                   # copy the current generated image into highres/
+systemctl --user stop wallgen.timer   # pause until the next login
+```
 
 ### Gaming (NixOS)
 
@@ -522,7 +580,7 @@ This configuration uses a hybrid approach:
 │   │                        #   syncthing, herdr, and the system-level system.nix
 │   ├── darwin/              # ntfy launchd agent
 │   ├── nixos/               # hyprland (Lua), dms, matugen, greetd, pyprland, apps, dotnet,
-│   │   │                    #   env, llama-cpp, tailscale, ntfy, scripts
+│   │   │                    #   env, llama-cpp, tailscale, ntfy, wallgen, scripts
 │   │   └── dms/plugins/     # nixosUpdates + headsetBattery DMS plugins (shipped via /etc)
 │   ├── config/              # oh-my-posh, lsd, omnisharp, matugen templates, dms-plugins.lock.json
 │   └── scripts/             # Everything that lands in ~/Scripts
@@ -545,7 +603,7 @@ NixOS-only desktop helpers in `modules/nixos/scripts.nix`.
 - **Gaming (NixOS)**: Steam + gamescope, GameMode, MangoHud, ananicy-cpp, wine-staging + winetricks
 - **Docker**: `virtualisation.docker` plus docker-compose and lazydocker
 - **Hardware (NixOS)**: AMD RX 9070 XT, LG 45" 5120x2160 WOLED capped at 120 Hz with a Dual Mode follower, DDC/CI via `ddcutil`, openrazer with battery notifier
-- **Flake Inputs**: `nixpkgs` (unstable), `home-manager`, `darwin`, `dank-material-shell`, `herdr`, `hunk`, `zen-browser`, `nix-claude-code`, `mcp-nixos`, `nixvim` (declared, unused), and `nixpkgs-darwin-stable` (a `TEMP` pin that only hunk follows, until it stops claiming x86_64-darwin)
+- **Flake Inputs**: `nixpkgs` (unstable), `home-manager`, `darwin`, `dank-material-shell`, `herdr`, `hunk`, `zen-browser`, `nix-claude-code`, `mcp-nixos`, `nixvim` (declared, unused), `nixpkgs-darwin-stable` (a `TEMP` pin that only hunk follows, until it stops claiming x86_64-darwin), and `nixpkgs-insync` (a `TEMP` pin to an older unstable rev, only for insync, until nixpkgs#576779 is fixed)
 
 ## Common Workflows
 

@@ -12,6 +12,16 @@
 		# Darwin config. Drop once hunk stops claiming that platform.
 		nixpkgs-darwin-stable.url = "github:NixOS/nixpkgs/nixpkgs-26.05-darwin";
 
+		# TEMP[insync-nixpkgs-pin]: insync comes from the last nixpkgs where it built
+		# TEMP-CHECK: grep -q '\.debug' "$(_flake_eval .inputs.nixpkgs.outPath)/pkgs/by-name/in/insync/package.nix"
+		# insync 3.9.11 (nixpkgs 80bfecb7946b) ships a stub QtWebEngineProcess.debug
+		# ELF that autoPatchelfHook dies on ("patchelf: data offset extends past file
+		# end"), and even with it deleted the result segfaults until patchelf carries
+		# NixOS/patchelf#672 -- NixOS/nixpkgs#576779. This rev is our previous lock,
+		# which builds insync 3.9.8. Only modules/nixos/hyprland.nix uses it. The check
+		# is a heuristic: it fires once insync's package.nix mentions .debug at all.
+		nixpkgs-insync.url = "github:NixOS/nixpkgs/e7439b6b14ad3cc35d05608ebca9bce01a25f5f8";
+
 		home-manager = {
 			url = "github:nix-community/home-manager";
 			inputs.nixpkgs.follows = "nixpkgs";
