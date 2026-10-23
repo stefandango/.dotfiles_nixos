@@ -76,6 +76,11 @@ machine needs it once:
 git clone git@github.com:stefandango/LazyVim-Config.git ~/.config/nvim
 
 # Write ~/.config/ntfy/credentials — see "Push Notifications" below
+
+# Obsidian vault access for Claude Code (user scope, so it works from any project).
+# ~/.claude.json is rewritten by Claude Code and cannot be Nix-managed; version is
+# pinned on purpose — remove and re-add to bump. Only mcp-nixos lives in the repo (.mcp.json).
+claude mcp add --scope user obsidian -- npx -y @bitbonsai/mcpvault@0.16.0 ~/Vault
 ```
 
 **NixOS**
@@ -385,6 +390,7 @@ nm-applet, openrazer-daemon and Insync.
 | `SUPER+Shift+F` | Focus mode: gaps scale with the tiled-window count (one window becomes a centred column) |
 | `Print` | Area screenshot to `~/Pictures` and clipboard (grimblast) |
 | `SUPER+L` / `SUPER+N` / `SUPER+Y` | Lock / notification centre / clipboard history |
+| `SUPER+Shift+N` | Notepad slideout |
 | `SUPER+Alt+Space` / `SUPER+Shift+T` | Control centre / DMS settings |
 | `SUPER+Shift+E` | Power menu |
 | `SUPER+Shift+W` | Wallpaper carousel (a plugin — dead until `dmsplugins sync` has run) |
@@ -434,7 +440,11 @@ autostart rather than its systemd unit, because the unit binds
   `dmsplugins` builds), `ddcBrightness` (the LG only takes brightness over
   DDC/CI), plus `wallpaperCarousel`. The `nixosUpdates` widget is ours and
   ships declaratively via `/etc/xdg/quickshell/dms-plugins` from
-  `modules/nixos/dms/plugins/`; it renders `nixupdates --json`.
+  `modules/nixos/dms/plugins/`; it renders `nixupdates --json`. So does
+  `headsetBattery`: the Audeze Maxwell 2 battery from
+  `headsetcontrol -b -o json` (its udev rules are installed by the host, so
+  no root needed), hidden while the headset is off, with a low-battery
+  notification.
 
 #### Theming
 
@@ -513,7 +523,7 @@ This configuration uses a hybrid approach:
 │   ├── darwin/              # ntfy launchd agent
 │   ├── nixos/               # hyprland (Lua), dms, matugen, greetd, pyprland, apps, dotnet,
 │   │   │                    #   env, llama-cpp, tailscale, ntfy, scripts
-│   │   └── dms/plugins/     # nixosUpdates DMS plugin (shipped via /etc)
+│   │   └── dms/plugins/     # nixosUpdates + headsetBattery DMS plugins (shipped via /etc)
 │   ├── config/              # oh-my-posh, lsd, omnisharp, matugen templates, dms-plugins.lock.json
 │   └── scripts/             # Everything that lands in ~/Scripts
 ├── nix/nvim.nix             # Dormant nixvim config (not imported — see Neovim above)

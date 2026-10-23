@@ -26,6 +26,7 @@
 - matugen template outputs (`~/.config/kitty/dank-theme.conf`, `~/.config/tmux/dank-colors.conf`) — must be real files or matugen fails silently.
 - `gtk-3.0/gtk.css`, `gtk-4.0/gtk.css` — written by DMS's `gtk.sh`.
 - DMS plugins under `~/.config/DankMaterialShell/plugins` — pinned by `modules/config/dms-plugins.lock.json`, restored by `dmsplugins sync`.
+- `~/.claude.json` — Claude Code's own state, rewritten constantly. User-scoped MCP servers (the `obsidian` mcpvault server) are registered there by hand with `claude mcp add --scope user`, version-pinned; only `mcp-nixos` is repo-managed (project `.mcp.json`).
 
 ## Testing Guidelines
 - Baseline: `nix flake check` must pass. There are no `outputs.checks` yet; add them there if a validation is worth automating.

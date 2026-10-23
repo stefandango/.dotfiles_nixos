@@ -17,6 +17,9 @@ let
 		hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("dms ipc call spotlight-bar toggle"))
 		hl.bind("SUPER + L", hl.dsp.exec_cmd("dms ipc call lock lock"))
 		hl.bind("SUPER + N", hl.dsp.exec_cmd("dms ipc call notifications toggle"))
+		-- The notepad slideout. `notepad` also answers open/close/expand/collapse
+		-- and `openFile <path>`, if a bind for a specific file ever seems useful.
+		hl.bind("SUPER + SHIFT + N", hl.dsp.exec_cmd("dms ipc call notepad toggle"))
 		hl.bind("SUPER + SHIFT + E", hl.dsp.exec_cmd("dms ipc call powermenu toggle"))
 		hl.bind("SUPER + Y", hl.dsp.exec_cmd("dms ipc call clipboard toggle"))
 		hl.bind("SUPER + SHIFT + T", hl.dsp.exec_cmd("dms ipc call settings open"))

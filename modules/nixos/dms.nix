@@ -216,9 +216,10 @@ let
       #
       # Everything before "systemTray" is a PLUGIN, not a built-in, and DMS
       # renders nothing for an id it cannot resolve. All but one are restored
-      # from the lockfile by `~/Scripts/dmsplugins`; `nixosUpdates` is the
-      # exception — it is ours, and ships declaratively via the environment.etc
-      # entry at the bottom of this file, so it is there from the first switch.
+      # from the lockfile by `~/Scripts/dmsplugins`; `nixosUpdates` and
+      # `headsetBattery` are the exceptions — they are ours, and ship
+      # declaratively via the environment.etc entries at the bottom of this
+      # file, so they are there from the first switch.
       #
       # The first two replace six built-in widgets that used to sit here:
       #   systemMonitorPlus → diskUsage + memUsage + cpuUsage + cpuTemp
@@ -235,7 +236,9 @@ let
       #   nixosUpdates  → the old custom/updates module: days behind nixpkgs,
       #                   with the package diff behind a click. See the
       #                   environment.etc entry below for why not `systemUpdate`.
-      # Its manifest claims control-center too, but the widget never defines
+      #   headsetBattery → Audeze Maxwell 2 battery via headsetcontrol;
+      #                   hidden while the headset is off.
+      # dankRazer's manifest claims control-center too, but the widget never defines
       # ccWidgetIcon, which is what WidgetModel.qml actually gates on — so
       # dankRazer is bar-only in practice regardless of that capability.
       #
@@ -243,7 +246,7 @@ let
       # { id, enabled = true } on load (Common/settings/Lists.qml).
       rightWidgets = [
         "systemMonitorPlus" "amdGpuMonitor" "claudeCodeUsage"
-        "dankRazer" "ddcBrightness" "nixosUpdates"
+        "dankRazer" "headsetBattery" "ddcBrightness" "nixosUpdates"
         "systemTray" "notificationButton"
         "controlCenterButton" "powerMenuButton"
       ];
@@ -298,6 +301,7 @@ let
       ddcBrightness.enabled = true;       # bar: DDC/CI brightness for the LG
       wallpaperCarousel.enabled = true;   # daemon: SUPER+SHIFT+W overlay
       nixosUpdates.enabled = true;        # bar: days behind nixpkgs (ships via /etc)
+      headsetBattery.enabled = true;      # bar: headset battery (ships via /etc)
     });
 
   dmsPluginSettingsPath = ".config/DankMaterialShell/plugin_settings.json";
@@ -417,4 +421,11 @@ in
   # waybar path.
   environment.etc."xdg/quickshell/dms-plugins/nixosUpdates".source =
     ./dms/plugins/nixosUpdates;
+
+  # Wireless headset battery, which DMS cannot see on its own: the kernel gives
+  # the Audeze Maxwell 2 no power_supply, so UPower has nothing to
+  # report. The widget runs headsetcontrol, installed with its udev rules in
+  # the host config. Ships via /etc for the same `--prune` reason as above.
+  environment.etc."xdg/quickshell/dms-plugins/headsetBattery".source =
+    ./dms/plugins/headsetBattery;
 }

@@ -1,0 +1,14 @@
+{
+  "id": "headsetBattery",
+  "name": "Headset Battery",
+  "description": "Wireless headset battery level via headsetcontrol (HyperX, SteelSeries, Logitech, Corsair...)",
+  "version": "1.0.0",
+  "author": "stefan",
+  "icon": "headphones",
+  "type": "widget",
+  "capabilities": ["dankbar-widget"],
+  "component": "./HeadsetBattery.qml",
+  "settings": "./HeadsetBatterySettings.qml",
+  "dependencies": ["headsetcontrol", "notify-send"],
+  "permissions": ["settings_read", "settings_write", "process"]
+}

@@ -16,8 +16,8 @@ This is a cross-platform Nix configuration repository supporting both NixOS (Lin
 - **modules/**: Reusable Nix modules organized by functionality
   - `shared/`: Cross-platform home-manager modules — `git.nix` (+ hunk as pager/difftool), `zsh.nix` (zsh, tmux, and registration of every cross-platform script), `kitty.nix`, `firefox.nix` (Linux only — Homebrew Firefox on macOS), `syncthing.nix`, `herdr.nix` — and the system-level `system.nix`
   - `darwin/`: `ntfy.nix` (launchd subscriber)
-  - `nixos/`: Linux-specific modules — `hyprland.nix` (generates `~/.config/hypr/hyprland.lua`), `dms.nix` (DankMaterialShell: seed settings, plugin flags, the `nixosUpdates` plugin via `/etc`), `matugen.nix` (user colour templates for kitty/tmux), `greetd.nix` (tuigreet), `pyprland.nix` (scratchpads), `apps.nix` (GUI apps), `dotnet.nix`, `env.nix`, `llama-cpp.nix`, `tailscale.nix`, `ntfy.nix`, `scripts.nix` (NixOS-only script registration)
-  - `nixos/dms/plugins/nixosUpdates/`: our own DMS bar widget (QML), shipped read-only from the store
+  - `nixos/`: Linux-specific modules — `hyprland.nix` (generates `~/.config/hypr/hyprland.lua`), `dms.nix` (DankMaterialShell: seed settings, plugin flags, the `nixosUpdates` and `headsetBattery` plugins via `/etc`), `matugen.nix` (user colour templates for kitty/tmux), `greetd.nix` (tuigreet), `pyprland.nix` (scratchpads), `apps.nix` (GUI apps), `dotnet.nix`, `env.nix`, `llama-cpp.nix`, `tailscale.nix`, `ntfy.nix`, `scripts.nix` (NixOS-only script registration)
+  - `nixos/dms/plugins/{nixosUpdates,headsetBattery}/`: our own DMS bar widgets (QML), shipped read-only from the store. `headsetBattery` runs `headsetcontrol`, whose udev rules the host installs (`services.udev.packages`)
   - `config/`: Static assets — `ohmyposhv3-v2.json`, `lsdconfig.yaml`, `lsdtheme.yaml`, `omnisharp.json`, `matugen/{kitty,tmux}.conf` templates, `dms-plugins.lock.json`
   - `scripts/`: Everything that lands in `~/Scripts`
 - **nix/nvim.nix**: An old nixvim config that is **not imported by either host**. The live Neovim config is a separate LazyVim repo checked out at `~/.config/nvim` (`github:stefandango/LazyVim-Config`); Nix only installs `neovim-unwrapped`
@@ -40,7 +40,7 @@ Things that are easy to get wrong here. Each has a longer explanation in a comme
 
 - **Run `nixswitch` / `nixup` as the user, never with sudo.** Both refuse to start as root and elevate only the activation step (`modules/scripts/nixswitch`).
 - **DMS owns `~/.config/DankMaterialShell/settings.json`.** Never declare it via `programs.dank-material-shell.settings` — a store symlink makes the Settings UI silently unable to save. `modules/nixos/dms.nix` seeds a writable copy once (`dmsSeedSettings`) and never touches it again. Seed keys must exist in the shell's current `SettingsSpec.js` or they are dropped without warning; re-dump with `dms ipc call settings dump` after tuning. `dank-material-shell` is unpinned, so `nixswitch` snapshots the file first and `dmssettings diff` shows what a new shell dropped.
-- **DMS plugins are runtime state.** `modules/config/dms-plugins.lock.json` pins them; `dmsplugins sync|update` is deliberately a script, not a `home.activation` step, so switching never needs the network. `dmsplugins sync` prunes anything not in the lockfile — which is why our own `nixosUpdates` plugin ships via `environment.etc."xdg/quickshell/dms-plugins/…"` instead.
+- **DMS plugins are runtime state.** `modules/config/dms-plugins.lock.json` pins them; `dmsplugins sync|update` is deliberately a script, not a `home.activation` step, so switching never needs the network. `dmsplugins sync` prunes anything not in the lockfile — which is why our own `nixosUpdates` and `headsetBattery` plugins ship via `environment.etc."xdg/quickshell/dms-plugins/…"` instead.
 - **matugen template outputs must be real files.** Inputs (`~/.config/matugen/config.toml`, `templates/*`) are home-manager symlinks; outputs (`kitty/dank-theme.conf`, `tmux/dank-colors.conf`) must never be declared, or matugen fails silently and you get no colours. The `[config]` section in `config.toml` must exist and stay empty.
 - **Nothing may manage `gtk-3.0/gtk.css` or `gtk-4.0/gtk.css`** — DMS's `gtk.sh` writes both and bails on a home-manager symlink. No `gtk.extraCss`.
 - **No package may ship a D-Bus activation file for `org.freedesktop.Notifications`.** Activation bypasses module imports; whichever daemon wins the name owns every notification. DMS is the daemon.
@@ -221,10 +221,24 @@ silences the expected home-manager-master vs nixos-unstable version skew.
 ## Runtime State Nix Does Not Own
 
 A fresh machine needs these once (details in README → Installation):
-`~/.config/nvim` (git clone), `~/.config/ntfy/credentials`, `dmsplugins sync`,
-DMS **Apply GTK Colors**, `tailscale-up`, `/etc/samba/credentials`, and
-optionally `llama-fetch`. `services.llama-cpp` enables itself only when the
-model file exists, so a `nixswitch` follows the download.
+`~/.config/nvim` (git clone), `~/.config/ntfy/credentials`, the `obsidian` MCP
+server (`claude mcp add --scope user`, below), `dmsplugins sync`, DMS **Apply
+GTK Colors**, `tailscale-up`, `/etc/samba/credentials`, and optionally
+`llama-fetch`. `services.llama-cpp` enables itself only when the model file
+exists, so a `nixswitch` follows the download.
+
+Only `mcp-nixos` is a repo-managed MCP server (project-scoped `.mcp.json`).
+User-scoped servers live in `~/.claude.json`, which Claude Code rewrites
+constantly — it cannot be a store symlink (same trap as DMS's `settings.json`),
+so they are registered by hand and pinned by version:
+
+```bash
+claude mcp add --scope user obsidian -- npx -y @bitbonsai/mcpvault@0.16.0 ~/Vault
+```
+
+`mcpvault` reads the vault straight from disk (no Obsidian plugin, Obsidian
+need not be running); Node comes from `modules/shared/system.nix`. Bump by
+`claude mcp remove obsidian -s user` and re-adding with the new version.
 
 ## Common Workflows
 

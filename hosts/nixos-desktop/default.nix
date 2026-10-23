@@ -229,7 +229,8 @@
     # Audio/Video tools
     alsa-utils
     pavucontrol
-    
+    headsetcontrol  # Audeze Maxwell 2 battery; read by the headsetBattery DMS widget
+
     # Development
     # docker CLI is provided by virtualisation.docker.enable; docker-compose is
     # NOT (the module has no compose option), so it stays here.
@@ -390,6 +391,13 @@
   services.udev.extraRules = ''
     ACTION=="add|change", KERNEL=="nvme[0-9]n[0-9]", ATTR{queue/scheduler}="none"
   '';
+
+  # headsetcontrol talks to the headset over /dev/hidraw*, which is root-only by
+  # default. Its 70-headsets.rules tags each supported dongle (ours: Audeze Maxwell 2,
+  # Xbox dongle 3329:4b28) `uaccess`, so the logged-in user can read
+  # the battery. The kernel exposes no power_supply for this headset, so neither
+  # UPower nor DMS's built-in battery widget can see it.
+  services.udev.packages = [ pkgs.headsetcontrol ];
 
   # Process priority optimization for gaming
   services.ananicy = {

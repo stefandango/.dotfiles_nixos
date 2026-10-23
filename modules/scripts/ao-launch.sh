@@ -29,20 +29,24 @@ AO_DIR="drive_c/PRK/client"
 # as: "Ithaca - <ip>:<port> (IA <n> IP <n>)".
 AO_ARGS=(IA 2642997703 IP 7000 UI)
 
-# MangoHud FPS/frametime overlay, opt-in via AO_MANGOHUD=1. Covers both render
-# paths: it hooks OpenGL via LD_PRELOAD for wine's built-in ddraw, and loads as
-# an implicit Vulkan layer when the launcher's DirectXLayer routes dgVoodoo2
-# through DXVK -- so the same toggle measures either configuration.
+# MangoHud FPS/frametime overlay, opt-in via AO_MANGOHUD=1. With the ao-vk
+# renderer (randy31.dll in the client folder) it loads as an implicit Vulkan
+# layer; on the stock renderer it hooks OpenGL via LD_PRELOAD for wine's
+# built-in ddraw. Per-frame logging for stutter hunts:
+#   MANGOHUD_CONFIG="read_cfg,output_folder=<dir>,autostart_log=1,log_interval=0"
 MANGOHUD_WRAP=()
 [ "${AO_MANGOHUD:-0}" = "1" ] && MANGOHUD_WRAP=(mangohud)
 
 # Layout for 5120x2160 ultrawide:
 #  Workspace 8: Adventurer fullscreen
 #  Workspace 9: Fixer (left) + Bureaucrat (right) side by side
+# No CPU pinning: it used to keep three clients off each other's cores, but the
+# split was wrong (8-11 are the SMT siblings of 0-3) and a single client gains
+# nothing from being held to 4 of 16 threads.
 INSTANCES=(
-    "Adventurer:ao-adventurer:0-3:5120 2160:0 0:8"
-    "Fixer:ao-fixer:4-7:2560 2160:0 0:9"
-    "Bureaucrat:ao-bureaucrat:8-11:2560 2160:2560 0:9"
+    "Adventurer:ao-adventurer:5120 2160:0 0:8"
+    "Fixer:ao-fixer:2560 2160:0 0:9"
+    "Bureaucrat:ao-bureaucrat:2560 2160:2560 0:9"
 )
 
 # Track addresses of windows we've already claimed
@@ -103,13 +107,54 @@ find_new_window() {
     return 1
 }
 
+# The client aborts with "Failed to set focus to the game window." because it
+# does `if (SetFocus(hwnd) == NULL) throw` (0x403ea6) -- but SetFocus returns
+# the *previous* focus window, which is NULL whenever nothing had focus yet.
+# Since Wine 11.18 that is every start. Turn the jne at file offset 0x32B1 into
+# a jmp so the check is skipped. Re-applied on every launch because a PRK
+# client patch replaces the exe; the bytes around it are verified first so a
+# different build is left alone. The first patch keeps AnarchyOnline.exe.orig.
+# Cloned prefixes hardlink the exe, so patching one patches them all.
+FOCUS_PATCH_OFFSET=$((0x32A6))
+FOCUS_PATCH_ORIG="ff 15 98 b3 40 00 89 46 0c 85 c0 75 13 68 84 ba 40 00"
+FOCUS_PATCH_DONE="ff 15 98 b3 40 00 89 46 0c 85 c0 eb 13 68 84 ba 40 00"
+
+ensure_focus_patch() {
+    local exe="$1/AnarchyOnline.exe"
+    local bytes
+    bytes=$(od -An -tx1 -j "$FOCUS_PATCH_OFFSET" -N 18 "$exe" | tr -d ' \n')
+
+    case "$bytes" in
+        "${FOCUS_PATCH_DONE// /}") return 0 ;;
+        "${FOCUS_PATCH_ORIG// /}")
+            [ -e "$exe.orig" ] || cp -p "$exe" "$exe.orig"
+            printf '\xeb' | dd of="$exe" bs=1 seek=$((0x32B1)) conv=notrunc status=none
+            echo "  Patched the focus check in $exe (original: $exe.orig)"
+            ;;
+        *)
+            echo "  Warning: unknown AnarchyOnline.exe build, focus check not patched"
+            echo "  (expect 'Failed to set focus to the game window.' on startup)"
+            ;;
+    esac
+}
+
+# PIDs of AnarchyOnline.exe clients running in the given prefix. Wine shows the
+# client as "C:\PRK\client\AnarchyOnline.exe ...", so match that and check the
+# prefix in its environment; the start.exe wrapper does not match.
+client_pids() {
+    local prefix="$1" pid
+    for pid in $(pgrep -f '^C:.PRK.client.AnarchyOnline\.exe'); do
+        tr '\0' '\n' < "/proc/$pid/environ" 2>/dev/null \
+            | grep -qx "WINEPREFIX=$prefix" && echo "$pid"
+    done
+}
+
 launch_instance() {
     local name="$1"
     local prefix="$2"
-    local cores="$3"
-    local size="$4"
-    local pos="$5"
-    local ws="$6"
+    local size="$3"
+    local pos="$4"
+    local ws="$5"
 
     if [ ! -d "$prefix" ]; then
         echo "ERROR: Prefix not found: $prefix"
@@ -125,8 +170,19 @@ launch_instance() {
         return 1
     fi
 
-    echo "Launching: $name (cores $cores)"
-    (cd "$ao_dir" && WINEPREFIX="$prefix" WINEDEBUG=-all AMD_DEBUG=nodma taskset -c "$cores" "${MANGOHUD_WRAP[@]}" wine "./AnarchyOnline.exe" "${AO_ARGS[@]}") &
+    local running
+    running=$(client_pids "$prefix")
+    if [ -n "$running" ]; then
+        echo "ERROR: $name is already running in $prefix (pid ${running//$'\n'/ })"
+        echo "A client that failed to start can sit hidden on its workspace using a"
+        echo "full core. Stop it with 'ao-launch.sh stop', then launch again."
+        return 1
+    fi
+
+    ensure_focus_patch "$ao_dir"
+
+    echo "Launching: $name"
+    (cd "$ao_dir" && WINEPREFIX="$prefix" WINEDEBUG=-all "${MANGOHUD_WRAP[@]}" wine "./AnarchyOnline.exe" "${AO_ARGS[@]}") &
 
     # Wait for the new window to appear
     echo "  Waiting for window..."
@@ -172,6 +228,8 @@ fi
 # directly (what everything below does) skips patching entirely, so run this
 # after a PRK client update, and to reach settings the client itself does not
 # expose -- notably DirectXLayer, which selects the bundled dgVoodoo2 builds.
+# Keep it on aoia-resfix with ao-vk: "Default" drops dgVoodoo's DDraw.dll into
+# the client folder, and ao-vk wants wine's own DirectDraw.
 # Defaults to instance 1's prefix; each prefix patches independently.
 if [ "$1" = "launcher" ]; then
     idx=$(( ${2:-1} - 1 ))
@@ -197,8 +255,8 @@ fi
 # Launch specific instance
 if [[ "$1" =~ ^[1-3]$ ]]; then
     idx=$(( $1 - 1 ))
-    IFS=':' read -r name dir cores size pos ws <<< "${INSTANCES[$idx]}"
-    launch_instance "$name" "$AO_BASE/$dir" "$cores" "$size" "$pos" "$ws"
+    IFS=':' read -r name dir size pos ws <<< "${INSTANCES[$idx]}"
+    launch_instance "$name" "$AO_BASE/$dir" "$size" "$pos" "$ws"
     exit 0
 fi
 
@@ -206,8 +264,8 @@ fi
 echo "=== Anarchy Online Triple Launcher ==="
 echo ""
 for inst in "${INSTANCES[@]}"; do
-    IFS=':' read -r name dir cores size pos ws <<< "$inst"
-    launch_instance "$name" "$AO_BASE/$dir" "$cores" "$size" "$pos" "$ws"
+    IFS=':' read -r name dir size pos ws <<< "$inst"
+    launch_instance "$name" "$AO_BASE/$dir" "$size" "$pos" "$ws"
 done
 echo ""
 echo "All instances launched!"
