@@ -19,7 +19,6 @@ location below.
 import argparse
 import colorsys
 import datetime as dt
-import json
 import math
 import os
 import shutil
@@ -50,9 +49,9 @@ KEEP_DAYS = 7
 # matugenSmartMode: DMS picks light or dark from the image, so wallgen draws
 # the natural light. Any other schedule (Manual, Schedule, Location) means DMS
 # decides, and wallgen tones the picture to match the mode DMS is in.
-DMS_SETTINGS = Path.home() / ".config/DankMaterialShell/settings.json"
-DMS_SESSION = Path.home() / ".local/state/DankMaterialShell/session.json"
+# `wallgen mode` switches between the three in one step.
 TONES = ("natural", "dark", "light")
+MODES = {"auto": "natural", "dark": "dark", "light": "light"}
 
 # Sun elevation (degrees) where night ends / day begins. Below -6 is past
 # civil twilight; above 6 the light has lost its warm low-sun colour. A
@@ -226,14 +225,12 @@ def apply_tone(pal, phase, recipe):
 
 def dms_tone():
     """'natural' while DMS takes its mode from the wallpaper, otherwise the
-    mode DMS is in right now. Unreadable state falls back to natural."""
-    try:
-        if json.loads(DMS_SETTINGS.read_text()).get("matugenSmartMode"):
-            return "natural"
-        session = json.loads(DMS_SESSION.read_text())
-        return "light" if session.get("isLightMode") else "dark"
-    except (OSError, ValueError):
+    mode DMS is in right now. Asked over IPC rather than read from DMS's
+    files, which lag a mode switch; no answer (DMS down) means natural."""
+    if dms("settings", "get", "matugenSmartMode") != "false":
         return "natural"
+    mode = dms("theme", "getMode")
+    return mode if mode in ("dark", "light") else "natural"
 
 
 def palette(phase, recipe):
@@ -1406,7 +1403,7 @@ def gaming():
     return "is active" in r.stdout
 
 
-def current_slot(now):
+def current_slot(now, tone=None):
     """(phase, day, tone, slot). The tone is part of the slot, so switching
     DMS between light and dark re-renders on the next timer run."""
     phase = phase_at(now)
@@ -1414,7 +1411,7 @@ def current_slot(now):
     # A night that started yesterday evening keeps yesterday's landscape.
     if phase == "night" and now.hour < 12:
         day -= dt.timedelta(days=1)
-    tone = dms_tone()
+    tone = tone or dms_tone()
     return phase, day, tone, f"{day.isoformat()}-{phase}-{tone}"
 
 
@@ -1455,6 +1452,41 @@ def cmd_prev():
         return 1
     print(target)
     return 0
+
+
+def cmd_mode(value):
+    """Set DMS's light/dark behaviour; returns the tone to render with.
+
+    auto  -> Theme schedule "Wallpaper" (DMS follows the image)
+    dark  -> Manual, dark       light -> Manual, light
+    cycle -> auto -> dark -> light -> auto
+    No value prints the current mode and returns None.
+    """
+    tone = dms_tone()
+    current = {v: k for k, v in MODES.items()}[tone]
+    if value is None:
+        print(current)
+        return None
+    if value == "cycle":
+        order = list(MODES)
+        value = order[(order.index(current) + 1) % len(order)]
+    if value not in MODES:
+        print(f"mode: expected one of {', '.join(MODES)}, cycle",
+              file=sys.stderr)
+        return None
+    if value == "auto":
+        ok = dms("settings", "set", "matugenSmartMode", "true")
+    else:
+        # theme dark/light also switch Wallpaper mode off (setLightMode).
+        ok = dms("theme", value)
+    if ok is None:
+        print("DMS not reachable", file=sys.stderr)
+        return None
+    detail = {"auto": "Light or dark follows the wallpaper",
+              "dark": "Forced dark", "light": "Forced light"}[value]
+    dms("toast", "infoWith", f"Theme: {value}", detail, "", "wallgen-mode")
+    print(value)
+    return MODES[value]
 
 
 def prune():
@@ -1501,10 +1533,14 @@ def main():
     ap = argparse.ArgumentParser(
         prog="wallgen", description="Generate a calm wallpaper for the "
         "current light outside and hand it to DMS.")
-    ap.add_argument("command", nargs="?", choices=["keep", "schedule", "prev"],
+    ap.add_argument("command", nargs="?",
+                    choices=["keep", "schedule", "prev", "mode"],
                     help="keep: copy the current generated wallpaper into "
                     f"{KEEP_DIR}; schedule: today's phase changes; prev: go "
-                    "back to the previously applied image")
+                    "back to the previously applied image; mode "
+                    "[auto|dark|light|cycle]: set DMS light/dark and "
+                    "re-render (no value: print the current mode)")
+    ap.add_argument("value", nargs="?", help=argparse.SUPPRESS)
     ap.add_argument("--phase", choices=PHASES)
     ap.add_argument("--style", choices=list(STYLES))
     ap.add_argument("--scene", choices=list(SCENES))
@@ -1539,12 +1575,17 @@ def main():
         return cmd_schedule()
     if a.command == "prev":
         return cmd_prev()
+    mode_tone = None
+    if a.command == "mode":
+        mode_tone = cmd_mode(a.value)
+        if mode_tone is None:
+            return 0 if a.value is None else 1
 
     now = dt.datetime.now().astimezone()
     # The slot is the real phase outside, whatever was asked for. The timer
     # compares slots, not file names, so anything applied by hand -- another
     # seed, style or phase -- stays up until the light actually changes.
-    real_phase, real_day, real_tone, slot = current_slot(now)
+    real_phase, real_day, real_tone, slot = current_slot(now, mode_tone)
     if a.auto and STATE.is_file() and STATE.read_text().strip() == slot:
         return 0
     if a.auto and gaming():

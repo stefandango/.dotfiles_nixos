@@ -396,6 +396,7 @@ nm-applet, openrazer-daemon and Insync.
 | `SUPER+Shift+W` | Wallpaper carousel (a plugin — dead until `dmsplugins sync` has run) |
 | `SUPER+Alt+W` | `wallgen --random`: a new generated wallpaper (takes a few seconds) |
 | `SUPER+Alt+Shift+W` | `wallgen prev`: back to the previous generated wallpaper |
+| `SUPER+Alt+D` | `wallgen mode cycle`: theme auto (follows the wallpaper) → dark → light, with a toast |
 | `SUPER+U` | NixOS updates popout (only while the pill is on the bar, i.e. when behind) |
 | `SUPER+Shift+plus` | DMS keybind reference, generated from the live binds |
 | `SUPER+Shift+R` | Reload Hyprland config |
@@ -483,6 +484,16 @@ wallgen tones the picture to match: in dark mode a daytime image is blended
 toward that day's night palette (blue hour, not black), in light mode a night
 image toward its day palette. Switching modes re-renders on the next timer
 run; `--tone dark|light|natural` overrides it for one render.
+
+`wallgen mode` does the DMS side and the re-render in one step, so you never
+need the Settings dropdown:
+
+```bash
+wallgen mode           # print the current mode: auto, dark or light
+wallgen mode dark      # DMS Manual + dark, re-render now (light likewise)
+wallgen mode auto      # back to Theme schedule "Wallpaper", re-render now
+wallgen mode cycle     # auto -> dark -> light -> auto (what SUPER+Alt+D runs)
+```
 
 A few dates get something extra: snowfall on about half of Advent and always
 on 24-26 December, fireworks on New Year's Eve, bonfires on the hills for

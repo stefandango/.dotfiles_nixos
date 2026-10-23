@@ -145,7 +145,7 @@ the matching workspace/session. `label_for()` in `wt` and
 dmsplugins [sync|update|list]      # Sync plugins against modules/config/dms-plugins.lock.json
 dmssettings snapshot|diff|list|restore   # Keep settings.json diffable across shell updates
 dms ipc call settings dump         # Current settings, for folding back into dms.nix's seed
-wallgen [--random] [--phase P] [--style S] [--tone T] [--event E] [--scene S] [--season S] [--seed N] [--no-apply] | prev | schedule | keep   # Generated 5120x2160 wallpaper for the light outside
+wallgen [--random] [--phase P] [--style S] [--tone T] [--event E] [--scene S] [--season S] [--seed N] [--no-apply] | mode [auto|dark|light|cycle] | prev | schedule | keep   # Generated 5120x2160 wallpaper for the light outside
 ```
 
 ### Local LLM

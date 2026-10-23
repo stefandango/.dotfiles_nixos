@@ -41,6 +41,9 @@ let
 		-- not instant.
 		hl.bind("SUPER + ALT + W", hl.dsp.exec_cmd("wallgen --random"))
 		hl.bind("SUPER + ALT + SHIFT + W", hl.dsp.exec_cmd("wallgen prev"))
+		-- Cycles DMS light/dark: auto (follows the wallpaper) -> dark -> light,
+		-- with a toast naming the new mode, then re-renders the wallpaper.
+		hl.bind("SUPER + ALT + D", hl.dsp.exec_cmd("wallgen mode cycle"))
 		-- Opens the nixosUpdates popout without having to aim at the pill. The id
 		-- resolves through BarWidgetService, so this only works while the widget
 		-- is actually on the bar -- and the pill hides itself when up to date,
