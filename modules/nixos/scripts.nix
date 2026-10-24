@@ -6,6 +6,12 @@ in
 	home-manager.users.${vars.user} = {
 		home = {
 
+			# focus-mode-daemon.sh reads Hyprland's event socket through socat.
+			# It used to arrive with the waybar module and vanished when that was
+			# removed, after which the daemon died on start and focus mode froze
+			# whatever gaps the toggle applied.
+			packages = [ pkgs.socat ];
+
 			file = {
 			"Scripts/viper_battery.py" = {
 				source = ../scripts/viper_battery.py;

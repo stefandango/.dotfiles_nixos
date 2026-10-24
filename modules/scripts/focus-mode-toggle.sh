@@ -10,15 +10,16 @@ PID_FILE="/tmp/hypr-focus-mode-daemon.pid"
 if [ -f "$STATE_FILE" ]; then
 	# Disable focus mode
 	rm -f "$STATE_FILE"
-	if [ -f "$PID_FILE" ]; then
-		kill "$(cat "$PID_FILE")" 2>/dev/null
-		rm -f "$PID_FILE"
-	fi
+	# Killing the PID alone leaves the daemon's socat | while-read pipeline
+	# running, and it piles up a duplicate on every off/on cycle.
+	pkill -f 'Scripts/focus-mode-daemon.sh'
+	rm -f "$PID_FILE"
 	hypr_set_gaps 20 20
 	notify-send -u low "Focus Mode" "Disabled"
 else
 	# Enable focus mode
 	touch "$STATE_FILE"
+	pkill -f 'Scripts/focus-mode-daemon.sh'
 	~/Scripts/focus-mode-daemon.sh &
 	echo $! > "$PID_FILE"
 	# Apply gaps immediately for current workspace

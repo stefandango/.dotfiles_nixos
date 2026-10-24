@@ -15,6 +15,12 @@
       background_opacity = lib.mkForce "0.95";
       font_family = "MonoLisa Nerd Font SemiBold";
       font_size = if pkgs.stdenv.isDarwin then "16.0" else "14.0";
+      # On by default, and it also restores the *maximised* state of the last
+      # window closed (~/.cache/kitty/main.json). Under Hyprland one kitty
+      # closed while maximised made every later one open maximised, and the
+      # next tiled window inherited it and covered the screen. The compositor
+      # owns window size on Linux; macOS keeps the default.
+      remember_window_size = if pkgs.stdenv.isDarwin then "yes" else "no";
 
       # macOS: make the LEFT Option key send Alt/Meta (so Alt+g, Alt+c/v/x
       # bindings reach zsh as ^[…). The RIGHT Option still types special
