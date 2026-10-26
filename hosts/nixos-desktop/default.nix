@@ -33,11 +33,11 @@
     };
     kernelPackages = pkgs.linuxPackages_latest;
     initrd.kernelModules = [ "amdgpu" ];
-    # systemd-based initrd: required for plymouth to survive the simpledrm →
-    # amdgpu DRM handover. Without this, plymouth renders to the EFI framebuffer,
-    # then amdgpu seizes the display at ~4s and the splash goes invisible on the
-    # ultrawide before the monitor re-syncs.
-    initrd.systemd.enable = true;
+    # The initrd is systemd-based, which plymouth needs to survive the simpledrm →
+    # amdgpu DRM handover (otherwise it renders to the EFI framebuffer, amdgpu
+    # seizes the display at ~4s and the splash goes invisible on the ultrawide).
+    # nixpkgs removed the scripted initrd in 2026-10, so systemd is the only
+    # option and `initrd.systemd.enable` is now an assertion error -- don't set it.
     # Graphical boot splash — hides raw systemd/kernel output behind a clean
     # NixOS logo so transient early-boot messages don't flash on the TTY.
     plymouth = {
@@ -113,46 +113,6 @@
       enable = true;
       batteryNotifier.enable = true;
       users = [ vars.user ];
-      # TEMP[openrazer-module-cer]: install the driver through modules_install
-      # TEMP-CHECK: nix_input_missing nixpkgs 'cp -v driver/\*\.ko'
-      # nixpkgs now signs modules with kmodigest during modules_install and
-      # aggregateModules cats a <module>.ko.cer for every external module. The
-      # driver.nix in our lock still `cp`s the .ko files by hand, so no .cer
-      # exists and linux-*-modules dies with "cat: kernel/drivers/hid/
-      # razerkbd.ko.cer: No such file or directory" (exit 123). Same change as
-      # nixpkgs 0923331843f0; drop this once that reaches nixos-unstable.
-      packages.kernel =
-        let kernel = config.boot.kernelPackages.kernel;
-        in config.boot.kernelPackages.openrazer.overrideAttrs (old: {
-          makeFlags = old.makeFlags ++ [
-            "INSTALL_MOD_PATH=${placeholder "out"}"
-            "INSTALL_MOD_DIR=kernel/drivers/hid"
-            "INSTALL_MOD_STRIP=1"
-            "DEPMOD=true"
-          ];
-          installTargets = [ "modules_install" ];
-          installFlags = [
-            "-C"
-            "${kernel.dev}/lib/modules/${kernel.modDirVersion}/build"
-            "M=$(PWD)/driver"
-          ];
-          # Empty -> stdenv's default installPhase (make $installTargets).
-          installPhase = "";
-          postInstall = ''
-            RAZER_MOUNT_OUT="$out/bin/razer_mount"
-            RAZER_RULES_OUT="$out/etc/udev/rules.d/99-razer.rules"
-            install -m 644 -v -D install_files/udev/99-razer.rules $RAZER_RULES_OUT
-            install -m 755 -v -D install_files/udev/razer_mount $RAZER_MOUNT_OUT
-            substituteInPlace $RAZER_RULES_OUT \
-              --replace razer_mount $RAZER_MOUNT_OUT \
-              --replace plugdev openrazer
-            substituteInPlace $RAZER_MOUNT_OUT \
-              --replace /usr/bin/logger ${pkgs.util-linux}/bin/logger \
-              --replace chgrp ${pkgs.coreutils}/bin/chgrp \
-              --replace "PATH='/sbin:/bin:/usr/sbin:/usr/bin'" "" \
-              --replace plugdev openrazer
-          '';
-        });
     };
     # Required for Bluetooth controller firmware (otherwise hci0 FW download
     # fails with -19 on boot). Also enables AMD microcode updates via the
@@ -245,16 +205,23 @@
   # NixOS-specific packages
   environment.systemPackages = with pkgs; [
     inputs.nix-claude-code.packages.${pkgs.stdenv.hostPlatform.system}.default
-    # TEMP[mcp-nixos-fastmcp]: build mcp-nixos ourselves instead of its flake package
-    # TEMP-CHECK: nix_input_missing mcp-nixos fastmcp3
-    # Build mcp-nixos against our own nixpkgs (native fastmcp 3.3.1) instead of
-    # inputs.mcp-nixos.packages.default, which force-pins fastmcp to 3.2.4 via its
-    # `fastmcp3` overlay. That pin now breaks: nixos-unstable split fastmcp into
-    # fastmcp + fastmcp-slim (3.3.1, monorepo `fastmcp_slim/` subdir), and the
-    # 3.2.4 src has no such subdir → "chmod: cannot access 'source/fastmcp_slim'".
-    # mkMcpNixos + pythonRelaxDeps builds cleanly on native fastmcp (needs >=3.2.0).
-    # Revert to packages.default once upstream drops the fastmcp3 overlay.
-    (inputs.mcp-nixos.lib.mkMcpNixos { inherit pkgs; })  # MCP server (used by .mcp.json)
+    # TEMP[mcp-nixos-fastmcp]: break an infinite recursion in mcp-nixos's fastmcp4 extension
+    # TEMP-CHECK: nix_input_missing mcp-nixos 'pair keepMcp'
+    # nixpkgs moved to mcp 2.x (and marks its own fastmcp 3.x broken against it),
+    # so mcp-nixos 3.x scopes in a `fastmcp4` extension that vendors fastmcp 4.
+    # That extension decides whether to keep `mcp` by reading `mcp-types.version`
+    # from pyPrev -- but nixpkgs' mcp-types does `inherit (mcp) version src` from
+    # the *final* set, which is the extension's own `mcp` → infinite recursion.
+    # Rebinding mcp-types to the previous layer's mcp breaks the cycle; the
+    # extension then keeps nixpkgs' mcp/mcp-types 2.2.0 and vendors only fastmcp.
+    # Drop the python3Packages override once upstream stops pairing them that way
+    # (they already special-case fastmcp-slim for the same reason).
+    (inputs.mcp-nixos.lib.mkMcpNixos {
+      inherit pkgs;
+      python3Packages = pkgs.python3Packages.overrideScope (final: prev: {
+        mcp-types = prev.mcp-types.override { mcp = prev.mcp; };
+      });
+    })  # MCP server (used by .mcp.json)
     # herdr (agent multiplexer) from nixpkgs, not the upstream flake: nixpkgs
     # carries 0.9.1, and the plugin API our review-tab plugin needs
     # (modules/shared/herdr.nix) only exists from 0.7.0 on — the old

@@ -78,7 +78,7 @@ Omit `TEMP-CHECK` only when nothing can be tested; the entry is then listed for
 manual review on every run. `nixup` runs the report **before** the build, because
 an overlay appending a patch nixpkgs has since adopted fails the build with
 "Reversed (or previously applied) patch" rather than going quietly obsolete.
-Current entries: `hunk-darwin-nixpkgs`, `insync-nixpkgs-pin` (flake.nix), `mcp-nixos-fastmcp`, `openrazer-module-cer` (host).
+Current entries: `hunk-darwin-nixpkgs`, `insync-nixpkgs-pin` (flake.nix), `mcp-nixos-fastmcp` (host).
 
 ## Common Commands
 
