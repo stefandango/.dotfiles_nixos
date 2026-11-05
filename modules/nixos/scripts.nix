@@ -50,6 +50,12 @@ in
 				recursive = true;
 				executable = true;
 			};
+			# matugen post_hook (modules/nixos/matugen.nix): DMS mode -> running Neovims
+			"Scripts/nvim-sync-background" = {
+				source = ../scripts/nvim-sync-background;
+				recursive = true;
+				executable = true;
+			};
 			"Scripts/focus-mode-daemon.sh" = {
 				source = ../scripts/focus-mode-daemon.sh;
 				recursive = true;

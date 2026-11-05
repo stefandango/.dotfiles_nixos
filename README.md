@@ -377,6 +377,8 @@ nm-applet, openrazer-daemon and Insync.
 | `SUPER+Q`, then `Q` or `Return` | Close window (armed for 5 s, `Esc` cancels; a DMS toast shows the state) |
 | `SUPER+F` / `SUPER+Shift+Space` | Fullscreen / toggle floating |
 | `SUPER+P` / `SUPER+J` | Pseudotile / toggle split (dwindle) |
+| `SUPER+Shift+Return` | Swap focused window into the centre column (master) |
+| `SUPER+Shift+L` | Toggle master (centred, default) / dwindle for this session |
 | `SUPER+R` | Window submap: `1-5`/`e` split-ratio presets, `s` toggle split, `r` rotate, arrows resize ±100 px (`Shift` ±400), `Esc` exit |
 | `SUPER+C` / `SUPER+Shift+P` | Centre / pin floating window |
 | `SUPER+G`, `SUPER+Tab` | Toggle window group (tabs), cycle within it (`Shift` reverses; `SUPER+Shift+G` locks) |

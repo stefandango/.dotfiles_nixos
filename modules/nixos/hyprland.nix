@@ -328,6 +328,12 @@ in
 			hl.config({ general = { col = { active_border = gradient } } })
 		end
 
+		-- The layout in force, tracked here so the toggle and the `window` submap's
+		-- ratio presets know which one they are driving. A config reload re-runs
+		-- this file, which resets both the variable and general.layout together.
+		local MASTER_MFACT = 0.5
+		local currentLayout = "master"
+
 		hl.config({
 			input = {
 				kb_layout  = "dk",
@@ -355,7 +361,10 @@ in
 					inactive_border = BORDER_INACTIVE,
 				},
 
-				layout = "dwindle",
+				-- master, centred: on the 5120-wide panel dwindle's halving put the
+				-- first (main) window left of centre and the split line straight
+				-- ahead. SUPER+Shift+L flips back to dwindle for the session.
+				layout = "master",
 
 				-- Please see https://wiki.hypr.land/Configuring/Advanced-and-Cool/Tearing/ before you turn this on
 				allow_tearing = false,
@@ -415,6 +424,18 @@ in
 			dwindle = {
 				-- pseudotile option removed in Hyprland 0.55 — pseudotiling is now per-window via the `pseudo` dispatcher (bound to mainMod + P below)
 				preserve_split = true, -- you probably want this
+			},
+
+			-- Main window in the middle half (~2560 px), the rest stacked in side
+			-- columns. slave_count_for_center_master = 0 keeps it centred even with
+			-- a single other window (one side stays empty); the default of 2 falls
+			-- back to master-left, which is the off-centre layout this replaces.
+			-- New windows join the sides so the main one never moves.
+			master = {
+				orientation                   = "center",
+				mfact                         = MASTER_MFACT,
+				slave_count_for_center_master = 0,
+				new_status                    = "slave",
 			},
 
 			misc = {
@@ -509,6 +530,16 @@ ${killPrompt}
 ${shellBinds}
 		hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())       -- dwindle
 		hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit")) -- dwindle (0.54+: via layoutmsg)
+		-- master: put the focused window in the centre column (and back)
+		hl.bind(mainMod .. " + SHIFT + Return", hl.dsp.layout("swapwithmaster"))
+		-- Session-only switch between master (default) and dwindle; reloading
+		-- the config goes back to master. mfact is reset so a submap preset
+		-- does not outlive the round trip.
+		hl.bind(mainMod .. " + SHIFT + L", function()
+			currentLayout = (currentLayout == "master") and "dwindle" or "master"
+			hl.config({ general = { layout = currentLayout }, master = { mfact = MASTER_MFACT } })
+			hl.dispatch(hl.dsp.exec_cmd("notify-send -u low 'Layout' '" .. currentLayout .. "'"))
+		end)
 		hl.bind("SUPER + SHIFT + R", hl.dsp.exec_cmd("${pkgs.hyprland}/bin/hyprctl reload"))
 		hl.bind("SUPER + F", hl.dsp.window.fullscreen())
 		hl.bind("print", hl.dsp.exec_cmd([[${pkgs.grimblast}/bin/grimblast --notify --freeze --wait 1 copysave area ~/Pictures/$(date +%Y-%m-%dT%H%M%S).png]]))
@@ -561,11 +592,18 @@ ${shellBinds}
 			-- is rejected with `failed to parse "exact" as a delta`, so hyprlang's
 			-- `dispatch splitratio exact X` has no direct equivalent. Driving the ratio
 			-- into the clamp floor first and then adding (X - 0.1) lands on exactly X.
+			-- Under master the same keys set mfact: a dwindle ratio r gives the first
+			-- window r/2 of the width, so 1 → 0.333 … 3 → 0.5 … 5 → 0.75. mfact is a
+			-- global option, so this resizes the main column on every workspace.
 			local function ratio(target)
 				return function()
 					setBorder(BORDER_NORMAL)
-					hl.dispatch(hl.dsp.layout("splitratio -10"))
-					hl.dispatch(hl.dsp.layout("splitratio " .. string.format("%.4f", target - RATIO_MIN)))
+					if currentLayout == "master" then
+						hl.config({ master = { mfact = target / 2 } })
+					else
+						hl.dispatch(hl.dsp.layout("splitratio -10"))
+						hl.dispatch(hl.dsp.layout("splitratio " .. string.format("%.4f", target - RATIO_MIN)))
+					end
 					hl.dispatch(hl.dsp.submap("reset"))
 				end
 			end
@@ -627,7 +665,7 @@ ${shellBinds}
 
 		-- Window grouping (tabs)
 		hl.bind("SUPER + G",           hl.dsp.group.toggle())
-		hl.bind("SUPER + SHIFT + G",   hl.dsp.group.lock_active({ action = "toggle" }))
+		hl.bind("SUPER + SHIFT + G",   hl.dsp.group.lock({ action = "toggle" }))
 		hl.bind("SUPER + Tab",         hl.dsp.group.next())
 		hl.bind("SUPER + SHIFT + Tab", hl.dsp.group.prev())
 

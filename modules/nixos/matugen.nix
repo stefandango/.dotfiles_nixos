@@ -33,12 +33,15 @@ in
     xdg.configFile = {
       "matugen/templates/kitty.conf".source = ../config/matugen/kitty.conf;
       "matugen/templates/tmux.conf".source = ../config/matugen/tmux.conf;
+      # Neovim's colourscheme is kanagawa, not matugen colours -- it only needs
+      # the mode, to pick wave or lotus. See modules/scripts/nvim-sync-background.
+      "matugen/templates/nvim-mode".text = "{{mode}}\n";
 
       # The [config] section must be present and must stay EMPTY. matugen's TOML
       # schema requires the field -- without it the merged config fails to parse
       # with "missing field `config`", and because DMS splices this file into its
       # own config, that breaks the shell's ENTIRE theme generation, not just the
-      # two templates below. Empty means it sets nothing, so it cannot shadow
+      # templates below. Empty means it sets nothing, so it cannot shadow
       # DMS's own [config] either.
       "matugen/config.toml".text = ''
         [config]
@@ -51,6 +54,11 @@ in
         input_path = '${templates}/tmux.conf'
         output_path = '${home}/.config/tmux/dank-colors.conf'
         post_hook = 'tmux source-file ${home}/.config/tmux/dank-colors.conf 2>/dev/null || true'
+
+        [templates.danknvim]
+        input_path = '${templates}/nvim-mode'
+        output_path = '${home}/.local/state/nvim/dank-mode'
+        post_hook = '${home}/Scripts/nvim-sync-background'
       '';
     };
   };

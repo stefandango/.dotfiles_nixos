@@ -42,6 +42,11 @@ die() { echo "dmsplugins: $*" >&2; exit 1; }
 # The binary is built inside the plugin's own directory under ~/.config, so
 # nothing here writes outside $HOME. Note this executes code from the plugin
 # repo — the same trust already granted by loading its QML into the shell.
+#
+# CGO_ENABLED=0 makes Go helpers static. A cgo build bakes the current glibc's
+# store path in as the ELF interpreter; once nixclean collects that glibc the
+# binary fails with "no such file or directory", build.sh still calls it up to
+# date (it only compares mtimes), and dankRazer shows "0 devices".
 build_helpers() {
 	local plugindir="${XDG_CONFIG_HOME:-$HOME/.config}/DankMaterialShell/plugins"
 	local script
@@ -49,7 +54,7 @@ build_helpers() {
 	for script in "$plugindir"/*/build.sh; do
 		[[ -f "$script" ]] || continue
 		echo "Building helper for $(basename "$(dirname "$script")")"
-		(cd "$(dirname "$script")" && sh build.sh) || echo "  ...failed, continuing" >&2
+		(cd "$(dirname "$script")" && CGO_ENABLED=0 sh build.sh) || echo "  ...failed, continuing" >&2
 	done
 }
 

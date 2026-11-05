@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Push DMS's light/dark mode into every running Neovim.
+#
+# matugen renders the mode ("light" or "dark") into ~/.local/state/nvim/dank-mode
+# on every theme change and then runs this as the template's post_hook (see
+# modules/nixos/matugen.nix). Each Neovim listens on $XDG_RUNTIME_DIR/nvim.<pid>.0;
+# setting 'background' there fires the OptionSet autocmd in the LazyVim config's
+# kanagawa.lua, which re-applies kanagawa as wave or lotus. New instances read
+# the same file at startup.
+
+mode=$(cat "${XDG_STATE_HOME:-$HOME/.local/state}/nvim/dank-mode" 2>/dev/null)
+case "$mode" in
+	light|dark) ;;
+	*) exit 0 ;;
+esac
+
+for sock in "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"/nvim.*.0; do
+	[ -S "$sock" ] || continue
+	# A stale socket from a crashed instance would hang the hook without the timeout.
+	timeout 2 nvim --server "$sock" --remote-expr "execute('set background=$mode')" >/dev/null 2>&1 || true
+done
