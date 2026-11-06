@@ -94,6 +94,7 @@
     onActivation.cleanup = "none";
     onActivation.extraFlags = [ "--cleanup" ];
     onActivation.upgrade = true;
+    onActivation.autoUpdate = true;
     caskArgs.appdir = "/Applications";
     caskArgs.no_quarantine = true;
     global.brewfile = true;
@@ -113,7 +114,7 @@
       "zen"
       "font-monaspice-nerd-font"
       "font-noto-sans-symbols-2"
-      "tailscale-app"
+      { name = "tailscale-app"; greedy = true; }
     ];
     brews = [ "uv" "herdr" ];
   };
