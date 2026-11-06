@@ -87,12 +87,10 @@
   # Homebrew integration
   homebrew = {
     enable = true;
-    # Homebrew 5.0.14 removed `brew bundle`'s `--force-cleanup` flag that
-    # nix-darwin still emits for cleanup = "uninstall" (breaks activation).
-    # Use cleanup = "none" + the new `--cleanup` flag to keep uninstalling
-    # packages that are no longer in the generated Brewfile.
-    onActivation.cleanup = "none";
-    onActivation.extraFlags = [ "--cleanup" ];
+    # Uninstalls packages that are no longer in the generated Brewfile.
+    # nix-darwin emits `--force-cleanup` for this; Homebrew 7.0.12 accepts that
+    # flag and rejects `--cleanup` as disabled.
+    onActivation.cleanup = "uninstall";
     onActivation.upgrade = true;
     onActivation.autoUpdate = true;
     caskArgs.appdir = "/Applications";
