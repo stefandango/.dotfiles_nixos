@@ -8,5 +8,6 @@
     ./firefox.nix
     ./syncthing.nix
     ./herdr.nix
+    ./pi.nix
   ];
 }

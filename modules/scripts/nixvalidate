@@ -13,12 +13,22 @@ fi
 
 echo "✅ Found flake.nix"
 
-# Check syntax
-echo -n "🔧 Checking flake syntax... "
-if nix flake check ~/.dotfiles --no-build 2>/dev/null; then
-    echo "✅ Syntax OK"
+# Check flake metadata
+echo -n "🔧 Checking flake metadata... "
+if nix flake metadata ~/.dotfiles >/dev/null 2>&1; then
+    echo "✅ Metadata OK"
 else
-    echo "❌ Syntax errors found"
+    echo "❌ Metadata errors found"
+    echo "Run 'nix flake metadata ~/.dotfiles' for details"
+    exit 1
+fi
+
+# Check flake structure
+echo -n "🔧 Checking flake structure... "
+if nix flake check ~/.dotfiles --no-build >/dev/null 2>&1; then
+    echo "✅ Structure OK"
+else
+    echo "❌ Structure errors found"
     echo "Run 'nix flake check ~/.dotfiles' for details"
     exit 1
 fi

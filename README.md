@@ -81,6 +81,11 @@ git clone git@github.com:stefandango/LazyVim-Config.git ~/.config/nvim
 # ~/.claude.json is rewritten by Claude Code and cannot be Nix-managed; version is
 # pinned on purpose — remove and re-add to bump. Only mcp-nixos lives in the repo (.mcp.json).
 claude mcp add --scope user obsidian -- npx -y @bitbonsai/mcpvault@0.16.0 ~/Vault
+
+# pi: shared instructions and skills come from ai-kit, auth and MCP are not in Nix
+git clone <ai-kit remote> ~/Dev/ai-kit   # if not already there
+pi                                       # then /login → Anthropic (Claude subscription)
+# copy ~/.pi/agent/mcp.json from the other machine (holds API keys) — see "pi" below
 ```
 
 **NixOS**
@@ -565,6 +570,47 @@ The OpenAI-compatible endpoint is `http://127.0.0.1:8080/v1`. On NixOS
 itself only when the model file exists under `/var/lib/llama-cpp/models`, so
 `nixswitch` once after the download. On macOS the `llama-cpp` package (Metal)
 is launched by the script from `~/Models`.
+
+### pi (AI coding agent)
+
+`modules/shared/pi.nix` sets pi up to behave like Claude Code:
+
+| Claude Code | pi |
+| --- | --- |
+| `~/.claude/CLAUDE.md` | `~/.pi/agent/CLAUDE.md` → same ai-kit file; repo `CLAUDE.md` files load as usual |
+| Opus, thinking on | `anthropic/claude-opus-5-5`, thinking `high` |
+| ai-kit skills / `/hunk` | `/skill:agent-run-prompts`, `/skill:decision-records`, `/hunk` |
+| git `deny`/`ask` permissions | `git-gate.ts` — push refused, history-writing git commands ask first |
+| plan mode | `/plan` or Ctrl+Alt+P (Shift+Tab cycles thinking level instead) |
+| task list | `todo` tool, `/todos` |
+| Agent tool | `pi-subagents`: scout, worker, reviewer, oracle, researcher, delegate; `/council` |
+| WebSearch / WebFetch | `pi-web-access`: `web_search`, URL/PDF fetch, GitHub clone |
+| AskUserQuestion | `questionnaire` tool |
+| other permission prompts | `permission-gate.ts` (rm -rf, sudo, chmod 777 ask); `protected-paths.ts` (.env*, .git/, node_modules/ refused) |
+| statusline | `pi-powerline-footer`; `triggers.ts` adds a notice and a footer tally for skill loads and MCP calls |
+| notifications | `notify.ts` (kitty OSC 99) |
+
+Extensions arrive three ways, all from `pi.nix`:
+
+- **pi's own examples**: linked from the package in the store, so they follow pi updates.
+- **Dependency-free third-party** (powerline): `fetchzip` of the npm tarball, hash-pinned.
+- **Packages with npm dependencies** (web-access, subagents): exact versions in
+  the `packages` key of `managedSettings`; pi installs them itself. Nix owns that
+  list — a hand `pi install` is undone by the next switch, so add packages there.
+  To try one without installing: `pi -e npm:<name>`.
+
+`settings.json` stays writable — pi writes to it — and the `piSettings`
+activation step only merges the keys `pi.nix` declares.
+
+Not in Nix, set up once per machine:
+
+- **Auth**: `pi` → `/login` → Anthropic. If a refresh fails with `invalid_grant`, `/login` again.
+- **MCP**: `~/.pi/agent/mcp.json` (mode 600, contains keys). Format is
+  `{"mcpServers": {...}}` with `"exposure": "direct"` for tools you want visible
+  up front — pi does not import Claude Code's config. `mcp-nixos` only exists
+  on NixOS, so add the `nixos` server there only.
+- **Do not** install `pi-mcp-adapter`: an extension that registers `/mcp`
+  replaces pi's built-in MCP and `mcp.json` stops being read.
 
 ### Package Management
 

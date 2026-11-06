@@ -14,7 +14,7 @@ This is a cross-platform Nix configuration repository supporting both NixOS (Lin
   - `nixos-desktop/`: NixOS host (`stefan`) — boot/plymouth (GRUB `configurationLimit = 4`, `/boot` is 511 MB), AMD RX 9070 XT, PipeWire, Steam/GameMode, polkit rules, CIFS automount, plus `hardware-configuration.nix`. Its comments are the record of the hardware incidents (DP 2.1 black screen, Dual Mode, CoreCtrl removal)
 - **home/**: Cross-platform home-manager entry point (`home/default.nix`) consumed by both host outputs — XDG paths, MangoHud config, the `llama`/`llama-fetch` scripts
 - **modules/**: Reusable Nix modules organized by functionality
-  - `shared/`: Cross-platform home-manager modules — `git.nix` (+ hunk as pager/difftool), `zsh.nix` (zsh, tmux, and registration of every cross-platform script), `kitty.nix`, `firefox.nix` (Linux only — Homebrew Firefox on macOS), `syncthing.nix`, `herdr.nix` — and the system-level `system.nix`
+  - `shared/`: Cross-platform home-manager modules — `git.nix` (+ hunk as pager/difftool), `zsh.nix` (zsh, tmux, and registration of every cross-platform script), `kitty.nix`, `firefox.nix` (Linux only — Homebrew Firefox on macOS), `syncthing.nix`, `herdr.nix`, `pi.nix` (pi agent set up like Claude Code; extensions linked from the package's examples, our `config/pi/git-gate.ts`, a `fetchzip`-pinned powerline footer, and npm packages pinned in its managed `packages` setting) — and the system-level `system.nix`
   - `darwin/`: `ntfy.nix` (launchd subscriber)
   - `nixos/`: Linux-specific modules — `hyprland.nix` (generates `~/.config/hypr/hyprland.lua`), `dms.nix` (DankMaterialShell: seed settings, plugin flags, the `nixosUpdates` and `headsetBattery` plugins via `/etc`), `matugen.nix` (user colour templates for kitty/tmux), `greetd.nix` (tuigreet), `pyprland.nix` (scratchpads), `apps.nix` (GUI apps), `dotnet.nix`, `env.nix`, `llama-cpp.nix`, `tailscale.nix`, `ntfy.nix`, `wallgen.nix` (packages `scripts/wallgen.py` with numpy/pillow; phases follow the real sun in Copenhagen, a 10-minute user timer runs `wallgen --auto`, which only acts when the phase or DMS's light/dark mode changes; tone follows DMS's Theme schedule setting), `scripts.nix` (NixOS-only script registration)
   - `nixos/dms/plugins/{nixosUpdates,headsetBattery}/`: our own DMS bar widgets (QML), shipped read-only from the store. `headsetBattery` runs `headsetcontrol`, whose udev rules the host installs (`services.udev.packages`)
@@ -224,9 +224,11 @@ silences the expected home-manager-master vs nixos-unstable version skew.
 A fresh machine needs these once (details in README → Installation):
 `~/.config/nvim` (git clone), `~/.config/ntfy/credentials`, the `obsidian` MCP
 server (`claude mcp add --scope user`, below), `dmsplugins sync`, DMS **Apply
-GTK Colors**, `tailscale-up`, `/etc/samba/credentials`, and optionally
-`llama-fetch`. `services.llama-cpp` enables itself only when the model file
-exists, so a `nixswitch` follows the download.
+GTK Colors**, `tailscale-up`, `/etc/samba/credentials`, pi's `/login` and
+`~/.pi/agent/mcp.json` (plus `~/Dev/ai-kit` checked out), and optionally
+`llama-fetch`. pi's `settings.json` is writable runtime state too — `pi.nix`
+merges its keys in, never symlinks it. `services.llama-cpp` enables itself only
+when the model file exists, so a `nixswitch` follows the download.
 
 Only `mcp-nixos` is a repo-managed MCP server (project-scoped `.mcp.json`).
 User-scoped servers live in `~/.claude.json`, which Claude Code rewrites

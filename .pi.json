@@ -1,0 +1,91 @@
+{
+  "$schema": "https://pi.dev/schemas/v1.0.0/settings.json",
+  "name": "dotfiles-development",
+  "description": "PI configuration for Nix/dotfiles development with Claude-like functionality",
+  
+  // Enable built-in extensions for Claude-like functionality
+  "extensions": {
+    "builtin:mcp": {
+      "enabled": true,
+      "mcpServers": {
+        "obsidian": {
+          "type": "stdio",
+          "command": "uvx",
+          "args": ["mcp-obsidian"],
+          "env": {
+            "OBSIDIAN_API_KEY": "1ae5e6a6276d8dfd6ffd3a15949c4496667dcf8d8fa0096f63c6c33b9ca2213"
+          },
+          "directTools": true,
+          "lifecycle": "eager"
+        },
+        "vault-search": {
+          "command": "uvx",
+          "args": ["mcp-server-qdrant"],
+          "env": {
+            "FASTEMBED_CACHE_PATH": "/Users/stefan/.cache/fastembed",
+            "QDRANT_URL": "http://100.64.0.2:6333",
+            "QDRANT_API_KEY": "c74d7838b34d152efcdd2aec12faee3ce00d61ecad8fe54323876854a163caf4",
+            "COLLECTION_NAME": "vault",
+            "EMBEDDING_MODEL": "sentence-transformers/all-MiniLM-L6-v2"
+          },
+          "directTools": true,
+          "lifecycle": "eager"
+        }
+      }
+    },
+    "builtin:tool-search": {
+      "enabled": true
+    },
+    "builtin:codemode": {
+      "enabled": true
+    }
+  },
+  
+  // Claude-like system prompt
+  "systemPrompt": "You are an expert coding assistant with capabilities similar to Claude Code. You have:
+
+1. **Full project context**: Read/write access to files, ability to execute commands
+2. **Deep Nix expertise**: Specialized knowledge in NixOS, nix-darwin, home-manager, and flakes
+3. **Terminal workflow**: Experience with zsh, tmux, kitty, herdr, and git worktrees
+4. **Cross-platform knowledge**: macOS and NixOS configuration expertise
+5. **Modular architecture understanding**: Familiar with shared vs OS-specific modules
+
+When assisting with this project:
+- Follow the established patterns in AGENTS.md and CLAUDE.md
+- Use two-space indentation in Nix files
+- Add explanatory comments for non-obvious decisions
+- Mark temporary changes with TEMP[id] comments
+- Ensure nix flake check passes before suggesting changes
+- Use MCP tools for Obsidian vault access when needed
+
+You have access to these tools:
+- read: Examine files
+- bash: Execute commands
+- edit: Modify files with precise replacements
+- write: Create/write files
+- MCP tools: Obsidian and vault search access",
+  
+  // Model configuration for Claude-like experience
+  "defaultProvider": "mistral",
+  "defaultModel": "codestral-latest",
+  "defaultThinkingLevel": "medium",
+  
+  // Session management
+  "session": {
+    "dir": "/Users/stefan/.dotfiles/.pi-sessions",
+    "autoSave": true,
+    "maxRecent": 20
+  },
+  
+  // UI preferences
+  "theme": "dark",
+  "markdown": {
+    "mermaid": "streaming",
+    "codeSyntaxHighlighting": true
+  },
+  
+  // Performance settings
+  "maxTokens": 8192,
+  "contextWindow": 128000,
+  "streaming": true
+}

@@ -1,5 +1,5 @@
 {
-	description = "Stefan's unified Nix configuration for Linux and macOS";
+	description = "Stefan\'s unified Nix configuration for Linux and macOS";
 
 	inputs = {
 		nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -90,25 +90,27 @@
 		});
 
 	in {
-		# Host configurations
-		darwinConfigurations = {
-			"Stefans-MacBook-Pro" = darwin.lib.darwinSystem {
-				specialArgs = { inherit inputs vars; };
-				modules = [
-					{ nixpkgs.hostPlatform = "aarch64-darwin"; }
-					./hosts/macbook
-					./modules/shared/system.nix
-					./modules/darwin
-					home-manager.darwinModules.home-manager {
-						home-manager.useGlobalPkgs = true;
-						home-manager.useUserPackages = true;
-						home-manager.backupFileExtension = "backup";
-						home-manager.extraSpecialArgs = { inherit inputs vars; };
-						home-manager.users.${vars.user} = import ./home;
-					}
-				];
-			};
-		};
+    # Host configurations
+		darwinConfigurations = let
+      cfg = darwin.lib.darwinSystem {
+        specialArgs = { inherit inputs vars; };
+        modules = [
+          { nixpkgs.hostPlatform = "aarch64-darwin"; }
+          ./hosts/macbook
+          ./modules/shared/system.nix
+          ./modules/darwin
+          home-manager.darwinModules.home-manager {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.backupFileExtension = "backup";
+            home-manager.extraSpecialArgs = { inherit inputs vars; };
+            home-manager.users.${vars.user} = import ./home;
+          }
+        ];
+      };
+    in {
+      "Stefans-MacBook-Pro" = cfg // { check = cfg.config.system.build.toplevel; };
+    };
 
 		nixosConfigurations = {
 			stefan = nixpkgs.lib.nixosSystem {
