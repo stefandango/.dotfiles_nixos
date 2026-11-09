@@ -8,9 +8,9 @@ This is a cross-platform Nix configuration repository supporting both NixOS (Lin
 
 ## Architecture
 
-- **flake.nix**: Main entry point. Inputs: `nixpkgs` (unstable), `home-manager`, `darwin`, `dank-material-shell` (the desktop shell), `herdr` (agent multiplexer, NixOS only — macOS uses Homebrew), `hunk` (git diff viewer), `zen-browser`, `nix-claude-code`, `mcp-nixos`, `nixvim` (**declared but unused**, see `nix/`), `nixpkgs-darwin-stable` (a `TEMP` pin that only `hunk` follows), and `nixpkgs-insync` (a `TEMP` pin to an older unstable rev, used only for insync). Outputs: `nixosConfigurations.stefan`, `darwinConfigurations.Stefans-MacBook-Pro`, and a `devShells.default` with `nixpkgs-fmt` + `nil`
+- **flake.nix**: Main entry point. Inputs: `nixpkgs` (unstable), `home-manager`, `darwin`, `dank-material-shell` (the desktop shell), `hunk` (git diff viewer), `zen-browser`, `nix-claude-code`, `mcp-nixos`, `nixvim` (**declared but unused**, see `nix/`), `nixpkgs-darwin-stable` (a `TEMP` pin that only `hunk` follows), and `nixpkgs-insync` (a `TEMP` pin to an older unstable rev, used only for insync). Outputs: `nixosConfigurations.stefan`, `darwinConfigurations.Stefans-MacBook-Pro`, and a `devShells.default` with `nixpkgs-fmt` + `nil`
 - **hosts/**: Host-specific system configurations
-  - `macbook/`: Darwin host (`Stefans-MacBook-Pro`) — system defaults, Homebrew casks + brews (`uv`, `herdr`), Touch ID, fonts
+  - `macbook/`: Darwin host (`Stefans-MacBook-Pro`) — system defaults, Homebrew casks (incl. `herdr-app`) + brews (`uv`, `herdr`), Touch ID, fonts
   - `nixos-desktop/`: NixOS host (`stefan`) — boot/plymouth (GRUB `configurationLimit = 4`, `/boot` is 511 MB), AMD RX 9070 XT, PipeWire, Steam/GameMode, polkit rules, CIFS automount, plus `hardware-configuration.nix`. Its comments are the record of the hardware incidents (DP 2.1 black screen, Dual Mode, CoreCtrl removal)
 - **home/**: Cross-platform home-manager entry point (`home/default.nix`) consumed by both host outputs — XDG paths, MangoHud config, the `llama`/`llama-fetch` scripts
 - **modules/**: Reusable Nix modules organized by functionality
@@ -216,7 +216,7 @@ silences the expected home-manager-master vs nixos-unstable version skew.
 ## Package Management
 
 - Nix: all CLI tooling on both hosts, and every GUI app on NixOS (`modules/nixos/apps.nix`, the host's `systemPackages`, `modules/nixos/hyprland.nix`)
-- Homebrew (macOS only): casks for GUI apps and fonts, brews `uv` and `herdr` (the herdr flake does not build on darwin)
+- Homebrew (macOS only): casks for GUI apps and fonts, brews `uv` and `herdr`. herdr itself comes from nixpkgs on NixOS (the host's `systemPackages`) and the desktop app from nixpkgs' `herdr-desktop` (`modules/nixos/apps.nix`); on macOS both come from Homebrew (`herdr` brew, `herdr-app` cask)
 - Cross-platform user packages: `home/default.nix` and `modules/shared/zsh.nix`; system-level for both hosts: `modules/shared/system.nix`
 
 ## Runtime State Nix Does Not Own

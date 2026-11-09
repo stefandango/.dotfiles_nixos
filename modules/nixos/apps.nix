@@ -13,5 +13,10 @@
         zed-editor
         discord
         hyperhdr
+        # herdr's desktop app. Its backend is nixpkgs' separate herdr-core
+        # package, not the herdr CLI in the host's systemPackages; ships a
+        # .desktop entry + icon.
+        # macOS gets it as the herdr-app cask instead (hosts/macbook).
+        herdr-desktop
     ];
 }

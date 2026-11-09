@@ -62,8 +62,9 @@
     # AI tools
     pi-coding-agent  # pi (pi.dev) coding agent harness
 
-    # herdr (agent multiplexer): macOS via Homebrew (hosts/macbook), NixOS via
-    # flake input (hosts/nixos-desktop) — upstream flake won't build on darwin.
+    # herdr (agent multiplexer) and its desktop app are installed per host:
+    # NixOS from nixpkgs (hosts/nixos-desktop, modules/nixos/apps.nix), macOS
+    # from Homebrew (hosts/macbook: herdr brew, herdr-app cask).
 
   ];
 

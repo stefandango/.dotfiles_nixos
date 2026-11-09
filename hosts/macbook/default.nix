@@ -110,6 +110,10 @@
       "font-monaspice-nerd-font"
       "font-noto-sans-symbols-2"
       { name = "tailscale-app"; greedy = true; }
+      # herdr's desktop app (NixOS: herdr-desktop in modules/nixos/apps.nix).
+      # Cask rather than nixpkgs: it is newer than nixpkgs' herdr-desktop and
+      # updates itself (auto_updates), so not greedy.
+      "herdr-app"
     ];
     brews = [ "uv" "herdr" ];
   };

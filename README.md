@@ -220,9 +220,10 @@ Its config (`modules/shared/herdr.nix`) sets the prefix to `Ctrl+a` to match
 tmux, inherits kitty's palette (`theme = "terminal"`), and pins the four
 semantic accents so "this agent errored" never changes hue with the wallpaper.
 The file is a read-only home-manager symlink; apply changes to a running
-session with `herdr server reload-config`. herdr is installed from its flake
-on NixOS and from Homebrew on macOS (the upstream flake does not build on
-darwin).
+session with `herdr server reload-config`. herdr and its desktop app (Herdr) come
+from nixpkgs on NixOS (`herdr` in the host's `systemPackages`, `herdr-desktop`
+in `modules/nixos/apps.nix`) and from Homebrew on macOS (the `herdr` brew and
+the `herdr-app` cask).
 
 ### Git Worktree Workflow (wt)
 
@@ -616,7 +617,7 @@ Not in Nix, set up once per machine:
 
 This configuration uses a hybrid approach:
 - **Nix packages**: Core development tools, CLI utilities, and on NixOS all GUI applications
-- **Homebrew** (macOS only): GUI applications and casks (Firefox, Zen, Raycast, kitty, Fork, DBeaver, Discord, Tailscale, fonts…) plus the `uv` and `herdr` brews
+- **Homebrew** (macOS only): GUI applications and casks (Firefox, Zen, Raycast, kitty, Fork, DBeaver, Discord, Tailscale, Herdr, fonts…) plus the `uv` and `herdr` brews
 - **Home-manager**: User environment and dotfiles management on both platforms
 
 ## Architecture
@@ -662,7 +663,7 @@ NixOS-only desktop helpers in `modules/nixos/scripts.nix`.
 - **Gaming (NixOS)**: Steam + gamescope, GameMode, MangoHud, ananicy-cpp, wine-staging + winetricks
 - **Docker**: `virtualisation.docker` plus docker-compose and lazydocker
 - **Hardware (NixOS)**: AMD RX 9070 XT, LG 45" 5120x2160 WOLED capped at 120 Hz with a Dual Mode follower, DDC/CI via `ddcutil`, openrazer with battery notifier
-- **Flake Inputs**: `nixpkgs` (unstable), `home-manager`, `darwin`, `dank-material-shell`, `herdr`, `hunk`, `zen-browser`, `nix-claude-code`, `mcp-nixos`, `nixvim` (declared, unused), `nixpkgs-darwin-stable` (a `TEMP` pin that only hunk follows, until it stops claiming x86_64-darwin), and `nixpkgs-insync` (a `TEMP` pin to an older unstable rev, only for insync, until nixpkgs#576779 is fixed)
+- **Flake Inputs**: `nixpkgs` (unstable), `home-manager`, `darwin`, `dank-material-shell`, `hunk`, `zen-browser`, `nix-claude-code`, `mcp-nixos`, `nixvim` (declared, unused), `nixpkgs-darwin-stable` (a `TEMP` pin that only hunk follows, until it stops claiming x86_64-darwin), and `nixpkgs-insync` (a `TEMP` pin to an older unstable rev, only for insync, until nixpkgs#576779 is fixed)
 
 ## Common Workflows
 
