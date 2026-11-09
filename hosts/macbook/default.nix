@@ -94,7 +94,9 @@
     onActivation.upgrade = true;
     onActivation.autoUpdate = true;
     caskArgs.appdir = "/Applications";
-    caskArgs.no_quarantine = true;
+    # No caskArgs.no_quarantine: Homebrew 7 removed --no-quarantine, and the
+    # Brewfile then fails every new cask with "invalid option". New apps get
+    # Gatekeeper's one-time first-launch prompt instead.
     global.brewfile = true;
     masApps = { };
     casks = [
