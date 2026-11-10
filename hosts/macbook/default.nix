@@ -73,6 +73,12 @@
     vlc-bin
     pom  # Terminal-based Pomodoro timer with notifications
     llama-cpp  # Metal acceleration auto-enabled on aarch64-darwin
+    # herdr-core (`hc`), the backend the herdr-app cask needs: the cask does
+    # not bundle it and Homebrew has no formula. The app looks for hc on PATH,
+    # then in usual install places including /run/current-system/sw/bin, which
+    # is where this lands -- so it is found even when launched from Finder.
+    # NixOS needs nothing: nixpkgs' herdr-desktop hardcodes its own herdr-core.
+    herdr-core
   ];
 
   # Font management

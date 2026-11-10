@@ -64,7 +64,8 @@
 
     # herdr (agent multiplexer) and its desktop app are installed per host:
     # NixOS from nixpkgs (hosts/nixos-desktop, modules/nixos/apps.nix), macOS
-    # from Homebrew (hosts/macbook: herdr brew, herdr-app cask).
+    # from Homebrew (hosts/macbook: herdr brew, herdr-app cask) plus nixpkgs'
+    # herdr-core, the app's backend, which Homebrew does not package.
 
   ];
 

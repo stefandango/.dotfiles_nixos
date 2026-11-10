@@ -223,7 +223,9 @@ The file is a read-only home-manager symlink; apply changes to a running
 session with `herdr server reload-config`. herdr and its desktop app (Herdr) come
 from nixpkgs on NixOS (`herdr` in the host's `systemPackages`, `herdr-desktop`
 in `modules/nixos/apps.nix`) and from Homebrew on macOS (the `herdr` brew and
-the `herdr-app` cask).
+the `herdr-app` cask). The cask does not bundle the app's backend, herdr-core
+(`hc`), and Homebrew has no formula for it, so the MacBook installs nixpkgs'
+`herdr-core` in its `systemPackages`.
 
 ### Git Worktree Workflow (wt)
 

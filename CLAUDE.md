@@ -216,7 +216,7 @@ silences the expected home-manager-master vs nixos-unstable version skew.
 ## Package Management
 
 - Nix: all CLI tooling on both hosts, and every GUI app on NixOS (`modules/nixos/apps.nix`, the host's `systemPackages`, `modules/nixos/hyprland.nix`)
-- Homebrew (macOS only): casks for GUI apps and fonts, brews `uv` and `herdr`. herdr itself comes from nixpkgs on NixOS (the host's `systemPackages`) and the desktop app from nixpkgs' `herdr-desktop` (`modules/nixos/apps.nix`); on macOS both come from Homebrew (`herdr` brew, `herdr-app` cask)
+- Homebrew (macOS only): casks for GUI apps and fonts, brews `uv` and `herdr`. herdr itself comes from nixpkgs on NixOS (the host's `systemPackages`) and the desktop app from nixpkgs' `herdr-desktop` (`modules/nixos/apps.nix`); on macOS both come from Homebrew (`herdr` brew, `herdr-app` cask), except the app's backend `herdr-core` (`hc`), which the cask does not bundle and Homebrew does not package -- the MacBook installs it from nixpkgs (`hosts/macbook` `systemPackages`)
 - Cross-platform user packages: `home/default.nix` and `modules/shared/zsh.nix`; system-level for both hosts: `modules/shared/system.nix`
 
 ## Runtime State Nix Does Not Own
