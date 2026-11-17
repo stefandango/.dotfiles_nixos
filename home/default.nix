@@ -38,6 +38,10 @@
     NPM_CONFIG_PREFIX = "${config.xdg.dataHome}/npm";
   };
 
+  # ai-kit is a separate checkout (see modules/shared/pi.nix); its herdr helpers
+  # go on PATH on both hosts. A missing directory on PATH is harmless.
+  home.sessionPath = [ "$HOME/Dev/ai-kit/herdr/bin" ];
+
   # Import shared home modules
   imports = [
     ../modules/shared/default.nix
