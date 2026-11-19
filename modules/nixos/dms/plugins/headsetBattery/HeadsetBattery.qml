@@ -23,6 +23,7 @@ PluginComponent {
     property bool failed: false
     property string errorText: ""
     property bool lowNotified: false
+    property string lastRead: ""
 
     readonly property int pollSeconds: pluginData?.pollSeconds ?? 60
     readonly property bool notifyLow: pluginData?.notifyLow !== false
@@ -61,9 +62,48 @@ PluginComponent {
             return level + "% battery";
         return "Headset off";
     }
+    readonly property string tooltipText: headline + (lastRead ? " • last read " + lastRead : "")
+
+    onTooltipTextChanged: {
+        if (tooltipLoader.item)
+            tooltipLoader.item.text = tooltipText;
+    }
+    onShownChanged: {
+        if (!shown)
+            hideTooltip();
+    }
 
     function applyVisibility() {
         setVisibilityOverride(root.shown);
+    }
+
+    // Same placement as DMS's own Vpn bar widget. DTooltip is its own layer
+    // window, so the bar's thin surface cannot clip it.
+    function showTooltip(item) {
+        if (!root.parentScreen)
+            return;
+        tooltipLoader.active = true;
+        if (!tooltipLoader.item)
+            return;
+        const edge = root.axis?.edge;
+        const screen = root.parentScreen;
+        const offset = root.barThickness + root.barSpacing + Theme.spacingXS;
+        if (root.isVertical) {
+            const isLeft = edge === "left";
+            const pos = item.mapToItem(null, item.width / 2, item.height / 2);
+            tooltipLoader.item.show(root.tooltipText, isLeft ? offset : screen.width - offset, pos.y, screen, isLeft, !isLeft);
+        } else {
+            const pos = item.mapToItem(null, item.width / 2, 0);
+            const tooltipHeight = Theme.fontSizeSmall * 1.5 + Theme.spacingS * 2;
+            const y = edge === "bottom" ? screen.height - offset - tooltipHeight : offset;
+            tooltipLoader.item.show(root.tooltipText, pos.x, y, screen, false, false);
+        }
+    }
+
+    function hideTooltip() {
+        if (tooltipLoader.item)
+            tooltipLoader.item.hide();
+        tooltipLoader.active = false;
     }
 
     function checkLow() {
@@ -83,6 +123,9 @@ PluginComponent {
     function refresh() {
         // headsetcontrol exits non-zero when no device is found or a query
         // fails, but still prints valid JSON — so parse first, judge after.
+        // The timeout is explicit because Proc's 10s default is shorter than the
+        // ~11s this took when BATTERY_UNAVAILABLE was measured: a killed read comes
+        // back empty and would show the error icon.
         Proc.runCommand("headsetBattery.read", ["headsetcontrol", "-b", "-o", "json"], (out, code) => {
             let parsed = null;
             try {
@@ -95,6 +138,7 @@ PluginComponent {
                 root.headset = withBattery.length > 0 ? withBattery[0] : null;
                 root.failed = false;
                 root.errorText = "";
+                root.lastRead = Qt.formatTime(new Date(), "HH:mm");
             } else {
                 root.headset = null;
                 root.failed = true;
@@ -102,7 +146,7 @@ PluginComponent {
             }
             root.applyVisibility();
             root.checkLow();
-        }, 0);
+        }, 0, 30000);
     }
 
     // triggeredOnStart does the initial load, so no Component.onCompleted here —
@@ -115,12 +159,24 @@ PluginComponent {
         onTriggered: root.refresh()
     }
 
+    Loader {
+        id: tooltipLoader
+        active: false
+        sourceComponent: DTooltip {}
+    }
+
     pillClickAction: () => root.refresh()
 
     horizontalBarPill: Component {
         Item {
+            id: horizontalContent
             implicitWidth: pillRow.implicitWidth
             implicitHeight: root.widgetThickness
+
+            // Passive, so clicks still reach the pill's click-to-refresh.
+            HoverHandler {
+                onHoveredChanged: hovered ? root.showTooltip(horizontalContent) : root.hideTooltip()
+            }
 
             Row {
                 id: pillRow
@@ -147,8 +203,13 @@ PluginComponent {
 
     verticalBarPill: Component {
         Item {
+            id: verticalContent
             implicitWidth: root.widgetThickness
             implicitHeight: vColumn.implicitHeight
+
+            HoverHandler {
+                onHoveredChanged: hovered ? root.showTooltip(verticalContent) : root.hideTooltip()
+            }
 
             Column {
                 id: vColumn
